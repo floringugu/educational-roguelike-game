@@ -1,6 +1,12 @@
+# 🎮 Educational Roguelike Game
+
+![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)
+![Flask](https://img.shields.io/badge/Flask-3.0-green.svg)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+
 **Transform your study sessions into epic roguelike adventures!**
 
-An interactive, pixel-art styled roguelike game that gamifies learning by generating educational questions from your PDF study materials using GrokAI. Answer questions correctly to defeat enemies, progress through dungeons, and track your learning statistics.
+An interactive, pixel-art styled roguelike game that gamifies learning by generating educational questions from your PDF study materials using **Grok AI (xAI)** - with free tier available! Answer questions correctly to defeat enemies, progress through dungeons, and track your learning statistics.
 
 ---
 
@@ -15,7 +21,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 - **Death and victory** - Classic roguelike experience
 
 ### 🤖 AI-Powered Question Generation
-- **Automatic question generation** using Claude API (Anthropic)
+- **Automatic question generation** using **Grok API (xAI)** - FREE TIER AVAILABLE!
 - **Multiple question types**:
   - Multiple choice (4 options)
   - True/False
@@ -23,6 +29,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 - **Plausible distractors** - Tests real understanding
 - **Detailed explanations** - Learn from mistakes
 - **Topic categorization** - Organized by subject
+- **More accessible** than Claude - generous free credits included
 
 ### 📊 Learning Analytics
 - **Comprehensive statistics** - Accuracy, time studied, score
@@ -58,7 +65,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 ### Prerequisites
 
 - **Python 3.10+**
-- **Grok API Key** (xAI) - Get it from [console.x.ai](https://console.x.ai/)
+- **Grok API Key** (xAI) - Get it from [console.x.ai](https://console.x.ai/) - **FREE TIER AVAILABLE!**
 
 ### Step 1: Clone the Repository
 
@@ -89,16 +96,16 @@ pip install -r requirements.txt
 
 ### Step 4: Set Up Environment Variables
 
-Create a `.env` file in the project root:
+Create a `.env` file in the project root (or copy from `.env.example`):
 
 ```bash
 # .env file
-ANTHROPIC_API_KEY=your_api_key_here
+XAI_API_KEY=xai-your-api-key-here
 FLASK_DEBUG=True
 SECRET_KEY=your_secret_key_here
 ```
 
-**Important:** Never commit your `.env` file to version control!
+**Important:** Never commit your `.env` file to version control! Sign up for free at [console.x.ai](https://console.x.ai/) to get your Grok API key with generous free credits.
 
 ---
 
@@ -110,7 +117,7 @@ All configuration is in `config.py`, but you can override with environment varia
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `ANTHROPIC_API_KEY` | *Required* | Your Claude API key |
+| `XAI_API_KEY` | *Required* | Your Grok API key (xAI) - FREE TIER! |
 | `FLASK_DEBUG` | `True` | Enable debug mode |
 | `SECRET_KEY` | `dev-secret-key` | Flask session secret |
 | `HOST` | `0.0.0.0` | Server host |
@@ -201,7 +208,7 @@ After uploading:
 ## 📁 Project Structure
 
 ```
-opscraft-platform/
+educational-roguelike-game/
 ├── app.py                 # Flask server & API routes
 ├── config.py             # Game configuration
 ├── database.py           # SQLite database models
@@ -237,24 +244,32 @@ opscraft-platform/
 
 ## 💰 API Costs
 
-### Claude API Pricing (as of 2025)
+### Grok API Pricing (xAI)
 
-- **Input tokens:** $3.00 / 1M tokens
-- **Output tokens:** $15.00 / 1M tokens
+**🎉 FREE TIER AVAILABLE!**
+- Sign up at [console.x.ai](https://console.x.ai/) and get **generous free credits**
+- Much more accessible than Claude API
+- Perfect for students and educators on a budget
 
-### Estimated Costs Per PDF
+### Paid Pricing (if you exceed free tier)
+
+- **Input tokens:** ~$5.00 / 1M tokens
+- **Output tokens:** ~$15.00 / 1M tokens
+
+### Estimated Costs Per PDF (After Free Credits)
 
 | PDF Size | Questions | Est. Cost |
 |----------|-----------|-----------|
 | 10 pages | 10-15 | $0.01-0.02 |
-| 50 pages | 30-40 | $0.03-0.05 |
-| 100 pages | 50-70 | $0.05-0.10 |
-| 200 pages | 80-100 | $0.10-0.20 |
+| 50 pages | 30-40 | $0.04-0.06 |
+| 100 pages | 50-70 | $0.07-0.12 |
+| 200 pages | 80-100 | $0.12-0.25 |
 
 **Cost Optimization:**
 - Questions are generated once and cached
 - Batch processing reduces API calls
-- Estimate cost before generating
+- Start with free credits - enough for many PDFs!
+- Use demo mode to test without any API key
 
 ---
 
@@ -306,11 +321,12 @@ TOTAL_ENCOUNTERS = 15        # More encounters = longer
 
 ### Common Issues
 
-#### 1. **"ANTHROPIC_API_KEY not found"**
+#### 1. **"XAI_API_KEY not found"**
 
 ```bash
-# Create .env file
-echo "ANTHROPIC_API_KEY=your_key_here" > .env
+# Create .env file or copy from template
+cp .env.example .env
+# Then edit .env and add your Grok API key from console.x.ai
 ```
 
 #### 2. **"PDF has no extractable text"**
