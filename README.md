@@ -64,7 +64,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 
 ```bash
 git clone <your-repository-url>
-cd opscraft-platform
+cd educational-roguelike-game
 ```
 
 ### Step 2: Create Virtual Environment
