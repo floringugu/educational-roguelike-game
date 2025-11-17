@@ -58,7 +58,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 ### Prerequisites
 
 - **Python 3.10+**
-- **Anthropic API Key** (Claude AI) - Get it from [console.anthropic.com](https://console.anthropic.com/)
+- **Grok API Key** (xAI) - Get it from [console.x.ai](https://console.x.ai/)
 
 ### Step 1: Clone the Repository
 
