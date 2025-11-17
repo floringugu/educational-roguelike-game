@@ -70,7 +70,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 
 ```bash
 git clone <your-repository-url>
-cd opscraft-platform
+cd educational-roguelike-game
 ```
 
 ### Step 2: Create Virtual Environment
@@ -207,7 +207,7 @@ After uploading:
 ## 📁 Project Structure
 
 ```
-opscraft-platform/
+educational-roguelike-game/
 ├── app.py                 # Flask server & API routes
 ├── config.py             # Game configuration
 ├── database.py           # SQLite database models
