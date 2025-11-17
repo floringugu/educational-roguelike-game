@@ -1,12 +1,13 @@
 """
-Question Generation module using Claude API
+Question Generation module using Grok API (xAI)
 Generates high-quality educational questions from PDF content
+FREE TIER AVAILABLE - More accessible than Claude
 """
 
 import json
 import logging
 from typing import List, Dict, Optional
-import anthropic
+from openai import OpenAI
 
 import config
 from database import question_manager
@@ -16,15 +17,19 @@ logger = logging.getLogger(__name__)
 
 
 class QuestionGenerator:
-    """Generates questions using Claude API"""
+    """Generates questions using Grok API (xAI)"""
 
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or config.ANTHROPIC_API_KEY
+        self.api_key = api_key or config.XAI_API_KEY
         if not self.api_key:
-            raise ValueError("ANTHROPIC_API_KEY not found in environment variables")
+            raise ValueError("XAI_API_KEY not found in environment variables")
 
-        self.client = anthropic.Anthropic(api_key=self.api_key)
-        self.model = config.CLAUDE_MODEL
+        # Grok API uses OpenAI-compatible format
+        self.client = OpenAI(
+            api_key=self.api_key,
+            base_url="https://api.x.ai/v1"
+        )
+        self.model = config.GROK_MODEL
 
     def generate_questions_from_text(
         self,
@@ -34,7 +39,7 @@ class QuestionGenerator:
         topic: str = None
     ) -> List[Dict]:
         """
-        Generate questions from text using Claude API
+        Generate questions from text using Grok API
 
         Args:
             text: Source text to generate questions from
@@ -50,20 +55,24 @@ class QuestionGenerator:
         try:
             logger.info(f"Generating {num_questions} questions (difficulty: {difficulty})")
 
-            response = self.client.messages.create(
+            response = self.client.chat.completions.create(
                 model=self.model,
-                max_tokens=config.MAX_TOKENS,
-                temperature=config.TEMPERATURE,
                 messages=[
+                    {
+                        "role": "system",
+                        "content": "You are an expert educational content creator specializing in creating high-quality study questions. Always respond with valid JSON only."
+                    },
                     {
                         "role": "user",
                         "content": prompt
                     }
-                ]
+                ],
+                temperature=config.TEMPERATURE,
+                max_tokens=config.MAX_TOKENS
             )
 
             # Extract JSON from response
-            response_text = response.content[0].text
+            response_text = response.choices[0].message.content
             questions = self._parse_response(response_text)
 
             logger.info(f"Successfully generated {len(questions)} questions")
@@ -81,7 +90,7 @@ class QuestionGenerator:
         difficulty: str,
         topic: str = None
     ) -> str:
-        """Build optimized prompt for Claude API"""
+        """Build optimized prompt for Grok API"""
 
         difficulty_guidance = {
             'easy': 'Focus on basic recall and simple comprehension. Questions should test fundamental understanding.',
@@ -92,9 +101,7 @@ class QuestionGenerator:
 
         topic_context = f"\n\nFocus specifically on the topic: {topic}" if topic else ""
 
-        prompt = f"""You are an expert educational content creator specializing in creating high-quality study questions.
-
-Your task is to generate {num_questions} educational questions based on the following text.
+        prompt = f"""Generate {num_questions} educational questions based on the following text.
 
 DIFFICULTY LEVEL: {difficulty}
 {difficulty_guidance.get(difficulty, difficulty_guidance['mixed'])}{topic_context}
@@ -152,11 +159,11 @@ Generate the questions now:"""
         return prompt
 
     def _parse_response(self, response_text: str) -> List[Dict]:
-        """Parse Claude's response and extract questions"""
+        """Parse Grok's response and extract questions"""
 
         try:
             # Try to find JSON in the response
-            # Sometimes Claude adds explanation text, so we need to extract JSON
+            # Sometimes LLMs add explanation text, so we need to extract JSON
 
             # Look for JSON array pattern
             start_idx = response_text.find('[')
@@ -248,10 +255,11 @@ Generate the questions now:"""
         Returns:
             Dict with estimated costs
         """
-        # Rough estimates
+        # Rough estimates for Grok API
         input_tokens = (len(text_length) / 4) + 500  # Text + prompt
         output_tokens = num_questions * config.AVG_OUTPUT_TOKENS_PER_QUESTION
 
+        # Grok pricing (update based on current xAI pricing)
         input_cost = (input_tokens / 1_000_000) * config.COST_PER_1M_INPUT_TOKENS
         output_cost = (output_tokens / 1_000_000) * config.COST_PER_1M_OUTPUT_TOKENS
 

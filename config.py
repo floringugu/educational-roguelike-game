@@ -10,11 +10,15 @@ from pathlib import Path
 # 🔑 API CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════
 
-# Claude API Configuration
-ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
-CLAUDE_MODEL = 'claude-sonnet-4-20250514'
+# Grok API Configuration (xAI) - FREE TIER AVAILABLE!
+XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
+GROK_MODEL = 'grok-beta'  # or 'grok-2-latest' for more advanced
 MAX_TOKENS = 4096
 TEMPERATURE = 0.7
+
+# Legacy Claude support (optional - can still use Claude if preferred)
+ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
+CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
 # ═══════════════════════════════════════════════════════════════════
 # 📁 PATHS
