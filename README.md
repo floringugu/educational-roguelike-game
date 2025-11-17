@@ -1,6 +1,6 @@
 **Transform your study sessions into epic roguelike adventures!**
 
-An interactive, pixel-art styled roguelike game that gamifies learning by generating educational questions from your PDF study materials using Claude AI. Answer questions correctly to defeat enemies, progress through dungeons, and track your learning statistics.
+An interactive, pixel-art styled roguelike game that gamifies learning by generating educational questions from your PDF study materials using GrokAI. Answer questions correctly to defeat enemies, progress through dungeons, and track your learning statistics.
 
 ---
 
