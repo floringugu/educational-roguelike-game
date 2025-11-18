@@ -4,7 +4,7 @@
 
 | Modelo | Disponibilidad | Velocidad | Calidad | Compatibilidad | Recomendado |
 |--------|----------------|-----------|---------|----------------|-------------|
-| **mistralai/Mistral-7B-Instruct-v0.2** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ✅ **SÍ** |
+| **mistralai/Mistral-7B-Instruct-v0.2** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ chat API | ✅ **SÍ** |
 | **microsoft/Phi-3-mini-4k-instruct** | ⚠️ API de pago | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ⚠️ Avanzado |
 | **HuggingFaceH4/zephyr-7b-beta** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ⚠️ chat only | ⚠️ Avanzado |
 | **mistralai/Mixtral-8x7B-Instruct-v0.1** | ⚠️ Variable | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ⚠️ A veces |
@@ -19,9 +19,11 @@
 - **Muy rápido**: Genera preguntas en 4-6 segundos
 - **Excelente calidad**: De los creadores de Mixtral, optimizado para instrucciones
 - **100% Gratis**: Funciona perfectamente con la API gratuita
-- **Máxima compatibilidad**: Usa API estándar de text-generation
+- **Máxima compatibilidad**: Usa chat API (el código lo maneja automáticamente)
 - **Confiable**: Probado y verificado que funciona con cuentas gratuitas
 - **Sin restricciones**: No requiere tier de pago
+
+**Nota importante**: Mistral-7B-Instruct usa la **chat API** (conversational), no text-generation. El código hace esto automáticamente, no necesitas cambiar nada.
 
 ### 📝 Configuración
 

@@ -14,6 +14,9 @@ El modelo `HuggingFaceH4/zephyr-7b-beta` está configurado para tareas conversac
 ### Problema 4: Phi-3 requiere tier de pago
 El modelo `microsoft/Phi-3-mini-4k-instruct` da error 403 Forbidden con la API gratuita de Hugging Face, ya que requiere un tier de pago para funcionar.
 
+### Problema 5: TODOS los modelos Instruct usan chat API
+Los modelos **Instruct** de Hugging Face (Mistral, Zephyr, etc.) están configurados para tareas **conversacionales** (chat), no para text-generation directa. El código ahora soporta automáticamente ambas APIs.
+
 ## ✅ Solución Implementada
 
 Se han realizado las siguientes correcciones:
@@ -24,8 +27,8 @@ Se han realizado las siguientes correcciones:
 4. ✅ **Creado script de verificación** para validar la configuración
 5. ✅ **Cambiado modelo default** a `mistralai/Mistral-7B-Instruct-v0.2` (funciona perfecto con API gratuita)
 6. ✅ **Mejorado manejo de errores** para diagnosticar problemas de modelos
-7. ✅ **Simplificado código de API** para mejor compatibilidad
-8. ✅ **Verificado que funciona** con cuentas gratuitas de Hugging Face
+7. ✅ **Implementado soporte dual API** (chat + text-generation con fallback automático)
+8. ✅ **Verificado que funciona** con cuentas gratuitas de Hugging Face usando chat API
 
 ---
 
