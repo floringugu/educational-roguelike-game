@@ -11,8 +11,11 @@ Werkzeug==3.0.1
 pdfplumber==0.10.3
 PyPDF2==3.0.1
 
-# AI / Grok API (xAI) - Uses OpenAI SDK
-openai>=1.0.0
+# AI - Hugging Face Inference API (FREE!)
+huggingface_hub>=0.20.0
+
+# Optional: Legacy API support
+# openai>=1.0.0  # For Grok/xAI if preferred
 
 # Database (SQLite is built-in to Python)
 

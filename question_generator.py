@@ -1,13 +1,12 @@
 """
-Question Generation module using Grok API (xAI)
+Question Generation module using Hugging Face Inference API
 Generates high-quality educational questions from PDF content
-FREE TIER AVAILABLE - More accessible than Claude
+100% FREE - No API costs!
 """
 
 import json
 import logging
 from typing import List, Dict, Optional
-from openai import OpenAI
 
 import config
 from database import question_manager
@@ -17,19 +16,27 @@ logger = logging.getLogger(__name__)
 
 
 class QuestionGenerator:
-    """Generates questions using Grok API (xAI)"""
+    """Generates questions using Hugging Face Inference API (FREE!)"""
 
     def __init__(self, api_key: str = None):
-        self.api_key = api_key or config.XAI_API_KEY
-        if not self.api_key:
-            raise ValueError("XAI_API_KEY not found in environment variables")
+        self.api_key = api_key or config.HUGGINGFACE_API_KEY
 
-        # Grok API uses OpenAI-compatible format
-        self.client = OpenAI(
-            api_key=self.api_key,
-            base_url="https://api.x.ai/v1"
-        )
-        self.model = config.GROK_MODEL
+        # Hugging Face is free, but API key improves rate limits
+        # Get free API key at: https://huggingface.co/settings/tokens
+        if not self.api_key:
+            logger.warning("HUGGINGFACE_API_KEY not set. Using public inference API with rate limits.")
+            logger.warning("Get a free API key at: https://huggingface.co/settings/tokens")
+
+        # Import Hugging Face client
+        try:
+            from huggingface_hub import InferenceClient
+            self.client = InferenceClient(token=self.api_key)
+        except ImportError:
+            logger.error("huggingface_hub not installed. Install with: pip install huggingface_hub")
+            raise ImportError("Please install huggingface_hub: pip install huggingface_hub")
+
+        self.model = config.HUGGINGFACE_MODEL
+        logger.info(f"Using Hugging Face model: {self.model}")
 
     def generate_questions_from_text(
         self,
@@ -39,7 +46,7 @@ class QuestionGenerator:
         topic: str = None
     ) -> List[Dict]:
         """
-        Generate questions from text using Grok API
+        Generate questions from text using Hugging Face Inference API
 
         Args:
             text: Source text to generate questions from
@@ -53,27 +60,19 @@ class QuestionGenerator:
         prompt = self._build_prompt(text, num_questions, difficulty, topic)
 
         try:
-            logger.info(f"Generating {num_questions} questions (difficulty: {difficulty})")
+            logger.info(f"Generating {num_questions} questions (difficulty: {difficulty}) using {self.model}")
 
-            response = self.client.chat.completions.create(
+            # Use Hugging Face text generation
+            response = self.client.text_generation(
+                prompt=prompt,
                 model=self.model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": "You are an expert educational content creator specializing in creating high-quality study questions. Always respond with valid JSON only."
-                    },
-                    {
-                        "role": "user",
-                        "content": prompt
-                    }
-                ],
+                max_new_tokens=config.MAX_TOKENS,
                 temperature=config.TEMPERATURE,
-                max_tokens=config.MAX_TOKENS
+                return_full_text=False
             )
 
             # Extract JSON from response
-            response_text = response.choices[0].message.content
-            questions = self._parse_response(response_text)
+            questions = self._parse_response(response)
 
             logger.info(f"Successfully generated {len(questions)} questions")
 
@@ -81,6 +80,7 @@ class QuestionGenerator:
 
         except Exception as e:
             logger.error(f"Error generating questions: {str(e)}")
+            logger.error(f"Try using a different model or check your HuggingFace API key")
             raise
 
     def _build_prompt(
@@ -90,7 +90,7 @@ class QuestionGenerator:
         difficulty: str,
         topic: str = None
     ) -> str:
-        """Build optimized prompt for Grok API"""
+        """Build optimized prompt for Hugging Face models"""
 
         difficulty_guidance = {
             'easy': 'Focus on basic recall and simple comprehension. Questions should test fundamental understanding.',
@@ -101,7 +101,8 @@ class QuestionGenerator:
 
         topic_context = f"\n\nFocus specifically on the topic: {topic}" if topic else ""
 
-        prompt = f"""Generate {num_questions} educational questions based on the following text.
+        # Format optimized for instruction-following models like Mixtral, Llama, etc.
+        prompt = f"""<s>[INST] You are an expert educational content creator. Generate {num_questions} educational questions based on the following text.
 
 DIFFICULTY LEVEL: {difficulty}
 {difficulty_guidance.get(difficulty, difficulty_guidance['mixed'])}{topic_context}
@@ -154,28 +155,45 @@ IMPORTANT:
 - For true/false questions, correct_answer should be exactly "true" or "false" (lowercase)
 - For multiple choice, correct_answer should exactly match one of the options
 
-Generate the questions now:"""
+Generate the questions now: [/INST]"""
 
         return prompt
 
     def _parse_response(self, response_text: str) -> List[Dict]:
-        """Parse Grok's response and extract questions"""
+        """Parse Hugging Face model response and extract questions"""
 
         try:
             # Try to find JSON in the response
             # Sometimes LLMs add explanation text, so we need to extract JSON
+
+            # Clean up common issues with LLM responses
+            response_text = response_text.strip()
+
+            # Remove markdown code blocks if present
+            if '```json' in response_text:
+                start = response_text.find('```json') + 7
+                end = response_text.find('```', start)
+                response_text = response_text[start:end].strip()
+            elif '```' in response_text:
+                start = response_text.find('```') + 3
+                end = response_text.find('```', start)
+                response_text = response_text[start:end].strip()
 
             # Look for JSON array pattern
             start_idx = response_text.find('[')
             end_idx = response_text.rfind(']')
 
             if start_idx == -1 or end_idx == -1:
+                logger.error(f"No JSON array found in response: {response_text[:500]}")
                 raise ValueError("No JSON array found in response")
 
             json_str = response_text[start_idx:end_idx + 1]
 
             # Parse JSON
             questions = json.loads(json_str)
+
+            if not isinstance(questions, list):
+                raise ValueError("Response is not a JSON array")
 
             # Validate and clean questions
             validated_questions = []
@@ -185,11 +203,14 @@ Generate the questions now:"""
                 else:
                     logger.warning(f"Skipping invalid question: {q.get('question_text', 'unknown')}")
 
+            if not validated_questions:
+                raise ValueError("No valid questions generated")
+
             return validated_questions
 
         except json.JSONDecodeError as e:
             logger.error(f"JSON parse error: {str(e)}")
-            logger.error(f"Response text: {response_text[:500]}")
+            logger.error(f"Response text (first 1000 chars): {response_text[:1000]}")
             raise ValueError(f"Failed to parse questions from response: {str(e)}")
 
     def _validate_question(self, question: Dict) -> bool:
@@ -253,25 +274,20 @@ Generate the questions now:"""
         Estimate API cost for generating questions
 
         Returns:
-            Dict with estimated costs
+            Dict with estimated usage (Hugging Face is FREE!)
         """
-        # Rough estimates for Grok API
+        # Rough estimates for token usage (informational only - HF is free!)
         input_tokens = (text_length / 4) + 500  # Text + prompt
         output_tokens = num_questions * config.AVG_OUTPUT_TOKENS_PER_QUESTION
-
-        # Grok pricing (update based on current xAI pricing)
-        input_cost = (input_tokens / 1_000_000) * config.COST_PER_1M_INPUT_TOKENS
-        output_cost = (output_tokens / 1_000_000) * config.COST_PER_1M_OUTPUT_TOKENS
-
-        total_cost = input_cost + output_cost
 
         return {
             'estimated_input_tokens': int(input_tokens),
             'estimated_output_tokens': int(output_tokens),
             'estimated_total_tokens': int(input_tokens + output_tokens),
-            'estimated_cost_usd': round(total_cost, 4),
-            'input_cost_usd': round(input_cost, 4),
-            'output_cost_usd': round(output_cost, 4)
+            'estimated_cost_usd': 0.0,  # FREE!
+            'input_cost_usd': 0.0,
+            'output_cost_usd': 0.0,
+            'note': 'Hugging Face Inference API is completely FREE!'
         }
 
 
@@ -391,12 +407,13 @@ def process_pdf_and_generate_questions(
         pdf_id: Database ID of the PDF
         text: Full text from PDF
         chunks: Text chunks from PDF
-        num_questions: Target number of questions (default: based on text length)
+        num_questions: Target number of questions (default: based on game requirements)
 
     Returns:
         Dict with generation stats
     """
     from database import pdf_manager as db_pdf_manager
+    from game_engine import calculate_minimum_questions_needed
 
     # Get PDF info
     pdf_info = db_pdf_manager.get_pdf(pdf_id)
@@ -405,9 +422,17 @@ def process_pdf_and_generate_questions(
 
     # Determine number of questions
     if not num_questions:
+        # Calculate minimum questions needed for a full game run
+        min_needed = calculate_minimum_questions_needed()
+
         # Estimate based on text length
         words = len(text.split())
-        num_questions = max(config.MIN_QUESTIONS_TO_START, min(50, words // 250))
+        text_based = max(config.MIN_QUESTIONS_TO_START, min(100, words // 250))
+
+        # Use the maximum to ensure enough questions
+        num_questions = max(min_needed, text_based)
+
+        logger.info(f"Generating {num_questions} questions (minimum needed: {min_needed}, text-based: {text_based})")
 
     # Initialize generators
     generator = QuestionGenerator()
@@ -435,5 +460,6 @@ def process_pdf_and_generate_questions(
         'questions_generated': len(questions),
         'questions_saved': saved_count,
         'cost_estimate': cost_estimate,
+        'minimum_needed': calculate_minimum_questions_needed(),
         'success': True
     }

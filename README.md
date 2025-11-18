@@ -20,7 +20,7 @@ pip install -r requirements_with_ocr.txt
 
 # Configurar variables de entorno
 cp .env.example .env
-nano .env  # Agregar XAI_API_KEY
+nano .env  # Agregar HUGGINGFACE_API_KEY (opcional pero recomendado)
 ```
 
 ### 2. Verificar Instalación
@@ -158,14 +158,37 @@ python ocr_processor.py documento.pdf
 En tu archivo `.env`:
 
 ```bash
-# API Key (Requerido)
-XAI_API_KEY=tu-key-aqui
+# ✨ Hugging Face API Key (GRATIS!) - Opcional pero recomendado
+# Obtén tu clave gratis en: https://huggingface.co/settings/tokens
+# Sin API key: funciona con límites de rate más bajos
+# Con API key: sin límites, mejor rendimiento, 100% GRATIS
+HUGGINGFACE_API_KEY=hf_tu_key_aqui
+
+# Modelo (opcional - usa un modelo gratis de HuggingFace)
+# Por defecto: mistralai/Mixtral-8x7B-Instruct-v0.1 (excelente calidad)
+# Alternativas:
+#   - meta-llama/Meta-Llama-3-8B-Instruct (más rápido)
+#   - mistralai/Mistral-7B-Instruct-v0.2 (balance)
+#   - HuggingFaceH4/zephyr-7b-beta (ligero)
+HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
 
 # OCR (Opcional - defaults son buenos)
 OCR_ENABLED=True
 OCR_ENGINE=tesseract
 TESSERACT_LANG=spa+eng
 ```
+
+### 🎁 Cómo obtener tu API Key GRATUITA de Hugging Face:
+
+1. Visita https://huggingface.co/join
+2. Crea una cuenta gratis (email, Google, o GitHub)
+3. Ve a https://huggingface.co/settings/tokens
+4. Clic en "New token"
+5. Dale un nombre (ej: "educational-roguelike")
+6. Selecciona "Read" como permiso
+7. Copia el token y pégalo en tu `.env`
+
+**¡Sin costos, sin tarjeta de crédito, sin límites de uso!** 🎉
 
 ---
 

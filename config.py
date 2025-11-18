@@ -10,13 +10,20 @@ from pathlib import Path
 # 🔑 API CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════
 
-# Grok API Configuration (xAI) - FREE TIER AVAILABLE!
-XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
-GROK_MODEL = 'grok-2-latest'  # or 'grok-2-latest' for more advanced
+# Hugging Face Configuration - FREE!
+HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY', '')
+# Recommended free models:
+# - 'mistralai/Mixtral-8x7B-Instruct-v0.1' - Excellent for instructions (recommended)
+# - 'meta-llama/Meta-Llama-3-8B-Instruct' - Fast and good quality
+# - 'HuggingFaceH4/zephyr-7b-beta' - Lightweight and fast
+# - 'mistralai/Mistral-7B-Instruct-v0.2' - Great balance of speed/quality
+HUGGINGFACE_MODEL = os.environ.get('HUGGINGFACE_MODEL', 'mistralai/Mixtral-8x7B-Instruct-v0.1')
 MAX_TOKENS = 4096
 TEMPERATURE = 0.7
 
-# Legacy Claude support (optional - can still use Claude if preferred)
+# Legacy API support (optional)
+XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
+GROK_MODEL = 'grok-2-latest'
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
@@ -86,7 +93,8 @@ ENEMY_TYPES = {
         'hp': 30,
         'damage': 10,
         'score': 100,
-        'difficulty': 1
+        'difficulty': 1,
+        'is_boss': False
     },
     'skeleton': {
         'name': 'Skeleton',
@@ -94,7 +102,8 @@ ENEMY_TYPES = {
         'hp': 50,
         'damage': 15,
         'score': 200,
-        'difficulty': 2
+        'difficulty': 2,
+        'is_boss': False
     },
     'ghost': {
         'name': 'Ghost',
@@ -102,7 +111,8 @@ ENEMY_TYPES = {
         'hp': 40,
         'damage': 20,
         'score': 250,
-        'difficulty': 2
+        'difficulty': 2,
+        'is_boss': False
     },
     'zombie': {
         'name': 'Zombie',
@@ -110,7 +120,8 @@ ENEMY_TYPES = {
         'hp': 70,
         'damage': 18,
         'score': 300,
-        'difficulty': 3
+        'difficulty': 3,
+        'is_boss': False
     },
     'demon': {
         'name': 'Demon',
@@ -118,7 +129,8 @@ ENEMY_TYPES = {
         'hp': 90,
         'damage': 25,
         'score': 400,
-        'difficulty': 4
+        'difficulty': 4,
+        'is_boss': False
     },
     'dragon': {
         'name': 'Dragon',
@@ -126,7 +138,48 @@ ENEMY_TYPES = {
         'hp': 120,
         'damage': 30,
         'score': 500,
-        'difficulty': 5
+        'difficulty': 5,
+        'is_boss': False
+    }
+}
+
+# Boss enemies - appear at the end of runs
+BOSS_TYPES = {
+    'lich_king': {
+        'name': 'Lich King',
+        'emoji': '👑💀',
+        'hp': 200,
+        'damage': 35,
+        'score': 1000,
+        'difficulty': 6,
+        'is_boss': True
+    },
+    'ancient_dragon': {
+        'name': 'Ancient Dragon',
+        'emoji': '🐲',
+        'hp': 250,
+        'damage': 40,
+        'score': 1200,
+        'difficulty': 6,
+        'is_boss': True
+    },
+    'demon_lord': {
+        'name': 'Demon Lord',
+        'emoji': '😈',
+        'hp': 220,
+        'damage': 38,
+        'score': 1100,
+        'difficulty': 6,
+        'is_boss': True
+    },
+    'void_beast': {
+        'name': 'Void Beast',
+        'emoji': '🌑',
+        'hp': 240,
+        'damage': 42,
+        'score': 1300,
+        'difficulty': 6,
+        'is_boss': True
     }
 }
 

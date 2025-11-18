@@ -11,12 +11,24 @@ class RoguelikeGame {
         this.currentQuestion = null;
         this.gameStatus = null;
         this.battleLog = [];
+        this.powerupsConfig = {};
         this.init();
     }
 
     async init() {
         this.setupEventListeners();
+        await this.loadConfig();
         await this.checkGameStatus();
+    }
+
+    async loadConfig() {
+        try {
+            const response = await fetch('/api/config');
+            const config = await response.json();
+            this.powerupsConfig = config.powerups;
+        } catch (error) {
+            console.error('Error loading config:', error);
+        }
     }
 
     setupEventListeners() {
@@ -350,9 +362,21 @@ class RoguelikeGame {
 
         // Update stats
         this.updateStats(this.gameStatus.stats);
+
+        // Update inventory
+        this.updateInventory(this.gameStatus.inventory);
     }
 
     updatePlayer(player) {
+        // Reset player sprite animations to ensure visibility
+        const playerSprite = document.getElementById('player-sprite');
+        if (playerSprite) {
+            playerSprite.style.animation = '';
+            playerSprite.style.opacity = '';
+            playerSprite.style.transform = '';
+            playerSprite.classList.remove('attacking', 'damaged');
+        }
+
         // Update HP
         const playerHpFill = document.getElementById('player-hp-fill');
         const playerHpText = document.getElementById('player-hp-text');
@@ -395,12 +419,29 @@ class RoguelikeGame {
         const enemySprite = document.getElementById('enemy-sprite');
         if (enemySprite) {
             enemySprite.textContent = enemy.emoji;
+            // Reset animations and styles to fix sprite visibility
+            enemySprite.style.animation = '';
+            enemySprite.style.opacity = '';
+            enemySprite.style.transform = '';
+            enemySprite.style.display = '';
+            // Remove animation classes
+            enemySprite.classList.remove('attacking', 'damaged');
         }
 
         // Update name
         const enemyName = document.getElementById('enemy-name');
         if (enemyName) {
             enemyName.textContent = enemy.name;
+        }
+
+        // Show boss indicator if this is a boss
+        const bossIndicator = document.getElementById('boss-indicator');
+        if (bossIndicator) {
+            if (enemy.is_boss) {
+                bossIndicator.classList.remove('hidden');
+            } else {
+                bossIndicator.classList.add('hidden');
+            }
         }
 
         // Update HP
@@ -444,6 +485,94 @@ class RoguelikeGame {
         const answeredEl = document.getElementById('questions-answered');
         if (answeredEl) {
             answeredEl.textContent = stats.questions_answered;
+        }
+    }
+
+    updateInventory(inventory) {
+        const inventoryEmpty = document.getElementById('inventory-empty');
+        const inventoryItems = document.getElementById('inventory-items');
+
+        if (!inventoryItems) return;
+
+        // Clear current items
+        inventoryItems.innerHTML = '';
+
+        if (!inventory || inventory.length === 0) {
+            if (inventoryEmpty) inventoryEmpty.style.display = 'block';
+            return;
+        }
+
+        if (inventoryEmpty) inventoryEmpty.style.display = 'none';
+
+        // Group powerups by type and count
+        const powerupCounts = {};
+        inventory.forEach(powerupId => {
+            powerupCounts[powerupId] = (powerupCounts[powerupId] || 0) + 1;
+        });
+
+        // Display each unique powerup
+        Object.entries(powerupCounts).forEach(([powerupId, count]) => {
+            const powerupData = this.powerupsConfig[powerupId];
+            if (!powerupData) return;
+
+            const itemEl = document.createElement('button');
+            itemEl.className = 'inventory-item';
+            itemEl.innerHTML = `
+                <span class="powerup-name">${powerupData.name}</span>
+                ${count > 1 ? `<span class="powerup-count">x${count}</span>` : ''}
+            `;
+            itemEl.title = `Click to use: ${this.getPowerupDescription(powerupId, powerupData)}`;
+            itemEl.addEventListener('click', () => this.usePowerup(powerupId));
+
+            inventoryItems.appendChild(itemEl);
+        });
+    }
+
+    getPowerupDescription(powerupId, powerupData) {
+        const descriptions = {
+            'heal': `Restores ${powerupData.value} HP`,
+            'shield': `Adds ${powerupData.value} shield`,
+            'damage_boost': `Multiplies damage by ${powerupData.value}x`,
+            'score_boost': `Multiplies score by ${powerupData.value}x`
+        };
+        return descriptions[powerupData.effect] || 'Unknown effect';
+    }
+
+    async usePowerup(powerupId) {
+        try {
+            this.showLoading('Using powerup...');
+
+            const response = await fetch(`/api/game/use-powerup/${this.pdfId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ powerup_id: powerupId })
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.error || 'Failed to use powerup');
+            }
+
+            // Update game status
+            this.gameStatus = result.game_status;
+            this.updateUI();
+
+            // Show notification
+            const powerupData = this.powerupsConfig[powerupId];
+            if (powerupData) {
+                this.showNotification(`Used ${powerupData.name}!`, 'success');
+                this.addBattleLog(`✨ Used ${powerupData.name}`, 'heal');
+            }
+
+            this.hideLoading();
+
+        } catch (error) {
+            console.error('Error using powerup:', error);
+            this.showNotification(error.message, 'error');
+            this.hideLoading();
         }
     }
 

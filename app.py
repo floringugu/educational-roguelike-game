@@ -350,6 +350,33 @@ def answer_question(pdf_id):
         return jsonify({'error': str(e)}), 500
 
 
+@app.route('/api/game/use-powerup/<int:pdf_id>', methods=['POST'])
+def use_powerup(pdf_id):
+    """Use a powerup from inventory"""
+    try:
+        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+
+        if session_key not in game_sessions:
+            return jsonify({'error': 'No active game'}), 400
+
+        data = request.get_json()
+        powerup_id = data.get('powerup_id')
+
+        if not powerup_id:
+            return jsonify({'error': 'Missing powerup_id'}), 400
+
+        game = game_sessions[session_key]
+        result = game.use_powerup(powerup_id)
+
+        return jsonify(result)
+
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Use powerup error: {str(e)}")
+        return jsonify({'error': str(e)}), 500
+
+
 @app.route('/api/game/save/<int:pdf_id>', methods=['POST'])
 def save_game(pdf_id):
     """Save current game"""
@@ -494,6 +521,7 @@ def get_config():
     """Get game configuration for frontend"""
     return jsonify({
         'enemy_types': config.ENEMY_TYPES,
+        'boss_types': config.BOSS_TYPES,
         'powerups': config.POWERUPS,
         'total_encounters': config.TOTAL_ENCOUNTERS,
         'player_max_hp': config.PLAYER_MAX_HP,
