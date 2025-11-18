@@ -391,12 +391,13 @@ def process_pdf_and_generate_questions(
         pdf_id: Database ID of the PDF
         text: Full text from PDF
         chunks: Text chunks from PDF
-        num_questions: Target number of questions (default: based on text length)
+        num_questions: Target number of questions (default: based on game requirements)
 
     Returns:
         Dict with generation stats
     """
     from database import pdf_manager as db_pdf_manager
+    from game_engine import calculate_minimum_questions_needed
 
     # Get PDF info
     pdf_info = db_pdf_manager.get_pdf(pdf_id)
@@ -405,9 +406,17 @@ def process_pdf_and_generate_questions(
 
     # Determine number of questions
     if not num_questions:
+        # Calculate minimum questions needed for a full game run
+        min_needed = calculate_minimum_questions_needed()
+
         # Estimate based on text length
         words = len(text.split())
-        num_questions = max(config.MIN_QUESTIONS_TO_START, min(50, words // 250))
+        text_based = max(config.MIN_QUESTIONS_TO_START, min(100, words // 250))
+
+        # Use the maximum to ensure enough questions
+        num_questions = max(min_needed, text_based)
+
+        logger.info(f"Generating {num_questions} questions (minimum needed: {min_needed}, text-based: {text_based})")
 
     # Initialize generators
     generator = QuestionGenerator()
@@ -435,5 +444,6 @@ def process_pdf_and_generate_questions(
         'questions_generated': len(questions),
         'questions_saved': saved_count,
         'cost_estimate': cost_estimate,
+        'minimum_needed': calculate_minimum_questions_needed(),
         'success': True
     }

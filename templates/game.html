@@ -79,6 +79,7 @@
                         <div class="character-sprite enemy-sprite" id="enemy-sprite">🐉</div>
                         <div class="character-info">
                             <div class="character-name" id="enemy-name">Dragon</div>
+                            <div id="boss-indicator" class="boss-indicator hidden">⚠️ BOSS ⚠️</div>
 
                             <div class="health-bar-container">
                                 <div class="health-bar">
@@ -114,6 +115,15 @@
                                 <span>Accuracy:</span>
                                 <span class="text-primary" id="session-accuracy">0%</span>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- Inventory Panel -->
+                    <div class="card mt-lg">
+                        <div class="card-title">🎒 Inventory</div>
+                        <div class="card-content" id="inventory-container">
+                            <div class="text-muted" id="inventory-empty">No items yet</div>
+                            <div id="inventory-items" style="display: flex; flex-direction: column; gap: 8px;"></div>
                         </div>
                     </div>
 
