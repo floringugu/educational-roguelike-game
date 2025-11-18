@@ -21,7 +21,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 - **Death and victory** - Classic roguelike experience
 
 ### 🤖 AI-Powered Question Generation
-- **Automatic question generation** using **Grok API (xAI)** - FREE TIER AVAILABLE!
+- **Automatic question generation** using **Grok API (xAI)** 
 - **Multiple question types**:
   - Multiple choice (4 options)
   - True/False
