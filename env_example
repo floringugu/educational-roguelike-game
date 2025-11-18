@@ -1,0 +1,232 @@
+# ═══════════════════════════════════════════════════════════════════
+# 🎮 EDUCATIONAL ROGUELIKE - ENVIRONMENT VARIABLES
+# ═══════════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════════
+# 🤖 AI CONFIGURATION - HUGGING FACE (100% GRATIS!)
+# ═══════════════════════════════════════════════════════════════════
+
+# ✨ Hugging Face API Key (OBLIGATORIO)
+# Obtén tu clave gratis en: https://huggingface.co/settings/tokens
+#
+# Pasos para obtener tu API key gratis:
+# 1. Visita: https://huggingface.co/join
+# 2. Crea una cuenta gratis (email, Google, o GitHub)
+# 3. Ve a: https://huggingface.co/settings/tokens
+# 4. Crea un "New token" con permiso "Read"
+# 5. Copia y pega aquí (reemplaza el ejemplo)
+#
+# ⚠️ IMPORTANTE: Reemplaza esta key con la tuya
+HUGGINGFACE_API_KEY=hf_clave_de_ejemplo
+
+# ═══════════════════════════════════════════════════════════════════
+# 🎯 MODELO DE IA - Opciones GRATIS verificadas 2025
+# ═══════════════════════════════════════════════════════════════════
+
+# Modelo principal a usar (todos son 100% GRATIS)
+# 
+# 🏆 TOP RECOMENDADOS PARA JUEGOS EDUCATIVOS:
+#
+# 1. mistralai/Mistral-7B-Instruct-v0.2  [RECOMENDADO]
+#    ✅ Mejor balance velocidad/calidad para juegos
+#    ✅ Rápido, conversacional, educativo
+#    ✅ 100% gratis en API, sin límites estrictos
+#    ⚡ Velocidad: Muy rápida
+#    🎯 Ideal para: Diálogos de NPCs, tutoriales, hints
+#
+# 2. meta-llama/Meta-Llama-3-8B-Instruct
+#    ✅ Excelente calidad, muy educativo
+#    ✅ Mejor para explicaciones complejas
+#    ⚡ Velocidad: Rápida
+#    🎯 Ideal para: Contenido educativo profundo, razonamiento
+#
+# 3. google/flan-t5-large
+#    ✅ Ultra ligero y rápido
+#    ✅ Perfecto para respuestas cortas
+#    ⚡ Velocidad: Ultra rápida ⚡⚡⚡
+#    🎯 Ideal para: Hints rápidos, preguntas simples
+#
+# 4. HuggingFaceH4/zephyr-7b-beta
+#    ✅ Optimizado para seguir instrucciones
+#    ✅ Conversaciones muy naturales
+#    ⚡ Velocidad: Rápida
+#    🎯 Ideal para: Diálogos complejos, role-playing
+#
+# 5. microsoft/phi-2
+#    ✅ Pequeño pero inteligente
+#    ✅ Excelente para código y matemáticas
+#    ⚡ Velocidad: Muy rápida
+#    🎯 Ideal para: Juegos de programación, lógica
+#
+# ⚠️ NO RECOMENDADOS (requieren cuenta PRO o son muy lentos):
+# ❌ mistralai/Mixtral-8x7B-Instruct-v0.1  -> Puede requerir PRO
+# ❌ moonshotai/Kimi-K2-Thinking           -> Demasiado grande
+# ❌ Qwen/Qwen2.5-72B-Instruct             -> Requiere PRO
+#
+
+# 🎯 MODELO SELECCIONADO (descomenta el que quieras usar)
+HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+
+# Alternativas (comenta el de arriba y descomenta uno de estos):
+# HUGGINGFACE_MODEL=meta-llama/Meta-Llama-3-8B-Instruct
+# HUGGINGFACE_MODEL=google/flan-t5-large
+# HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
+# HUGGINGFACE_MODEL=microsoft/phi-2
+
+# ═══════════════════════════════════════════════════════════════════
+# ⚙️ PARÁMETROS DE GENERACIÓN
+# ═══════════════════════════════════════════════════════════════════
+
+# Temperatura (0.0 = determinista, 1.0 = creativo)
+# Para juegos educativos: 0.7 es ideal (balance)
+AI_TEMPERATURE=0.7
+
+# Máximo de tokens a generar (palabras aprox.)
+# Ajusta según necesites respuestas largas o cortas
+# - 50: Respuestas muy cortas (hints)
+# - 100: Respuestas normales (diálogos)
+# - 200: Respuestas largas (explicaciones)
+AI_MAX_TOKENS=300
+
+# Top P (nucleus sampling)
+# 0.9 = respuestas más consistentes
+# 1.0 = más variedad
+AI_TOP_P=0.9
+
+# Penalización por repetición
+# Evita que el modelo repita las mismas palabras
+# 1.0 = sin penalización, 1.5 = penalización moderada
+AI_REPETITION_PENALTY=1.2
+
+# Timeout para requests (segundos)
+AI_REQUEST_TIMEOUT=30
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔄 SISTEMA DE FALLBACK (opcional pero recomendado)
+# ═══════════════════════════════════════════════════════════════════
+
+# Si el modelo principal falla, intentar con estos
+# (separados por coma, en orden de prioridad)
+AI_FALLBACK_MODELS=google/flan-t5-large,HuggingFaceH4/zephyr-7b-beta
+
+# Número de reintentos antes de usar fallback
+AI_MAX_RETRIES=3
+
+# Tiempo de espera entre reintentos (segundos)
+AI_RETRY_DELAY=2
+
+# ═══════════════════════════════════════════════════════════════════
+# 💾 CACHÉ DE RESPUESTAS (mejora performance)
+# ═══════════════════════════════════════════════════════════════════
+
+# Habilitar caché de respuestas comunes
+ENABLE_CACHE=True
+
+# Tiempo de expiración del caché (minutos)
+CACHE_EXPIRATION=60
+
+# Tamaño máximo del caché (número de entradas)
+CACHE_MAX_SIZE=1000
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔍 OCR CONFIGURATION (Opcional)
+# ═══════════════════════════════════════════════════════════════════
+
+# Habilitar OCR para PDFs escaneados
+OCR_ENABLED=True
+
+# Motor OCR a usar: tesseract, easyocr, paddleocr
+# Recomendado: tesseract (rápido y confiable)
+OCR_ENGINE=tesseract
+
+# Idiomas para OCR (separados por +)
+# spa = Español, eng = Inglés
+TESSERACT_LANG=spa+eng
+
+# Ruta al ejecutable de Tesseract (solo Windows usualmente)
+# Dejar vacío para auto-detectar
+TESSERACT_CMD=
+
+# DPI para extracción de imágenes (mayor = mejor calidad pero más lento)
+OCR_DPI=300
+
+# Nivel de confianza mínimo (0-100)
+OCR_MIN_CONFIDENCE=60
+
+# Habilitar preprocesamiento de imágenes
+OCR_PREPROCESSING=True
+
+# Número de páginas a procesar en paralelo
+OCR_BATCH_SIZE=5
+
+# ═══════════════════════════════════════════════════════════════════
+# 🌐 FLASK CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════
+
+# Flask secret key (cambiar en producción)
+SECRET_KEY=dev-secret-key-change-in-production
+
+# Flask debug mode
+FLASK_DEBUG=True
+
+# Host
+HOST=0.0.0.0
+
+# Port
+PORT=5000
+
+# ═══════════════════════════════════════════════════════════════════
+# 🎨 PERSONALIZACIÓN DE NPCs
+# ═══════════════════════════════════════════════════════════════════
+
+# Personalidad base del NPC sabio
+NPC_PERSONALITY=Eres un sabio maestro en un juego roguelike educativo. Hablas con sabiduría pero de forma amigable y didáctica. Usa analogías simples y ejemplos prácticos.
+
+# Longitud máxima de respuestas de NPCs (palabras)
+NPC_MAX_RESPONSE_LENGTH=50
+
+# Prefijo para prompts del sistema
+SYSTEM_PROMPT_PREFIX=Eres un asistente educativo en un juego roguelike.
+
+# ═══════════════════════════════════════════════════════════════════
+# 📊 LOGGING Y DEBUG
+# ═══════════════════════════════════════════════════════════════════
+
+# Nivel de logging: DEBUG, INFO, WARNING, ERROR
+LOG_LEVEL=INFO
+
+# Guardar logs de conversaciones con IA
+LOG_AI_CONVERSATIONS=True
+
+# Ruta para logs
+LOG_FILE=logs/game.log
+
+# ═══════════════════════════════════════════════════════════════════
+# 📝 NOTES
+# ═══════════════════════════════════════════════════════════════════
+#
+# 💰 COSTOS:
+# - Hugging Face: 100% GRATIS (sin tarjeta de crédito)
+# - OCR: 100% GRATIS (software open-source)
+# - Base de datos: SQLite local, 100% GRATIS
+# - Total mensual: $0.00 USD
+#
+# 🚀 QUICK START:
+# 1. Copia este archivo: cp .env.example .env
+# 2. Obtén tu API key gratis de Hugging Face
+# 3. Pégala arriba en HUGGINGFACE_API_KEY
+# 4. Elige tu modelo favorito (por defecto: Mistral-7B)
+# 5. ¡Listo! Todo funciona gratis
+#
+# 🔧 TROUBLESHOOTING:
+# - Si un modelo es muy lento: prueba google/flan-t5-large
+# - Si obtienes error 503: el modelo se está cargando, espera 20s
+# - Si obtienes error 429: límite de rate, espera 1 minuto
+# - Si nada funciona: verifica que tu API key sea correcta
+#
+# 📚 DOCUMENTACIÓN:
+# - Hugging Face API: https://huggingface.co/docs/api-inference
+# - Modelos disponibles: https://huggingface.co/models
+# - Obtener API key: https://huggingface.co/settings/tokens
+#
+# ═══════════════════════════════════════════════════════════════════
