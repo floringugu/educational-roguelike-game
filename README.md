@@ -65,7 +65,7 @@ An interactive, pixel-art styled roguelike game that gamifies learning by genera
 ### Prerequisites
 
 - **Python 3.10+**
-- **Grok API Key** (xAI) - Get it from [console.x.ai](https://console.x.ai/) - **FREE TIER AVAILABLE!**
+- **Grok API Key** (xAI) - Get it from [console.x.ai](https://console.x.ai/) 
 
 ### Step 1: Clone the Repository
 
@@ -214,7 +214,7 @@ educational-roguelike-game/
 ├── database.py           # SQLite database models
 ├── game_engine.py        # Roguelike game logic
 ├── pdf_processor.py      # PDF text extraction
-├── question_generator.py # Claude AI integration
+├── question_generator.py # AI integration
 ├── stats_exporter.py     # Statistics export
 ├── requirements.txt      # Python dependencies
 ├── README.md            # This file
