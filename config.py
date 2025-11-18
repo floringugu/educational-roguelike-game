@@ -86,7 +86,8 @@ ENEMY_TYPES = {
         'hp': 30,
         'damage': 10,
         'score': 100,
-        'difficulty': 1
+        'difficulty': 1,
+        'is_boss': False
     },
     'skeleton': {
         'name': 'Skeleton',
@@ -94,7 +95,8 @@ ENEMY_TYPES = {
         'hp': 50,
         'damage': 15,
         'score': 200,
-        'difficulty': 2
+        'difficulty': 2,
+        'is_boss': False
     },
     'ghost': {
         'name': 'Ghost',
@@ -102,7 +104,8 @@ ENEMY_TYPES = {
         'hp': 40,
         'damage': 20,
         'score': 250,
-        'difficulty': 2
+        'difficulty': 2,
+        'is_boss': False
     },
     'zombie': {
         'name': 'Zombie',
@@ -110,7 +113,8 @@ ENEMY_TYPES = {
         'hp': 70,
         'damage': 18,
         'score': 300,
-        'difficulty': 3
+        'difficulty': 3,
+        'is_boss': False
     },
     'demon': {
         'name': 'Demon',
@@ -118,7 +122,8 @@ ENEMY_TYPES = {
         'hp': 90,
         'damage': 25,
         'score': 400,
-        'difficulty': 4
+        'difficulty': 4,
+        'is_boss': False
     },
     'dragon': {
         'name': 'Dragon',
@@ -126,7 +131,48 @@ ENEMY_TYPES = {
         'hp': 120,
         'damage': 30,
         'score': 500,
-        'difficulty': 5
+        'difficulty': 5,
+        'is_boss': False
+    }
+}
+
+# Boss enemies - appear at the end of runs
+BOSS_TYPES = {
+    'lich_king': {
+        'name': 'Lich King',
+        'emoji': '👑💀',
+        'hp': 200,
+        'damage': 35,
+        'score': 1000,
+        'difficulty': 6,
+        'is_boss': True
+    },
+    'ancient_dragon': {
+        'name': 'Ancient Dragon',
+        'emoji': '🐲',
+        'hp': 250,
+        'damage': 40,
+        'score': 1200,
+        'difficulty': 6,
+        'is_boss': True
+    },
+    'demon_lord': {
+        'name': 'Demon Lord',
+        'emoji': '😈',
+        'hp': 220,
+        'damage': 38,
+        'score': 1100,
+        'difficulty': 6,
+        'is_boss': True
+    },
+    'void_beast': {
+        'name': 'Void Beast',
+        'emoji': '🌑',
+        'hp': 240,
+        'damage': 42,
+        'score': 1300,
+        'difficulty': 6,
+        'is_boss': True
     }
 }
 

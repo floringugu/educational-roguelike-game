@@ -50,6 +50,7 @@ class Enemy:
     damage: int
     score_value: int
     difficulty: int
+    is_boss: bool = False
 
     def to_dict(self) -> Dict:
         return asdict(self)
@@ -72,6 +73,11 @@ class GameState:
     questions_correct: int
     start_time: str
     active_powerups: Dict
+    inventory: List[str] = None  # List of powerup IDs that can be used
+
+    def __post_init__(self):
+        if self.inventory is None:
+            self.inventory = []
 
     def to_dict(self) -> Dict:
         data = asdict(self)
@@ -84,6 +90,8 @@ class GameState:
         data['player'] = Player.from_dict(data['player'])
         if data.get('current_enemy'):
             data['current_enemy'] = Enemy.from_dict(data['current_enemy'])
+        if 'inventory' not in data:
+            data['inventory'] = []
         return cls(**data)
 
 
@@ -189,10 +197,32 @@ class GameEngine:
         Generate an enemy appropriate for the encounter number
 
         Difficulty scales with encounter number
+        Final encounter is always a boss
         """
         # Calculate difficulty tier based on encounter
         progress = encounter_num / self.state.total_encounters
         scaling_factor = 1.0 + (progress * (config.DIFFICULTY_SCALING - 1.0))
+
+        # Check if this is the final encounter (boss fight)
+        if encounter_num == self.state.total_encounters:
+            # Generate boss enemy
+            boss_type = random.choice(list(config.BOSS_TYPES.keys()))
+            enemy_data = config.BOSS_TYPES[boss_type].copy()
+
+            enemy = Enemy(
+                enemy_type=boss_type,
+                name=enemy_data['name'],
+                emoji=enemy_data['emoji'],
+                hp=enemy_data['hp'],  # Boss HP doesn't scale
+                max_hp=enemy_data['hp'],
+                damage=enemy_data['damage'],  # Boss damage doesn't scale
+                score_value=enemy_data['score'],
+                difficulty=enemy_data['difficulty'],
+                is_boss=True
+            )
+
+            logger.info(f"Generated BOSS {enemy.name} for final encounter!")
+            return enemy
 
         # Select enemy types based on difficulty
         if progress < 0.3:
@@ -217,7 +247,8 @@ class GameEngine:
             max_hp=int(enemy_data['hp'] * scaling_factor),
             damage=int(enemy_data['damage'] * scaling_factor),
             score_value=int(enemy_data['score'] * scaling_factor),
-            difficulty=enemy_data['difficulty']
+            difficulty=enemy_data['difficulty'],
+            is_boss=False
         )
 
         logger.info(f"Generated {enemy.name} for encounter {encounter_num} (scaling: {scaling_factor:.2f}x)")
@@ -297,10 +328,10 @@ class GameEngine:
                 self.state.player.score += score_gained
                 result['score_gained'] = score_gained
 
-                # Check for powerup drop
+                # Check for powerup drop (now goes to inventory)
                 powerup = self._try_powerup_drop()
                 if powerup:
-                    self._apply_powerup(powerup)
+                    self.state.inventory.append(powerup)
                     result['powerup_gained'] = powerup
 
                 # Progress to next encounter
@@ -339,6 +370,31 @@ class GameEngine:
             if random.random() < powerup_data['chance']:
                 return powerup_id
         return None
+
+    def use_powerup(self, powerup_id: str) -> Dict:
+        """
+        Use a powerup from inventory
+
+        Returns:
+            Dict with result information
+        """
+        if not self.state:
+            raise ValueError("No active game")
+
+        if powerup_id not in self.state.inventory:
+            raise ValueError(f"Powerup {powerup_id} not in inventory")
+
+        # Remove from inventory
+        self.state.inventory.remove(powerup_id)
+
+        # Apply powerup effect
+        self._apply_powerup(powerup_id)
+
+        return {
+            'success': True,
+            'powerup_id': powerup_id,
+            'game_status': self.get_game_status()
+        }
 
     def _apply_powerup(self, powerup_id: str):
         """Apply a powerup effect to the player"""
@@ -412,7 +468,8 @@ class GameEngine:
                 'hp': self.state.current_enemy.hp,
                 'max_hp': self.state.current_enemy.max_hp,
                 'hp_percent': (self.state.current_enemy.hp / self.state.current_enemy.max_hp) * 100,
-                'damage': self.state.current_enemy.damage
+                'damage': self.state.current_enemy.damage,
+                'is_boss': self.state.current_enemy.is_boss
             } if self.state.current_enemy else None,
             'progress': {
                 'current_encounter': self.state.current_encounter,
@@ -425,7 +482,8 @@ class GameEngine:
                 'accuracy': (self.state.questions_correct / self.state.questions_answered * 100)
                     if self.state.questions_answered > 0 else 0
             },
-            'active_powerups': self.state.active_powerups
+            'active_powerups': self.state.active_powerups,
+            'inventory': self.state.inventory
         }
 
 
@@ -458,3 +516,52 @@ def get_difficulty_recommendation(encounter_num: int, total_encounters: int) -> 
         return 'medium'
     else:
         return 'hard'
+
+
+def calculate_minimum_questions_needed() -> int:
+    """
+    Calculate minimum questions needed to complete a full run
+
+    This calculates how many correct answers are needed to defeat all enemies,
+    then adds a multiplier to account for incorrect answers
+
+    Returns:
+        Recommended minimum number of questions to generate
+    """
+    total_hp = 0
+
+    # Calculate HP for regular encounters (1 to TOTAL_ENCOUNTERS - 1)
+    for encounter in range(1, config.TOTAL_ENCOUNTERS):
+        progress = encounter / config.TOTAL_ENCOUNTERS
+        scaling_factor = 1.0 + (progress * (config.DIFFICULTY_SCALING - 1.0))
+
+        # Estimate average enemy HP for this encounter
+        if progress < 0.3:
+            avg_hp = 40  # Average of slime, skeleton, ghost
+        elif progress < 0.7:
+            avg_hp = 55  # Average of skeleton, ghost, zombie
+        else:
+            avg_hp = 93  # Average of zombie, demon, dragon
+
+        total_hp += int(avg_hp * scaling_factor)
+
+    # Add boss HP (final encounter)
+    avg_boss_hp = sum(boss['hp'] for boss in config.BOSS_TYPES.values()) / len(config.BOSS_TYPES)
+    total_hp += int(avg_boss_hp)
+
+    # Calculate questions needed if all answers are correct
+    questions_if_perfect = total_hp // config.PLAYER_BASE_DAMAGE + 1
+
+    # Add multiplier for incorrect answers (assume 60% accuracy)
+    # If 60% correct, need more questions
+    recommended_questions = int(questions_if_perfect / 0.6)
+
+    # Add buffer for safety
+    recommended_questions = int(recommended_questions * 1.2)
+
+    # Ensure minimum
+    recommended_questions = max(recommended_questions, config.MIN_QUESTIONS_TO_START * 3)
+
+    logger.info(f"Calculated minimum questions needed: {recommended_questions} (total enemy HP: {total_hp})")
+
+    return recommended_questions
