@@ -80,7 +80,17 @@ class QuestionGenerator:
 
         except Exception as e:
             logger.error(f"Error generating questions: {str(e)}")
+            logger.error(f"Error type: {type(e).__name__}")
+            logger.error(f"Full error details: {repr(e)}")
             logger.error(f"Try using a different model or check your HuggingFace API key")
+
+            # Check if it's a model availability issue
+            if "not currently available" in str(e).lower() or "loading" in str(e).lower():
+                logger.error(f"Model {self.model} may not be available for serverless inference")
+                logger.error("Try switching to a different model in your .env file:")
+                logger.error("  HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta")
+                logger.error("  HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct")
+
             raise
 
     def _build_prompt(

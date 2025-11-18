@@ -1,8 +1,12 @@
 # 🚀 Configuración Rápida - Generación de Preguntas
 
-## ⚠️ Problema Identificado
+## ⚠️ Problemas Identificados y Resueltos
 
+### Problema 1: Archivo .env no se cargaba
 El archivo `.env` con la API key de Hugging Face no estaba siendo cargado correctamente, por lo que no se generaban preguntas.
+
+### Problema 2: Modelo Mixtral-8x7B no disponible
+El modelo `mistralai/Mixtral-8x7B-Instruct-v0.1` es muy grande (47B parámetros) y puede no estar disponible en la API de inferencia serverless gratuita de Hugging Face.
 
 ## ✅ Solución Implementada
 
@@ -12,6 +16,8 @@ Se han realizado las siguientes correcciones:
 2. ✅ **Creado archivo `.env`** con plantilla de configuración
 3. ✅ **Creado `.gitignore`** para proteger tu API key
 4. ✅ **Creado script de verificación** para validar la configuración
+5. ✅ **Cambiado modelo default** a `HuggingFaceH4/zephyr-7b-beta` (más ligero y disponible)
+6. ✅ **Mejorado manejo de errores** para diagnosticar problemas de modelos
 
 ---
 
@@ -45,6 +51,12 @@ Con tu API key real (debe empezar con `hf_`):
 
 ```bash
 HUGGINGFACE_API_KEY=hf_tu_token_real_aqui
+```
+
+El modelo ya está configurado con **Zephyr-7b-beta** que es rápido, confiable y siempre disponible:
+
+```bash
+HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
 ```
 
 **¡Guarda el archivo!**
