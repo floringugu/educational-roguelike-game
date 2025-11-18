@@ -5,6 +5,10 @@ Contains game constants, API settings, and game balance parameters
 
 import os
 from pathlib import Path
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # ═══════════════════════════════════════════════════════════════════
 # 🔑 API CONFIGURATION
