@@ -10,13 +10,20 @@ from pathlib import Path
 # 🔑 API CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════
 
-# Grok API Configuration (xAI) - FREE TIER AVAILABLE!
-XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
-GROK_MODEL = 'grok-2-latest'  # or 'grok-2-latest' for more advanced
+# Hugging Face Configuration - FREE!
+HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY', '')
+# Recommended free models:
+# - 'mistralai/Mixtral-8x7B-Instruct-v0.1' - Excellent for instructions (recommended)
+# - 'meta-llama/Meta-Llama-3-8B-Instruct' - Fast and good quality
+# - 'HuggingFaceH4/zephyr-7b-beta' - Lightweight and fast
+# - 'mistralai/Mistral-7B-Instruct-v0.2' - Great balance of speed/quality
+HUGGINGFACE_MODEL = os.environ.get('HUGGINGFACE_MODEL', 'mistralai/Mixtral-8x7B-Instruct-v0.1')
 MAX_TOKENS = 4096
 TEMPERATURE = 0.7
 
-# Legacy Claude support (optional - can still use Claude if preferred)
+# Legacy API support (optional)
+XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
+GROK_MODEL = 'grok-2-latest'
 ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
 CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
