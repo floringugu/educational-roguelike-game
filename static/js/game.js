@@ -353,6 +353,15 @@ class RoguelikeGame {
     }
 
     updatePlayer(player) {
+        // Reset player sprite animations to ensure visibility
+        const playerSprite = document.getElementById('player-sprite');
+        if (playerSprite) {
+            playerSprite.style.animation = '';
+            playerSprite.style.opacity = '';
+            playerSprite.style.transform = '';
+            playerSprite.classList.remove('attacking', 'damaged');
+        }
+
         // Update HP
         const playerHpFill = document.getElementById('player-hp-fill');
         const playerHpText = document.getElementById('player-hp-text');
@@ -395,6 +404,13 @@ class RoguelikeGame {
         const enemySprite = document.getElementById('enemy-sprite');
         if (enemySprite) {
             enemySprite.textContent = enemy.emoji;
+            // Reset animations and styles to fix sprite visibility
+            enemySprite.style.animation = '';
+            enemySprite.style.opacity = '';
+            enemySprite.style.transform = '';
+            enemySprite.style.display = '';
+            // Remove animation classes
+            enemySprite.classList.remove('attacking', 'damaged');
         }
 
         // Update name

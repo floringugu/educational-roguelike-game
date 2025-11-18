@@ -171,50 +171,5 @@
 
     <script src="{{ url_for('static', filename='js/animations.js') }}"></script>
     <script src="{{ url_for('static', filename='js/game.js') }}"></script>
-    
-        <script>
-        // Fix para sprites de enemigos que desaparecen
-            document.addEventListener('DOMContentLoaded', function() {
-        // Observer para detectar cambios en el juego
-            const observer = new MutationObserver(function() {
-            const enemySprite = document.getElementById('enemy-sprite');
-            const enemyName = document.getElementById('enemy-name');
-        
-                if (enemySprite && enemyName) {
-            // Si hay nombre de enemigo pero no sprite, arreglarlo
-                    if (enemyName.textContent && !enemySprite.textContent) {
-                // Mapeo de nombres a emojis
-                        const emojiMap = {
-                            'Slime': '🟢',
-                            'Skeleton': '💀',
-                            'Ghost': '👻',
-                            'Zombie': '🧟',
-                            'Demon': '👹',
-                            'Dragon': '🐉'
-                        };
-                
-                        const enemyType = enemyName.textContent;
-                        const emoji = emojiMap[enemyType] || '👹';
-                
-                        enemySprite.textContent = emoji;
-                        enemySprite.style.display = 'block';
-                        enemySprite.style.fontSize = '80px';
-                
-                        console.log(`✅ Fixed sprite for ${enemyType}: ${emoji}`);
-                }
-            }
-        });
-    
-        // Observar cambios en el panel del enemigo
-        const enemyPanel = document.querySelector('.character-panel');
-            if (enemyPanel) {
-            observer.observe(enemyPanel, {
-                childList: true,
-                subtree: true,
-                characterData: true
-                });
-            }
-        });
-        </script>
 </body>
 </html>
