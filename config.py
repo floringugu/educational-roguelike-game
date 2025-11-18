@@ -12,7 +12,7 @@ from pathlib import Path
 
 # Grok API Configuration (xAI) - FREE TIER AVAILABLE!
 XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
-GROK_MODEL = 'grok-beta'  # or 'grok-2-latest' for more advanced
+GROK_MODEL = 'grok-2-latest'  # or 'grok-2-latest' for more advanced
 MAX_TOKENS = 4096
 TEMPERATURE = 0.7
 
@@ -199,6 +199,45 @@ PORT = int(os.environ.get('PORT', 5000))
 # Upload settings
 MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
 ALLOWED_EXTENSIONS = {'pdf'}
+
+# ═══════════════════════════════════════════════════════════════════
+# 🔍 OCR CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════
+
+# Enable OCR for scanned PDFs and images
+OCR_ENABLED = os.environ.get('OCR_ENABLED', 'True').lower() == 'true'
+
+# OCR Engine: 'tesseract', 'easyocr', or 'paddleocr'
+OCR_ENGINE = os.environ.get('OCR_ENGINE', 'tesseract')
+
+# Tesseract Configuration
+TESSERACT_CMD = os.environ.get('TESSERACT_CMD', None)  # Path to tesseract executable
+TESSERACT_LANG = os.environ.get('TESSERACT_LANG', 'spa+eng')  # Languages: spa=Spanish, eng=English
+TESSERACT_CONFIG = '--psm 3 --oem 3'  # Page segmentation mode and OCR engine mode
+
+# OCR Processing Settings
+OCR_DPI = 300  # DPI for image extraction (higher = better quality but slower)
+OCR_MIN_CONFIDENCE = 60  # Minimum confidence score (0-100) to accept OCR text
+OCR_PREPROCESSING = True  # Apply image preprocessing (denoise, contrast, etc.)
+OCR_BATCH_SIZE = 5  # Number of pages to process in parallel
+
+# Image preprocessing options
+OCR_PREPROCESS_OPTIONS = {
+    'grayscale': True,       # Convert to grayscale
+    'denoise': True,         # Remove noise
+    'deskew': True,          # Correct skewed images
+    'remove_borders': True,  # Remove black borders
+    'enhance_contrast': True # Improve text visibility
+}
+
+# Fallback to text extraction if OCR fails
+OCR_FALLBACK_TO_TEXT = True
+
+# OCR Cache (to avoid re-processing same pages)
+OCR_CACHE_ENABLED = True
+OCR_CACHE_DIR = DATA_DIR / 'ocr_cache'
+if OCR_CACHE_ENABLED:
+    OCR_CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
 # ═══════════════════════════════════════════════════════════════════
 # 💰 COST ESTIMATION

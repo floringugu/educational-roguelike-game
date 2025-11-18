@@ -12,6 +12,14 @@ import logging
 import config
 from database import pdf_manager
 
+# Import OCR processor if available
+try:
+    from ocr_processor import extract_text_with_ocr, PDFOCRProcessor
+    OCR_AVAILABLE = True
+except ImportError:
+    OCR_AVAILABLE = False
+    logger.warning("OCR processor not available. Scanned PDFs may not be processed correctly.")
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -23,12 +31,16 @@ class PDFProcessor:
         self.min_text_length = 100  # Minimum characters to consider valid
         self.max_chunk_size = 4000  # Maximum chunk size for API processing
 
-    def extract_text_from_pdf(self, pdf_path: str) -> Dict:
+    def extract_text_from_pdf(self, pdf_path: str, use_ocr: bool = None) -> Dict:
         """
-        Extract all text from a PDF file
+        Extract all text from a PDF file with automatic OCR fallback
+
+        Args:
+            pdf_path: Path to PDF file
+            use_ocr: Force OCR usage (None = auto-detect, True = force, False = disable)
 
         Returns:
-            Dict with keys: text, num_pages, metadata, chunks
+            Dict with keys: text, num_pages, metadata, chunks, extraction_method
         """
         pdf_path = Path(pdf_path)
 
@@ -41,9 +53,10 @@ class PDFProcessor:
                 metadata = pdf.metadata or {}
                 num_pages = len(pdf.pages)
 
-                # Extract text from all pages
+                # Try text extraction first
                 full_text = ""
                 page_texts = []
+                needs_ocr = False
 
                 for i, page in enumerate(pdf.pages, 1):
                     page_text = page.extract_text() or ""
@@ -54,8 +67,45 @@ class PDFProcessor:
                     })
                     full_text += f"\n\n--- Page {i} ---\n\n{page_text}"
 
+                # Check if we got sufficient text
+                if len(full_text.strip()) < self.min_text_length:
+                    needs_ocr = True
+                    logger.warning(f"Insufficient text extracted ({len(full_text)} chars), may need OCR")
+
+                # Determine if OCR should be used
+                should_use_ocr = use_ocr if use_ocr is not None else (needs_ocr and config.OCR_ENABLED)
+
+                extraction_method = 'text'
+                ocr_stats = None
+
+                # Use OCR if needed and available
+                if should_use_ocr:
+                    if OCR_AVAILABLE:
+                        logger.info("Using OCR to extract text from PDF...")
+                        ocr_result = extract_text_with_ocr(str(pdf_path))
+                        
+                        if ocr_result['success'] and len(ocr_result['text']) > len(full_text):
+                            logger.info(f"OCR extracted more text: {len(ocr_result['text'])} vs {len(full_text)} chars")
+                            full_text = ocr_result['text']
+                            extraction_method = 'ocr'
+                            ocr_stats = {
+                                'pages_with_ocr': ocr_result['pages_with_ocr'],
+                                'avg_confidence': ocr_result['avg_confidence']
+                            }
+                        else:
+                            logger.warning("OCR did not improve text extraction, using original")
+                    else:
+                        logger.warning("OCR requested but not available. Install: pip install pytesseract pillow opencv-python")
+
                 # Clean the text
                 full_text = self.clean_text(full_text)
+
+                # Validate we have enough text
+                if len(full_text.strip()) < self.min_text_length:
+                    raise ValueError(
+                        f"Insufficient text extracted from PDF ({len(full_text)} chars). "
+                        "PDF may be scanned images without OCR, or contain no readable text."
+                    )
 
                 # Split into manageable chunks for question generation
                 chunks = self.split_into_chunks(full_text)
@@ -71,10 +121,12 @@ class PDFProcessor:
                     'page_texts': page_texts,
                     'chunks': chunks,
                     'topics': topics,
-                    'title': metadata.get('Title') or pdf_path.stem
+                    'title': metadata.get('Title') or pdf_path.stem,
+                    'extraction_method': extraction_method,
+                    'ocr_stats': ocr_stats
                 }
 
-                logger.info(f"Extracted {len(full_text)} characters from {num_pages} pages")
+                logger.info(f"Extracted {len(full_text)} characters from {num_pages} pages using {extraction_method}")
                 logger.info(f"Found {len(topics)} topics, created {len(chunks)} chunks")
 
                 return result
@@ -250,7 +302,14 @@ class PDFProcessor:
                 first_page_text = pdf.pages[0].extract_text() or ""
 
                 if len(first_page_text) < self.min_text_length:
-                    return False, "PDF appears to have no extractable text (might be scanned images)"
+                    # Check if OCR is available
+                    if config.OCR_ENABLED and OCR_AVAILABLE:
+                        return True, "PDF appears to be scanned. OCR will be used for text extraction."
+                    else:
+                        return False, (
+                            "PDF appears to have no extractable text (might be scanned images). "
+                            "Enable OCR by installing: pip install pytesseract pillow opencv-python"
+                        )
 
                 return True, "PDF is valid"
 

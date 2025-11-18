@@ -256,7 +256,7 @@ Generate the questions now:"""
             Dict with estimated costs
         """
         # Rough estimates for Grok API
-        input_tokens = (len(text_length) / 4) + 500  # Text + prompt
+        input_tokens = (text_length / 4) + 500  # Text + prompt
         output_tokens = num_questions * config.AVG_OUTPUT_TOKENS_PER_QUESTION
 
         # Grok pricing (update based on current xAI pricing)

@@ -60,6 +60,7 @@ class RoguelikeGame {
             }
 
             this.gameStatus = data.game_status;
+            this.showGameScreen();
             this.updateUI();
             this.addBattleLog('⚔️ A new adventure begins!', 'info');
             await this.loadNextQuestion();
@@ -504,6 +505,16 @@ class RoguelikeGame {
 
         if (welcomeScreen) welcomeScreen.classList.remove('hidden');
         if (gameScreen) gameScreen.classList.add('hidden');
+    }
+
+    showGameScreen() {
+        console.log('🎮 Showing game screen');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const gameScreen = document.getElementById('game-screen');
+
+        if (welcomeScreen) welcomeScreen.classList.add('hidden');
+        if (gameScreen) gameScreen.classList.remove('hidden');
+
     }
 
     showGameOver() {
