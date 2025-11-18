@@ -62,17 +62,31 @@ class QuestionGenerator:
         try:
             logger.info(f"Generating {num_questions} questions (difficulty: {difficulty}) using {self.model}")
 
-            # Use Hugging Face text generation
-            response = self.client.text_generation(
-                prompt=prompt,
-                model=self.model,
-                max_new_tokens=config.MAX_TOKENS,
-                temperature=config.TEMPERATURE,
-                return_full_text=False
-            )
+            # Try chat completion first (for conversational models like Zephyr)
+            try:
+                response = self.client.chat_completion(
+                    messages=[{"role": "user", "content": prompt}],
+                    model=self.model,
+                    max_tokens=config.MAX_TOKENS,
+                    temperature=config.TEMPERATURE
+                )
+                # Extract content from chat completion response
+                response_text = response.choices[0].message.content
+                logger.info("Using chat completion API (conversational model)")
+            except Exception as chat_error:
+                # Fallback to text generation for non-conversational models
+                logger.info(f"Chat API failed, trying text generation: {str(chat_error)[:100]}")
+                response_text = self.client.text_generation(
+                    prompt=prompt,
+                    model=self.model,
+                    max_new_tokens=config.MAX_TOKENS,
+                    temperature=config.TEMPERATURE,
+                    return_full_text=False
+                )
+                logger.info("Using text generation API")
 
             # Extract JSON from response
-            questions = self._parse_response(response)
+            questions = self._parse_response(response_text)
 
             logger.info(f"Successfully generated {len(questions)} questions")
 
@@ -88,8 +102,15 @@ class QuestionGenerator:
             if "not currently available" in str(e).lower() or "loading" in str(e).lower():
                 logger.error(f"Model {self.model} may not be available for serverless inference")
                 logger.error("Try switching to a different model in your .env file:")
-                logger.error("  HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta")
                 logger.error("  HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct")
+                logger.error("  HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2")
+
+            # Check if it's a task mismatch
+            if "not supported for task" in str(e).lower():
+                logger.error("The model may require a different API method")
+                logger.error("Try a different model that supports text-generation:")
+                logger.error("  HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct")
+                logger.error("  HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2")
 
             raise
 

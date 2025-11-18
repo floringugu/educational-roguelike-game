@@ -17,11 +17,11 @@ load_dotenv()
 # Hugging Face Configuration - FREE!
 HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY', '')
 # Recommended free models (available on serverless inference):
-# - 'HuggingFaceH4/zephyr-7b-beta' - Fast, reliable, excellent quality (RECOMMENDED)
-# - 'microsoft/Phi-3-mini-4k-instruct' - Very fast and efficient
-# - 'mistralai/Mistral-7B-Instruct-v0.2' - Great balance of speed/quality
-# - 'mistralai/Mixtral-8x7B-Instruct-v0.1' - Excellent but may not be available
-HUGGINGFACE_MODEL = os.environ.get('HUGGINGFACE_MODEL', 'HuggingFaceH4/zephyr-7b-beta')
+# - 'microsoft/Phi-3-mini-4k-instruct' - Fastest, most reliable (RECOMMENDED)
+# - 'mistralai/Mistral-7B-Instruct-v0.2' - Great quality, slightly slower
+# - 'HuggingFaceH4/zephyr-7b-beta' - Excellent, uses chat API
+# - 'mistralai/Mixtral-8x7B-Instruct-v0.1' - Best quality but may not be available
+HUGGINGFACE_MODEL = os.environ.get('HUGGINGFACE_MODEL', 'microsoft/Phi-3-mini-4k-instruct')
 MAX_TOKENS = 4096
 TEMPERATURE = 0.7
 

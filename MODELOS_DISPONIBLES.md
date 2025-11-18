@@ -2,66 +2,69 @@
 
 ## 📊 Comparación de Modelos
 
-| Modelo | Disponibilidad | Velocidad | Calidad | Recomendado |
-|--------|----------------|-----------|---------|-------------|
-| **HuggingFaceH4/zephyr-7b-beta** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ SÍ |
-| **microsoft/Phi-3-mini-4k-instruct** | ✅ Siempre | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐ | ✅ SÍ |
-| **mistralai/Mistral-7B-Instruct-v0.2** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ SÍ |
-| **mistralai/Mixtral-8x7B-Instruct-v0.1** | ⚠️ Variable | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ⚠️ A veces |
+| Modelo | Disponibilidad | Velocidad | Calidad | Compatibilidad | Recomendado |
+|--------|----------------|-----------|---------|----------------|-------------|
+| **microsoft/Phi-3-mini-4k-instruct** | ✅ Siempre | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ✅ **SÍ** |
+| **mistralai/Mistral-7B-Instruct-v0.2** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ✅ SÍ |
+| **HuggingFaceH4/zephyr-7b-beta** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ⚠️ chat only | ⚠️ Avanzado |
+| **mistralai/Mixtral-8x7B-Instruct-v0.1** | ⚠️ Variable | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ⚠️ A veces |
 
 ---
 
-## 🎯 Modelo Recomendado: Zephyr-7b-beta
+## 🎯 Modelo Recomendado: Phi-3-mini-4k-instruct
 
 ### ✅ Ventajas
 
 - **Siempre disponible**: Funciona 24/7 en la API serverless de Hugging Face
-- **Muy rápido**: Genera preguntas en 2-5 segundos
-- **Excelente calidad**: Optimizado para seguir instrucciones
+- **El más rápido**: Genera preguntas en 2-3 segundos
+- **Excelente calidad**: Creado por Microsoft, optimizado para instrucciones
 - **Gratis**: 100% gratuito con tu API key
-- **Confiable**: No falla por "modelo no disponible"
+- **Máxima compatibilidad**: Funciona con la API estándar de text-generation
+- **Confiable**: No falla por "modelo no disponible" o "API incorrecta"
 
 ### 📝 Configuración
 
 Ya está configurado por defecto en tu `.env`:
 
 ```bash
-HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
+HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
 ```
 
 ---
 
 ## 🔄 Modelos Alternativos
 
-### 1. Microsoft Phi-3 Mini (Más Rápido)
+### 1. Mistral-7B-Instruct (Excelente Calidad)
 
-Si necesitas máxima velocidad:
-
-```bash
-HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
-```
-
-**Características:**
-- ⚡ El más rápido de todos
-- 🎯 Muy eficiente
-- ✅ Siempre disponible
-- 📝 Calidad muy buena
-
----
-
-### 2. Mistral-7B (Balance)
-
-Si prefieres Mistral pero más ligero que Mixtral:
+Si prefieres el estilo de Mistral:
 
 ```bash
 HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
 ```
 
 **Características:**
-- 🎯 Excelente balance calidad/velocidad
+- ⭐ Excelente calidad para preguntas educativas
 - ✅ Siempre disponible
-- 📝 Muy buena calidad de respuestas
-- 🔧 De los creadores de Mixtral
+- 🎯 Muy buena calidad de respuestas
+- 🔧 De los creadores de Mixtral (versión más ligera)
+- ⚡ Rápido (ligeramente más lento que Phi-3)
+
+---
+
+### 2. Zephyr-7b-beta (Avanzado)
+
+⚠️ **Requiere API de chat (el código lo maneja automáticamente)**
+
+```bash
+HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
+```
+
+**Características:**
+- ⭐ Excelente calidad
+- ✅ Siempre disponible
+- 🔧 Usa chat API en lugar de text-generation
+- ⚡ Rápido
+- ⚠️ El código hace fallback automático si falla
 
 ---
 
@@ -99,14 +102,19 @@ HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
 
 ## 💡 Recomendaciones
 
-### Para uso general:
-```bash
-HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
-```
-
-### Si necesitas velocidad máxima:
+### Para uso general (RECOMENDADO):
 ```bash
 HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
+```
+
+### Si prefieres el estilo Mistral:
+```bash
+HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+```
+
+### Si eres usuario avanzado:
+```bash
+HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
 ```
 
 ### Si Mixtral funciona para ti:
@@ -148,9 +156,9 @@ HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
 
 | Modelo | Tiempo Promedio |
 |--------|-----------------|
-| Phi-3-mini | ~3 segundos |
-| Zephyr-7b | ~5 segundos |
-| Mistral-7B | ~6 segundos |
+| Phi-3-mini | ~2-3 segundos ⚡ |
+| Mistral-7B | ~4-6 segundos |
+| Zephyr-7b | ~4-5 segundos |
 | Mixtral-8x7B | ~15 segundos (si está disponible) |
 
 ### Calidad de preguntas:
@@ -161,17 +169,18 @@ Todos los modelos recomendados generan preguntas de alta calidad para propósito
 
 ## ✅ Conclusión
 
-**Usa Zephyr-7b-beta** (configuración actual) - Es el mejor balance de:
-- ✅ Disponibilidad garantizada
-- ✅ Velocidad excelente
-- ✅ Calidad muy alta
+**Usa Phi-3-mini-4k-instruct** (configuración actual) - Es la mejor opción:
+- ✅ Máxima velocidad (el más rápido)
+- ✅ Disponibilidad garantizada 24/7
+- ✅ Calidad excelente para preguntas educativas
 - ✅ 100% gratis
-- ✅ Confiable
+- ✅ Máxima compatibilidad (text-generation API)
+- ✅ Creado por Microsoft, muy confiable
 
 **Solo cambia si:**
-- Necesitas máxima velocidad → Phi-3-mini
-- Mixtral funciona consistentemente para ti → Mixtral-8x7B
-- Prefieres la familia Mistral → Mistral-7B
+- Prefieres el estilo Mistral → Mistral-7B-Instruct-v0.2
+- Eres usuario avanzado → Zephyr-7b-beta (usa chat API)
+- Mixtral funciona para ti → Mixtral-8x7B-Instruct-v0.1
 
 ---
 

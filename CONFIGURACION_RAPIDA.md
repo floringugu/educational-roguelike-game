@@ -8,6 +8,9 @@ El archivo `.env` con la API key de Hugging Face no estaba siendo cargado correc
 ### Problema 2: Modelo Mixtral-8x7B no disponible
 El modelo `mistralai/Mixtral-8x7B-Instruct-v0.1` es muy grande (47B parámetros) y puede no estar disponible en la API de inferencia serverless gratuita de Hugging Face.
 
+### Problema 3: Zephyr requiere API de chat
+El modelo `HuggingFaceH4/zephyr-7b-beta` está configurado para tareas conversacionales (chat) en lugar de text-generation directa, lo que causa errores de compatibilidad.
+
 ## ✅ Solución Implementada
 
 Se han realizado las siguientes correcciones:
@@ -16,8 +19,9 @@ Se han realizado las siguientes correcciones:
 2. ✅ **Creado archivo `.env`** con plantilla de configuración
 3. ✅ **Creado `.gitignore`** para proteger tu API key
 4. ✅ **Creado script de verificación** para validar la configuración
-5. ✅ **Cambiado modelo default** a `HuggingFaceH4/zephyr-7b-beta` (más ligero y disponible)
+5. ✅ **Cambiado modelo default** a `microsoft/Phi-3-mini-4k-instruct` (el más rápido y compatible)
 6. ✅ **Mejorado manejo de errores** para diagnosticar problemas de modelos
+7. ✅ **Agregado soporte para chat API** (fallback automático para Zephyr)
 
 ---
 
@@ -53,11 +57,13 @@ Con tu API key real (debe empezar con `hf_`):
 HUGGINGFACE_API_KEY=hf_tu_token_real_aqui
 ```
 
-El modelo ya está configurado con **Zephyr-7b-beta** que es rápido, confiable y siempre disponible:
+El modelo ya está configurado con **Phi-3-mini-4k-instruct** que es el más rápido, confiable y compatible:
 
 ```bash
-HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
+HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
 ```
+
+Este es el mejor modelo para empezar - es el más rápido y siempre funciona.
 
 **¡Guarda el archivo!**
 
