@@ -1,5 +1,17 @@
 # 🚀 Configuración Rápida - Generación de Preguntas
 
+## ⚠️ IMPORTANTE: Limitaciones de API Gratuita
+
+La API **gratuita** de Hugging Face tiene muchas limitaciones y puede no funcionar bien para producción.
+
+**Lee `OPCIONES_API.md` para ver tus opciones reales.**
+
+Si tienes acceso a **Grok (xAI)** o quieres usar otra API, esas son mejores opciones.
+
+---
+
+# 🚀 Configuración Rápida - Generación de Preguntas
+
 ## ⚠️ Problemas Identificados y Resueltos
 
 ### Problema 1: Archivo .env no se cargaba

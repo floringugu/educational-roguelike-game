@@ -79,17 +79,24 @@ class QuestionGenerator:
                 logger.info("✓ Using chat completion API (conversational model)")
 
             except Exception as chat_error:
-                logger.info(f"Chat API not available, trying text generation: {str(chat_error)[:100]}")
+                logger.warning(f"Chat API failed with error: {type(chat_error).__name__}: {str(chat_error)[:200]}")
+                logger.info("Trying text generation API as fallback...")
 
                 # Fallback to text generation for non-conversational models
-                response_text = self.client.text_generation(
-                    prompt=prompt,
-                    model=self.model,
-                    max_new_tokens=config.MAX_TOKENS,
-                    temperature=config.TEMPERATURE,
-                    return_full_text=False
-                )
-                logger.info("✓ Using text generation API")
+                try:
+                    response_text = self.client.text_generation(
+                        prompt=prompt,
+                        model=self.model,
+                        max_new_tokens=config.MAX_TOKENS,
+                        temperature=config.TEMPERATURE,
+                        return_full_text=False
+                    )
+                    logger.info("✓ Using text generation API")
+                except Exception as text_gen_error:
+                    logger.error(f"Text generation API also failed: {type(text_gen_error).__name__}: {str(text_gen_error)[:200]}")
+                    logger.error("Both chat and text generation APIs failed")
+                    logger.error("This model may require a paid tier or is not available on free API")
+                    raise ValueError(f"Model {self.model} not accessible with current API key. Both chat_completion and text_generation failed. Try a different model or upgrade your HuggingFace account.")
 
             logger.info(f"Received response (length: {len(response_text) if response_text else 0} chars)")
 
