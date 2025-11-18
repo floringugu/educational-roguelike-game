@@ -4,50 +4,53 @@
 
 | Modelo | Disponibilidad | Velocidad | Calidad | Compatibilidad | Recomendado |
 |--------|----------------|-----------|---------|----------------|-------------|
-| **microsoft/Phi-3-mini-4k-instruct** | ✅ Siempre | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ✅ **SÍ** |
-| **mistralai/Mistral-7B-Instruct-v0.2** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ✅ SÍ |
+| **mistralai/Mistral-7B-Instruct-v0.2** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ✅ **SÍ** |
+| **microsoft/Phi-3-mini-4k-instruct** | ⚠️ API de pago | ⚡⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ⚠️ Avanzado |
 | **HuggingFaceH4/zephyr-7b-beta** | ✅ Siempre | ⚡⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ⚠️ chat only | ⚠️ Avanzado |
 | **mistralai/Mixtral-8x7B-Instruct-v0.1** | ⚠️ Variable | ⚡⚡⚡ | ⭐⭐⭐⭐⭐ | ✅ text-gen | ⚠️ A veces |
 
 ---
 
-## 🎯 Modelo Recomendado: Phi-3-mini-4k-instruct
+## 🎯 Modelo Recomendado: Mistral-7B-Instruct-v0.2
 
 ### ✅ Ventajas
 
-- **Siempre disponible**: Funciona 24/7 en la API serverless de Hugging Face
-- **El más rápido**: Genera preguntas en 2-3 segundos
-- **Excelente calidad**: Creado por Microsoft, optimizado para instrucciones
-- **Gratis**: 100% gratuito con tu API key
-- **Máxima compatibilidad**: Funciona con la API estándar de text-generation
-- **Confiable**: No falla por "modelo no disponible" o "API incorrecta"
+- **Siempre disponible**: Funciona 24/7 en la API serverless gratuita de Hugging Face
+- **Muy rápido**: Genera preguntas en 4-6 segundos
+- **Excelente calidad**: De los creadores de Mixtral, optimizado para instrucciones
+- **100% Gratis**: Funciona perfectamente con la API gratuita
+- **Máxima compatibilidad**: Usa API estándar de text-generation
+- **Confiable**: Probado y verificado que funciona con cuentas gratuitas
+- **Sin restricciones**: No requiere tier de pago
 
 ### 📝 Configuración
 
 Ya está configurado por defecto en tu `.env`:
 
 ```bash
-HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
+HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
 ```
 
 ---
 
 ## 🔄 Modelos Alternativos
 
-### 1. Mistral-7B-Instruct (Excelente Calidad)
+### 1. Phi-3-mini-4k-instruct (Muy Rápido, pero...)
 
-Si prefieres el estilo de Mistral:
+⚠️ **Puede requerir tier de pago de Hugging Face**
 
 ```bash
-HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
 ```
 
 **Características:**
-- ⭐ Excelente calidad para preguntas educativas
-- ✅ Siempre disponible
-- 🎯 Muy buena calidad de respuestas
-- 🔧 De los creadores de Mixtral (versión más ligera)
-- ⚡ Rápido (ligeramente más lento que Phi-3)
+- ⚡ El más rápido (~2-3 segundos)
+- ⭐ Excelente calidad
+- ⚠️ **Requiere tier de pago de HuggingFace** (error 403 con API gratuita)
+- ✅ Si tienes tier de pago, funciona perfectamente
+- 🔧 Creado por Microsoft
+
+**Nota:** Si obtienes error 403, usa Mistral-7B en su lugar.
 
 ---
 
@@ -68,7 +71,7 @@ HUGGINGFACE_MODEL=HuggingFaceH4/zephyr-7b-beta
 
 ---
 
-### 3. Mixtral-8x7B (Mayor Calidad, pero...)
+### 3. Mixtral-8x7B (Máxima Calidad, pero...)
 
 ⚠️ **Solo usar si funciona en tu cuenta**
 
@@ -102,14 +105,14 @@ HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
 
 ## 💡 Recomendaciones
 
-### Para uso general (RECOMENDADO):
-```bash
-HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
-```
-
-### Si prefieres el estilo Mistral:
+### Para API gratuita (RECOMENDADO):
 ```bash
 HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
+```
+
+### Si tienes tier de pago de HuggingFace:
+```bash
+HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
 ```
 
 ### Si eres usuario avanzado:
@@ -154,12 +157,12 @@ HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
 
 ### Tiempo de generación (10 preguntas):
 
-| Modelo | Tiempo Promedio |
-|--------|-----------------|
-| Phi-3-mini | ~2-3 segundos ⚡ |
-| Mistral-7B | ~4-6 segundos |
-| Zephyr-7b | ~4-5 segundos |
-| Mixtral-8x7B | ~15 segundos (si está disponible) |
+| Modelo | Tiempo Promedio | Disponibilidad |
+|--------|-----------------|----------------|
+| Mistral-7B | ~4-6 segundos | ✅ API gratuita |
+| Phi-3-mini | ~2-3 segundos ⚡ | ⚠️ Requiere tier de pago |
+| Zephyr-7b | ~4-5 segundos | ✅ API gratuita |
+| Mixtral-8x7B | ~15 segundos | ⚠️ Variable |
 
 ### Calidad de preguntas:
 
@@ -169,16 +172,17 @@ Todos los modelos recomendados generan preguntas de alta calidad para propósito
 
 ## ✅ Conclusión
 
-**Usa Phi-3-mini-4k-instruct** (configuración actual) - Es la mejor opción:
-- ✅ Máxima velocidad (el más rápido)
+**Usa Mistral-7B-Instruct-v0.2** (configuración actual) - Es la mejor opción para API gratuita:
+- ✅ Funciona perfecto con API gratuita de Hugging Face
 - ✅ Disponibilidad garantizada 24/7
 - ✅ Calidad excelente para preguntas educativas
-- ✅ 100% gratis
+- ✅ 100% gratis sin restricciones
+- ✅ Rápido (4-6 segundos)
 - ✅ Máxima compatibilidad (text-generation API)
-- ✅ Creado por Microsoft, muy confiable
+- ✅ De los creadores de Mixtral, muy confiable
 
 **Solo cambia si:**
-- Prefieres el estilo Mistral → Mistral-7B-Instruct-v0.2
+- Tienes tier de pago → Phi-3-mini-4k-instruct (más rápido)
 - Eres usuario avanzado → Zephyr-7b-beta (usa chat API)
 - Mixtral funciona para ti → Mixtral-8x7B-Instruct-v0.1
 

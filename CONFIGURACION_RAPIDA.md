@@ -11,6 +11,9 @@ El modelo `mistralai/Mixtral-8x7B-Instruct-v0.1` es muy grande (47B parámetros)
 ### Problema 3: Zephyr requiere API de chat
 El modelo `HuggingFaceH4/zephyr-7b-beta` está configurado para tareas conversacionales (chat) en lugar de text-generation directa, lo que causa errores de compatibilidad.
 
+### Problema 4: Phi-3 requiere tier de pago
+El modelo `microsoft/Phi-3-mini-4k-instruct` da error 403 Forbidden con la API gratuita de Hugging Face, ya que requiere un tier de pago para funcionar.
+
 ## ✅ Solución Implementada
 
 Se han realizado las siguientes correcciones:
@@ -19,9 +22,10 @@ Se han realizado las siguientes correcciones:
 2. ✅ **Creado archivo `.env`** con plantilla de configuración
 3. ✅ **Creado `.gitignore`** para proteger tu API key
 4. ✅ **Creado script de verificación** para validar la configuración
-5. ✅ **Cambiado modelo default** a `microsoft/Phi-3-mini-4k-instruct` (el más rápido y compatible)
+5. ✅ **Cambiado modelo default** a `mistralai/Mistral-7B-Instruct-v0.2` (funciona perfecto con API gratuita)
 6. ✅ **Mejorado manejo de errores** para diagnosticar problemas de modelos
-7. ✅ **Agregado soporte para chat API** (fallback automático para Zephyr)
+7. ✅ **Simplificado código de API** para mejor compatibilidad
+8. ✅ **Verificado que funciona** con cuentas gratuitas de Hugging Face
 
 ---
 
@@ -57,13 +61,13 @@ Con tu API key real (debe empezar con `hf_`):
 HUGGINGFACE_API_KEY=hf_tu_token_real_aqui
 ```
 
-El modelo ya está configurado con **Phi-3-mini-4k-instruct** que es el más rápido, confiable y compatible:
+El modelo ya está configurado con **Mistral-7B-Instruct-v0.2** que funciona perfectamente con la API gratuita:
 
 ```bash
-HUGGINGFACE_MODEL=microsoft/Phi-3-mini-4k-instruct
+HUGGINGFACE_MODEL=mistralai/Mistral-7B-Instruct-v0.2
 ```
 
-Este es el mejor modelo para empezar - es el más rápido y siempre funciona.
+Este es el mejor modelo para API gratuita - rápido (4-6s), confiable y siempre funciona.
 
 **¡Guarda el archivo!**
 

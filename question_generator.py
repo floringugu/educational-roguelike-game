@@ -62,28 +62,20 @@ class QuestionGenerator:
         try:
             logger.info(f"Generating {num_questions} questions (difficulty: {difficulty}) using {self.model}")
 
-            # Try chat completion first (for conversational models like Zephyr)
-            try:
-                response = self.client.chat_completion(
-                    messages=[{"role": "user", "content": prompt}],
-                    model=self.model,
-                    max_tokens=config.MAX_TOKENS,
-                    temperature=config.TEMPERATURE
-                )
-                # Extract content from chat completion response
-                response_text = response.choices[0].message.content
-                logger.info("Using chat completion API (conversational model)")
-            except Exception as chat_error:
-                # Fallback to text generation for non-conversational models
-                logger.info(f"Chat API failed, trying text generation: {str(chat_error)[:100]}")
-                response_text = self.client.text_generation(
-                    prompt=prompt,
-                    model=self.model,
-                    max_new_tokens=config.MAX_TOKENS,
-                    temperature=config.TEMPERATURE,
-                    return_full_text=False
-                )
-                logger.info("Using text generation API")
+            # Use text generation API (most compatible)
+            logger.info("Calling Hugging Face Inference API...")
+            response_text = self.client.text_generation(
+                prompt=prompt,
+                model=self.model,
+                max_new_tokens=config.MAX_TOKENS,
+                temperature=config.TEMPERATURE,
+                return_full_text=False
+            )
+
+            logger.info(f"Received response (length: {len(response_text) if response_text else 0} chars)")
+
+            if not response_text or len(response_text) < 10:
+                raise ValueError(f"Empty or too short response from API (length: {len(response_text) if response_text else 0})")
 
             # Extract JSON from response
             questions = self._parse_response(response_text)
