@@ -370,7 +370,9 @@ class RoguelikeGame {
         if (!this.gameState) return;
 
         // Update player info
-        this.updatePlayer(this.gameState.player);
+        if (this.gameState.player) {
+            this.updatePlayer(this.gameState.player);
+        }
 
         // Update enemy info
         if (this.gameState.enemy) {
@@ -378,16 +380,24 @@ class RoguelikeGame {
         }
 
         // Update progress
-        this.updateProgress(this.gameState.progress);
+        if (this.gameState.progress) {
+            this.updateProgress(this.gameState.progress);
+        }
 
         // Update stats
-        this.updateStats(this.gameState.stats);
+        if (this.gameState.stats) {
+            this.updateStats(this.gameState.stats);
+        }
 
         // Update inventory
-        this.updateInventory(this.gameState.inventory);
+        if (this.gameState.inventory) {
+            this.updateInventory(this.gameState.inventory);
+        }
     }
 
     updatePlayer(player) {
+        if (!player) return;
+
         // Reset player sprite animations to ensure visibility
         const playerSprite = document.getElementById('player-sprite');
         if (playerSprite) {
@@ -401,7 +411,7 @@ class RoguelikeGame {
         const playerHpFill = document.getElementById('player-hp-fill');
         const playerHpText = document.getElementById('player-hp-text');
 
-        if (playerHpFill) {
+        if (playerHpFill && player.hp_percent !== undefined) {
             playerHpFill.style.width = `${player.hp_percent}%`;
 
             // Change color based on HP
@@ -412,13 +422,13 @@ class RoguelikeGame {
             }
         }
 
-        if (playerHpText) {
+        if (playerHpText && player.hp !== undefined && player.max_hp !== undefined) {
             playerHpText.textContent = `${player.hp}/${player.max_hp}`;
         }
 
         // Update shield
         const shieldIndicator = document.getElementById('player-shield');
-        if (shieldIndicator) {
+        if (shieldIndicator && player.shield !== undefined) {
             if (player.shield > 0) {
                 shieldIndicator.textContent = `🛡️ Shield: ${player.shield}`;
                 shieldIndicator.classList.remove('hidden');
@@ -429,15 +439,17 @@ class RoguelikeGame {
 
         // Update score
         const scoreEl = document.getElementById('player-score');
-        if (scoreEl) {
+        if (scoreEl && player.score !== undefined) {
             scoreEl.textContent = player.score.toLocaleString();
         }
     }
 
     updateEnemy(enemy) {
+        if (!enemy) return;
+
         // Update sprite
         const enemySprite = document.getElementById('enemy-sprite');
-        if (enemySprite) {
+        if (enemySprite && enemy.emoji) {
             enemySprite.textContent = enemy.emoji;
             // Reset animations and styles to fix sprite visibility
             enemySprite.style.animation = '';
@@ -484,22 +496,26 @@ class RoguelikeGame {
     }
 
     updateProgress(progress) {
+        if (!progress) return;
+
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
 
-        if (progressFill) {
+        if (progressFill && progress.percent !== undefined) {
             progressFill.style.width = `${progress.percent}%`;
         }
 
-        if (progressText) {
+        if (progressText && progress.current_encounter !== undefined && progress.total_encounters !== undefined) {
             progressText.textContent = `Encounter ${progress.current_encounter}/${progress.total_encounters}`;
         }
     }
 
     updateStats(stats) {
+        if (!stats) return;
+
         // Update accuracy
         const accuracyEl = document.getElementById('session-accuracy');
-        if (accuracyEl) {
+        if (accuracyEl && stats.accuracy !== undefined) {
             accuracyEl.textContent = `${stats.accuracy.toFixed(1)}%`;
         }
 
