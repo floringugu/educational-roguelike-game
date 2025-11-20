@@ -322,6 +322,7 @@ class GameEngine:
         enemy_defeated = False
         player_damaged = False
         player_defeated = False
+        powerup_dropped = None  # Track el powerup que se dropea
 
         if damage > 0:
             self.state.current_enemy.hp = max(0, self.state.current_enemy.hp - damage)
@@ -337,8 +338,17 @@ class GameEngine:
                 # Drop powerup
                 powerup = self._try_drop_powerup()
                 if powerup:
-                    self.state.inventory.append(powerup['id'])
-                    battle_log.append(f"¡Obtuviste {powerup['name']}!")
+                    powerup_dropped = powerup['id']  # Guardar el ID
+                    powerup_config = config.POWERUPS.get(powerup['id'])
+                    # Si tiene auto_use, aplicar inmediatamente
+                    if powerup_config and powerup_config.get('auto_use', False):
+                        use_result = self.use_powerup(powerup['id'], auto_apply=True)
+                        if use_result['success']:
+                            battle_log.append(f"✨ {use_result['message']}")
+                    else:
+                        # Si no es auto-use, agregar al inventario
+                        self.state.inventory.append(powerup['id'])
+                        battle_log.append(f"¡Obtuviste {powerup['name']}!")
 
         # Track damage received for response
         damage_received = 0
@@ -398,17 +408,10 @@ class GameEngine:
 
         # Calculate score gained (if enemy was defeated)
         score_gained = 0
-        powerup_gained = None
+        powerup_gained = powerup_dropped  # Usar el powerup que se dropeó
 
         if enemy_defeated:
             score_gained = int(self.state.current_enemy.score_value * self.state.player.score_boost)
-            # Check battle log for powerup drops
-            for log in battle_log:
-                if "Obtuviste" in log:
-                    # Extract powerup from inventory (last added)
-                    if self.state.inventory and len(self.state.inventory) > 0:
-                        powerup_gained = self.state.inventory[-1]
-                    break
 
         return {
             'success': True,
@@ -495,46 +498,66 @@ class GameEngine:
 
         return None
 
-    def use_powerup(self, powerup_id: str) -> Dict:
-        """Use a powerup from inventory"""
-        if powerup_id not in self.state.inventory:
-            return {'success': False, 'message': 'Powerup no está en el inventario'}
+    def use_powerup(self, powerup_id: str, auto_apply: bool = False) -> Dict:
+        """
+        Use a powerup (from inventory or auto-apply when obtained)
 
+        Args:
+            powerup_id: ID del powerup
+            auto_apply: Si es True, no verifica inventario (se usa al obtenerlo)
+        """
         powerup = config.POWERUPS.get(powerup_id)
         if not powerup:
             return {'success': False, 'message': 'Powerup no válido'}
 
-        # Remove from inventory
-        self.state.inventory.remove(powerup_id)
+        # Si no es auto-apply, verificar y remover del inventario
+        if not auto_apply:
+            if powerup_id not in self.state.inventory:
+                return {'success': False, 'message': 'Powerup no está en el inventario'}
+            self.state.inventory.remove(powerup_id)
 
-        # Apply effect
-        message = ""
-        if powerup_id == 'health_potion':
-            heal = powerup['effect']['heal']
+        # Aplicar efectos genéricamente
+        effect = powerup['effect']
+        messages = []
+
+        # Curación
+        if 'heal' in effect:
+            heal = effect['heal']
+            old_hp = self.state.player.hp
             self.state.player.hp = min(self.state.player.max_hp, self.state.player.hp + heal)
-            message = f"Te curaste {heal} HP"
+            actual_heal = self.state.player.hp - old_hp
+            if actual_heal > 0:
+                messages.append(f"+{actual_heal} HP")
 
-        elif powerup_id == 'shield':
-            shield = powerup['effect']['shield']
+        # Escudo
+        if 'shield' in effect:
+            shield = effect['shield']
             self.state.player.shield += shield
-            message = f"Ganaste {shield} de escudo"
+            messages.append(f"+{shield} Shield")
 
-        elif powerup_id == 'double_damage':
-            duration = powerup['effect']['duration']
-            self.state.player.damage_boost = 2.0
-            self.state.active_powerups['double_damage'] = duration
-            message = f"¡Daño x2 por {duration} turnos!"
+        # Boost de daño
+        if 'damage_boost' in effect:
+            boost = effect['damage_boost']
+            duration = effect.get('duration', 3)
+            self.state.player.damage_boost = boost
+            self.state.active_powerups['damage_boost'] = duration
+            messages.append(f"Damage x{boost} ({duration} turns)")
 
-        elif powerup_id == 'lucky_coin':
-            duration = powerup['effect']['duration']
-            self.state.player.score_boost = 1.5
-            self.state.active_powerups['lucky_coin'] = duration
-            message = f"¡Score x1.5 por {duration} turnos!"
+        # Boost de score
+        if 'score_boost' in effect:
+            boost = effect['score_boost']
+            duration = effect.get('duration', 3)
+            self.state.player.score_boost = boost
+            self.state.active_powerups['score_boost'] = duration
+            messages.append(f"Score x{boost} ({duration} turns)")
+
+        message = f"{powerup['name']}: {', '.join(messages)}" if messages else powerup['name']
 
         return {
             'success': True,
             'message': message,
-            'powerup': powerup_id
+            'powerup': powerup_id,
+            'effects': messages
         }
 
     def save_game(self, save_name: str) -> int:

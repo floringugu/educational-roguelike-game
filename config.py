@@ -51,31 +51,77 @@ PLAYER_STARTING_LEVEL = 1
 TOTAL_ENCOUNTERS = 10
 DIFFICULTY_SCALE_FACTOR = 0.2  # 20% más difícil por encuentro
 
-# Power-ups
+# Power-ups (se aplican automáticamente al obtenerlos)
 POWERUPS = {
     'health_potion': {
         'name': '💚 Health Potion',
         'emoji': '💚',
         'effect': {'heal': 30},
-        'drop_chance': 30.0
+        'drop_chance': 50.0,
+        'auto_use': True
+    },
+    'mega_potion': {
+        'name': '💗 Mega Potion',
+        'emoji': '💗',
+        'effect': {'heal': 50},
+        'drop_chance': 25.0,
+        'auto_use': True
     },
     'shield': {
         'name': '🛡️ Shield',
         'emoji': '🛡️',
         'effect': {'shield': 20},
-        'drop_chance': 25.0
+        'drop_chance': 45.0,
+        'auto_use': True
+    },
+    'iron_shield': {
+        'name': '🔰 Iron Shield',
+        'emoji': '🔰',
+        'effect': {'shield': 35},
+        'drop_chance': 30.0,
+        'auto_use': True
     },
     'double_damage': {
         'name': '⚔️ Double Damage',
         'emoji': '⚔️',
         'effect': {'damage_boost': 2.0, 'duration': 3},
-        'drop_chance': 20.0
+        'drop_chance': 40.0,
+        'auto_use': True
+    },
+    'triple_damage': {
+        'name': '🗡️ Triple Damage',
+        'emoji': '🗡️',
+        'effect': {'damage_boost': 3.0, 'duration': 2},
+        'drop_chance': 20.0,
+        'auto_use': True
     },
     'lucky_coin': {
         'name': '💰 Lucky Coin',
         'emoji': '💰',
         'effect': {'score_boost': 1.5, 'duration': 3},
-        'drop_chance': 25.0
+        'drop_chance': 40.0,
+        'auto_use': True
+    },
+    'golden_coin': {
+        'name': '🪙 Golden Coin',
+        'emoji': '🪙',
+        'effect': {'score_boost': 2.0, 'duration': 3},
+        'drop_chance': 25.0,
+        'auto_use': True
+    },
+    'energy_drink': {
+        'name': '🧃 Energy Drink',
+        'emoji': '🧃',
+        'effect': {'heal': 20, 'shield': 10},
+        'drop_chance': 35.0,
+        'auto_use': True
+    },
+    'max_restore': {
+        'name': '✨ Max Restore',
+        'emoji': '✨',
+        'effect': {'heal': 999},
+        'drop_chance': 15.0,
+        'auto_use': True
     }
 }
 
