@@ -317,7 +317,9 @@ class RoguelikeGame {
         }
 
         // Check for game won
+        console.log('Victory check:', result.game_won, 'Current encounter:', this.gameState?.progress?.current_encounter);
         if (result.game_won) {
+            console.log('VICTORY DETECTED! Showing victory screen...');
             this.addBattleLog('🌟 Victory! You completed the dungeon!', 'info');
             playAnimation('victory');
             this.showVictory();

@@ -333,6 +333,9 @@ def answer_card(deck_id):
         if not result['success']:
             return jsonify(result), 400
 
+        # Debug logging
+        logger.info(f"Answer processed: game_won={result.get('game_won')}, player_defeated={result.get('player_defeated')}")
+
         # Add next card data if game continues
         state = game.get_state()
         if state and state.current_card and not result.get('game_won') and not result.get('player_defeated'):
@@ -344,6 +347,8 @@ def answer_card(deck_id):
 
         # Add updated state
         result['state'] = state.to_dict() if state else None
+
+        logger.info(f"Returning response with game_won={result.get('game_won')}, has_next_card={'next_card' in result}")
 
         return jsonify(result)
 

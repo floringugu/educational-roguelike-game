@@ -374,14 +374,19 @@ class GameEngine:
         if enemy_defeated and not player_defeated:
             self.state.current_encounter += 1
 
+            # Debug logging
+            logger.info(f"Enemy defeated! Current encounter: {self.state.current_encounter}, Total: {self.state.total_encounters}")
+
             if self.state.current_encounter <= self.state.total_encounters:
                 # Generar siguiente enemigo
                 next_enemy = self._generate_enemy(self.state.current_encounter)
                 self.state.current_enemy = next_enemy
+                logger.info(f"Generated next enemy: {next_enemy.name}")
             else:
                 # ¡Juego completado!
                 game_won = True
                 battle_log.append("¡VICTORIA! ¡Completaste todos los encuentros!")
+                logger.info(f"GAME WON! Victory condition met.")
                 self._end_game(completed=True)
 
         # Cargar siguiente tarjeta si el juego continúa
