@@ -84,20 +84,74 @@ class GameState:
             self.inventory = []
 
     def to_dict(self) -> Dict:
-        data = asdict(self)
-        data['player'] = self.player.to_dict()
-        data['current_enemy'] = self.current_enemy.to_dict() if self.current_enemy else None
-        return data
+        """Convert state to dict with frontend-friendly format"""
+        # Calculate progress percentage
+        progress_percent = (self.current_encounter / self.total_encounters * 100) if self.total_encounters > 0 else 0
+
+        # Calculate accuracy
+        accuracy = (self.cards_correct / self.cards_reviewed * 100) if self.cards_reviewed > 0 else 0
+
+        return {
+            'deck_id': self.deck_id,
+            'player': self.player.to_dict(),
+            'enemy': self.current_enemy.to_dict() if self.current_enemy else None,
+            'progress': {
+                'current_encounter': self.current_encounter,
+                'total_encounters': self.total_encounters,
+                'percent': progress_percent
+            },
+            'stats': {
+                'cards_reviewed': self.cards_reviewed,
+                'accuracy': accuracy
+            },
+            'inventory': self.inventory or [],
+            'current_card': self.current_card,
+            'card_revealed': self.card_revealed,
+            'session_id': self.session_id,
+            'start_time': self.start_time,
+            'active_powerups': self.active_powerups
+        }
 
     @classmethod
     def from_dict(cls, data: Dict):
-        data['player'] = Player.from_dict(data['player'])
-        if data.get('current_enemy'):
+        """Create GameState from dict, handling both formats"""
+        # Handle player
+        if isinstance(data.get('player'), dict):
+            data['player'] = Player.from_dict(data['player'])
+
+        # Handle enemy (support both 'enemy' and 'current_enemy' keys)
+        if 'enemy' in data and data['enemy']:
+            data['current_enemy'] = Enemy.from_dict(data['enemy'])
+            del data['enemy']
+        elif 'current_enemy' in data and data['current_enemy']:
             data['current_enemy'] = Enemy.from_dict(data['current_enemy'])
+        else:
+            data['current_enemy'] = None
+
+        # Extract progress fields if in nested format
+        if 'progress' in data:
+            progress = data['progress']
+            data['current_encounter'] = progress.get('current_encounter', 0)
+            data['total_encounters'] = progress.get('total_encounters', 10)
+            del data['progress']
+
+        # Extract stats fields if in nested format
+        if 'stats' in data:
+            stats = data['stats']
+            data['cards_reviewed'] = stats.get('cards_reviewed', 0)
+            # Calculate cards_correct from accuracy if available
+            if 'accuracy' in stats and data['cards_reviewed'] > 0:
+                data['cards_correct'] = int(data['cards_reviewed'] * stats['accuracy'] / 100)
+            del data['stats']
+
+        # Set defaults
         if 'inventory' not in data:
             data['inventory'] = []
         if 'card_revealed' not in data:
             data['card_revealed'] = False
+        if 'cards_correct' not in data:
+            data['cards_correct'] = 0
+
         return cls(**data)
 
 
