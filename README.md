@@ -248,7 +248,7 @@ MIT License - Ver archivo LICENSE para detalles
 ## 📞 Soporte
 
 - 🐛 **Issues:** [GitHub Issues](https://github.com/floringugu/educational-roguelike-game/issues)
-- 📧 **Email:** (tu email aquí si deseas)
+- 📧 **Email:** (floringugu4@gmail.com)
 
 ---
 
