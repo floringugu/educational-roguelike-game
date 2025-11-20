@@ -370,6 +370,13 @@ def use_powerup(deck_id):
         game = game_sessions[session_key]
         result = game.use_powerup(powerup_id)
 
+        if not result['success']:
+            return jsonify(result), 400
+
+        # Añadir estado actualizado del juego
+        state = game.get_state()
+        result['state'] = state.to_dict() if state else None
+
         return jsonify(result)
 
     except ValueError as e:

@@ -51,77 +51,112 @@ PLAYER_STARTING_LEVEL = 1
 TOTAL_ENCOUNTERS = 10
 DIFFICULTY_SCALE_FACTOR = 0.2  # 20% más difícil por encuentro
 
-# Power-ups (se aplican automáticamente al obtenerlos)
+# Power-ups e Items (el jugador debe hacer clic para usarlos)
 POWERUPS = {
+    # Pociones de Vida
     'health_potion': {
         'name': '💚 Health Potion',
         'emoji': '💚',
+        'type': 'consumable',
         'effect': {'heal': 30},
-        'drop_chance': 50.0,
-        'auto_use': True
+        'drop_chance': 50.0
     },
     'mega_potion': {
         'name': '💗 Mega Potion',
         'emoji': '💗',
+        'type': 'consumable',
         'effect': {'heal': 50},
-        'drop_chance': 25.0,
-        'auto_use': True
-    },
-    'shield': {
-        'name': '🛡️ Shield',
-        'emoji': '🛡️',
-        'effect': {'shield': 20},
-        'drop_chance': 45.0,
-        'auto_use': True
-    },
-    'iron_shield': {
-        'name': '🔰 Iron Shield',
-        'emoji': '🔰',
-        'effect': {'shield': 35},
-        'drop_chance': 30.0,
-        'auto_use': True
-    },
-    'double_damage': {
-        'name': '⚔️ Double Damage',
-        'emoji': '⚔️',
-        'effect': {'damage_boost': 2.0, 'duration': 3},
-        'drop_chance': 40.0,
-        'auto_use': True
-    },
-    'triple_damage': {
-        'name': '🗡️ Triple Damage',
-        'emoji': '🗡️',
-        'effect': {'damage_boost': 3.0, 'duration': 2},
-        'drop_chance': 20.0,
-        'auto_use': True
-    },
-    'lucky_coin': {
-        'name': '💰 Lucky Coin',
-        'emoji': '💰',
-        'effect': {'score_boost': 1.5, 'duration': 3},
-        'drop_chance': 40.0,
-        'auto_use': True
-    },
-    'golden_coin': {
-        'name': '🪙 Golden Coin',
-        'emoji': '🪙',
-        'effect': {'score_boost': 2.0, 'duration': 3},
-        'drop_chance': 25.0,
-        'auto_use': True
-    },
-    'energy_drink': {
-        'name': '🧃 Energy Drink',
-        'emoji': '🧃',
-        'effect': {'heal': 20, 'shield': 10},
-        'drop_chance': 35.0,
-        'auto_use': True
+        'drop_chance': 25.0
     },
     'max_restore': {
         'name': '✨ Max Restore',
         'emoji': '✨',
+        'type': 'consumable',
         'effect': {'heal': 999},
-        'drop_chance': 15.0,
-        'auto_use': True
+        'drop_chance': 15.0
+    },
+
+    # Escudos
+    'shield_potion': {
+        'name': '🛡️ Shield Potion',
+        'emoji': '🛡️',
+        'type': 'consumable',
+        'effect': {'shield': 20},
+        'drop_chance': 45.0
+    },
+    'iron_shield': {
+        'name': '🔰 Iron Shield',
+        'emoji': '🔰',
+        'type': 'consumable',
+        'effect': {'shield': 35},
+        'drop_chance': 30.0
+    },
+
+    # Buffs
+    'damage_boost': {
+        'name': '⚔️ Damage Boost',
+        'emoji': '⚔️',
+        'type': 'consumable',
+        'effect': {'damage_boost': 2.0, 'duration': 3},
+        'drop_chance': 40.0
+    },
+    'lucky_coin': {
+        'name': '💰 Lucky Coin',
+        'emoji': '💰',
+        'type': 'consumable',
+        'effect': {'score_boost': 1.5, 'duration': 3},
+        'drop_chance': 40.0
+    },
+    'energy_drink': {
+        'name': '🧃 Energy Drink',
+        'emoji': '🧃',
+        'type': 'consumable',
+        'effect': {'heal': 20, 'shield': 10},
+        'drop_chance': 35.0
+    },
+
+    # Hechizos (Spells) - Hacen daño instantáneo al enemigo
+    'fireball': {
+        'name': '🔥 Fireball',
+        'emoji': '🔥',
+        'type': 'spell',
+        'effect': {'instant_damage': 40},
+        'drop_chance': 35.0
+    },
+    'lightning': {
+        'name': '⚡ Lightning',
+        'emoji': '⚡',
+        'type': 'spell',
+        'effect': {'instant_damage': 50},
+        'drop_chance': 30.0
+    },
+    'ice_shard': {
+        'name': '❄️ Ice Shard',
+        'emoji': '❄️',
+        'type': 'spell',
+        'effect': {'instant_damage': 35},
+        'drop_chance': 35.0
+    },
+    'meteor': {
+        'name': '☄️ Meteor',
+        'emoji': '☄️',
+        'type': 'spell',
+        'effect': {'instant_damage': 80},
+        'drop_chance': 20.0
+    },
+    'holy_light': {
+        'name': '✨ Holy Light',
+        'emoji': '✨',
+        'type': 'spell',
+        'effect': {'instant_damage': 30, 'heal': 20},
+        'drop_chance': 25.0
+    },
+    'poison_dart': {
+        'name': '🧪 Poison Dart',
+        'emoji': '🧪',
+        'type': 'spell',
+        'effect': {'instant_damage': 25},
+        'drop_chance': 40.0
     }
 }
 

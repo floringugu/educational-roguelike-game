@@ -595,14 +595,23 @@ class RoguelikeGame {
             }
 
             // Update game state
-            this.gameState = result.state;
-            this.updateUI();
+            if (result.state) {
+                this.gameState = result.state;
+                this.updateUI();
+            }
 
-            // Show notification
-            const powerupData = this.powerupsConfig[powerupId];
-            if (powerupData) {
-                this.showNotification(`Used ${powerupData.name}!`, 'success');
-                this.addBattleLog(`✨ Used ${powerupData.name}`, 'heal');
+            // Show notification with effects
+            if (result.message) {
+                this.showNotification(result.message, 'success');
+
+                // Determinar color del log según tipo de item
+                const logType = result.item_type === 'spell' ? 'damage' : 'heal';
+                this.addBattleLog(`✨ ${result.message}`, logType);
+            }
+
+            // Si fue un hechizo que hizo daño, mostrar animación
+            if (result.damage_dealt && result.damage_dealt > 0) {
+                playAnimation('correct');
             }
 
             this.hideLoading();
