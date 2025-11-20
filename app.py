@@ -272,6 +272,9 @@ def game_status(deck_id):
         if not state:
             return jsonify({'active': False})
 
+        # Debug logging
+        logger.info(f"Game status check: encounter={state.current_encounter}/{state.total_encounters}, enemy={state.current_enemy.name if state.current_enemy else 'None'}")
+
         response_data = {
             'active': True,
             'state': state.to_dict(),
