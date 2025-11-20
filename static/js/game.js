@@ -272,6 +272,13 @@ class RoguelikeGame {
     }
 
     async processResponseResult(result, response) {
+        console.log('Processing response result:', {
+            game_won: result.game_won,
+            player_defeated: result.player_defeated,
+            enemy_defeated: result.enemy_defeated,
+            has_next_card: !!result.next_card
+        });
+
         // Update game state
         this.gameState = result.state;
 
@@ -318,11 +325,18 @@ class RoguelikeGame {
 
         // Check for game won
         console.log('Victory check:', result.game_won, 'Current encounter:', this.gameState?.progress?.current_encounter);
+        console.log('Full result:', result);
         if (result.game_won) {
             console.log('VICTORY DETECTED! Showing victory screen...');
-            this.addBattleLog('🌟 Victory! You completed the dungeon!', 'info');
-            playAnimation('victory');
-            this.showVictory();
+            try {
+                this.addBattleLog('🌟 Victory! You completed the dungeon!', 'info');
+                playAnimation('victory');
+                this.showVictory();
+            } catch (error) {
+                console.error('Error showing victory screen:', error);
+                // Fallback: redirect immediately
+                window.location.href = `/stats/${this.deckId}`;
+            }
             return;
         }
 
