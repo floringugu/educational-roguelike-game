@@ -34,10 +34,16 @@ class Player:
     score_boost: float = 1.0
 
     def to_dict(self) -> Dict:
-        return asdict(self)
+        data = asdict(self)
+        # Calculate HP percentage for frontend
+        data['hp_percent'] = (self.hp / self.max_hp * 100) if self.max_hp > 0 else 0
+        return data
 
     @classmethod
     def from_dict(cls, data: Dict):
+        # Remove calculated fields before creating instance
+        data = data.copy()
+        data.pop('hp_percent', None)  # Remove if exists
         return cls(**data)
 
 
@@ -55,10 +61,16 @@ class Enemy:
     is_boss: bool = False
 
     def to_dict(self) -> Dict:
-        return asdict(self)
+        data = asdict(self)
+        # Calculate HP percentage for frontend
+        data['hp_percent'] = (self.hp / self.max_hp * 100) if self.max_hp > 0 else 0
+        return data
 
     @classmethod
     def from_dict(cls, data: Dict):
+        # Remove calculated fields before creating instance
+        data = data.copy()
+        data.pop('hp_percent', None)  # Remove if exists
         return cls(**data)
 
 
