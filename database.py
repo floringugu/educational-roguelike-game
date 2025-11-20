@@ -473,6 +473,44 @@ class ReviewStateManager:
                 state=state
             )
 
+    def get_weak_cards(self, deck_id: int, limit: int = 10) -> List[Dict]:
+        """
+        Get cards that need the most practice
+
+        Returns cards with:
+        - Low ease factor (difficult cards)
+        - High incorrect count
+        - Low accuracy
+
+        Ordered by priority for review
+        """
+        with self.db.get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute('''
+                SELECT
+                    card_id,
+                    ease_factor,
+                    total_reviews,
+                    total_correct,
+                    total_incorrect,
+                    total_hard,
+                    last_response,
+                    CASE
+                        WHEN total_reviews > 0
+                        THEN (total_correct * 100.0 / total_reviews)
+                        ELSE 0
+                    END as accuracy
+                FROM card_review_states
+                WHERE deck_id = ? AND total_reviews > 0
+                ORDER BY
+                    accuracy ASC,
+                    ease_factor ASC,
+                    total_incorrect DESC
+                LIMIT ?
+            ''', (deck_id, limit))
+
+            return [dict(row) for row in cursor.fetchall()]
+
 
 # ═══════════════════════════════════════════════════════════════════
 # 📝 REVIEW HISTORY OPERATIONS

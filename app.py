@@ -456,9 +456,20 @@ def get_stats(deck_id):
         overall = stats_manager.get_overall_stats(deck_id)
         progress = stats_manager.get_deck_progress(deck_id)
 
+        # Get weak cards that need practice
+        weak_cards = review_state_manager.get_weak_cards(deck_id, limit=10)
+
+        # Enrich with card data
+        for weak_card in weak_cards:
+            card = card_db_manager.get_card(weak_card['card_id'])
+            if card:
+                weak_card['front'] = card['front']
+                weak_card['tags'] = card.get('tags', [])
+
         return jsonify({
             'overall': overall,
-            'progress': progress
+            'progress': progress,
+            'weak_cards': weak_cards
         })
 
     except Exception as e:

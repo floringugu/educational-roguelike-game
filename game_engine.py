@@ -631,13 +631,19 @@ class GameEngine:
 
     def _end_game(self, completed: bool = False):
         """End the game and update final statistics"""
+        # Calcular tiempo de juego
+        start_time = datetime.fromisoformat(self.state.start_time)
+        end_time = datetime.now()
+        time_played = (end_time - start_time).total_seconds()
+
         stats_manager.update_session(
             self.state.session_id,
             cards_reviewed=self.state.cards_reviewed,
             cards_correct=self.state.cards_correct,
             total_score=self.state.player.score,
             highest_encounter=self.state.current_encounter,
-            game_completed=completed
+            game_completed=completed,
+            time_played_seconds=int(time_played)
         )
 
         # Guardar todos los estados de tarjetas
