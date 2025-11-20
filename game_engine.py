@@ -249,7 +249,8 @@ class GameEngine:
 
         return {
             'success': True,
-            'answer': self.state.current_card['back']
+            'back': self.state.current_card['back'],
+            'answer': self.state.current_card['back']  # Mantener compatibilidad
         }
 
     def answer_card(self, response: str) -> Dict:
@@ -327,7 +328,10 @@ class GameEngine:
                     self.state.inventory.append(powerup['id'])
                     battle_log.append(f"¡Obtuviste {powerup['name']}!")
 
-        else:
+        # Track damage received for response
+        damage_received = 0
+
+        if damage == 0:
             # Respuesta incorrecta (Again) - el enemigo ataca
             enemy_damage = self.state.current_enemy.damage
 
@@ -343,6 +347,7 @@ class GameEngine:
                 self.state.player.hp = max(0, self.state.player.hp - enemy_damage)
                 battle_log.append(f"El {self.state.current_enemy.name} te hizo {enemy_damage} de daño")
                 player_damaged = True
+                damage_received = enemy_damage
 
                 if self.state.player.hp <= 0:
                     player_defeated = True
@@ -379,15 +384,33 @@ class GameEngine:
             enemies_defeated=self.state.current_encounter - 1 if enemy_defeated else self.state.current_encounter - 1
         )
 
+        # Calculate score gained (if enemy was defeated)
+        score_gained = 0
+        powerup_gained = None
+
+        if enemy_defeated:
+            score_gained = int(self.state.current_enemy.score_value * self.state.player.score_boost)
+            # Check battle log for powerup drops
+            for log in battle_log:
+                if "Obtuviste" in log:
+                    # Extract powerup from inventory (last added)
+                    if self.state.inventory and len(self.state.inventory) > 0:
+                        powerup_gained = self.state.inventory[-1]
+                    break
+
         return {
             'success': True,
             'response': response,
             'damage': damage,
+            'damage_dealt': damage,  # Alias for frontend compatibility
+            'damage_received': damage_received,
             'battle_log': battle_log,
             'enemy_defeated': enemy_defeated,
             'player_damaged': player_damaged,
             'player_defeated': player_defeated,
             'game_won': game_won,
+            'score_gained': score_gained,
+            'powerup_gained': powerup_gained,
             'next_enemy': next_enemy.to_dict() if next_enemy else None,
             'card_stats': result['updated_state'],
             'deck_stats': self.card_manager.get_stats()
