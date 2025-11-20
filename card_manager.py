@@ -145,6 +145,24 @@ class CardSelector:
             future_review.sort(key=lambda x: x[1].next_review or datetime.max)
             return future_review[0]
 
+        # 5. Si no hay tarjetas disponibles, reciclar las ya revisadas
+        # Prioridad: HARD > AGAIN > GOOD (excluir EASY porque ya están dominadas)
+        reviewed_cards = []
+        for card in cards:
+            card_id = card['id']
+            state = states.get(card_id)
+            if state and state.last_response:
+                # Solo incluir HARD, AGAIN, GOOD (no EASY)
+                # last_response está en mayúsculas (AGAIN, HARD, GOOD, EASY)
+                if state.last_response.upper() in ['HARD', 'AGAIN', 'GOOD']:
+                    reviewed_cards.append((card, state))
+
+        if reviewed_cards:
+            # Ordenar por prioridad de respuesta
+            priority_map = {'HARD': 1, 'AGAIN': 2, 'GOOD': 3}
+            reviewed_cards.sort(key=lambda x: priority_map.get(x[1].last_response.upper(), 999))
+            return reviewed_cards[0]
+
         # No hay más tarjetas disponibles
         return None
 
