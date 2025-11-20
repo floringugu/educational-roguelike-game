@@ -477,18 +477,26 @@ class GameEngine:
         )
 
     def _try_drop_powerup(self) -> Optional[Dict]:
-        """Try to drop a random powerup"""
-        roll = random.random() * 100
+        """Try to drop a random powerup using weighted probabilities"""
+        # Crear lista de items con sus probabilidades
+        items = []
+        weights = []
 
         for powerup_id, powerup_data in config.POWERUPS.items():
-            if roll < powerup_data['drop_chance']:
-                return {
-                    'id': powerup_id,
-                    'name': powerup_data['name'],
-                    'emoji': powerup_data['emoji']
-                }
+            items.append({
+                'id': powerup_id,
+                'name': powerup_data['name'],
+                'emoji': powerup_data['emoji']
+            })
+            weights.append(powerup_data['drop_chance'])
 
-        return None
+        # Decidir si dropea algo (70% chance de que caiga al menos un item)
+        if random.random() * 100 > 70:
+            return None
+
+        # Seleccionar item aleatoriamente basado en pesos
+        selected = random.choices(items, weights=weights, k=1)[0]
+        return selected
 
     def use_powerup(self, powerup_id: str) -> Dict:
         """
