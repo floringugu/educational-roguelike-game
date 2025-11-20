@@ -1,13 +1,13 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 📊 EDUCATIONAL ROGUELIKE - STATISTICS
+ * 📊 EDUCATIONAL ROGUELIKE - STATISTICS (Anki Flashcard System)
  * Statistics visualization and management
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class StatsManager {
-    constructor(pdfId) {
-        this.pdfId = pdfId;
+    constructor(deckId) {
+        this.deckId = deckId;
         this.stats = null;
         this.init();
     }
@@ -46,7 +46,7 @@ class StatsManager {
         try {
             this.showLoading();
 
-            const response = await fetch(`/api/stats/${this.pdfId}`);
+            const response = await fetch(`/api/stats/${this.deckId}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -204,7 +204,7 @@ class StatsManager {
         try {
             this.showLoading('Exporting...');
 
-            const response = await fetch(`/api/stats/export/${this.pdfId}/${format}`);
+            const response = await fetch(`/api/stats/export/${this.deckId}/${format}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -288,9 +288,9 @@ class StatsManager {
 document.addEventListener('DOMContentLoaded', () => {
     const statsContainer = document.getElementById('stats-container');
     if (statsContainer) {
-        const pdfId = statsContainer.dataset.pdfId;
-        if (pdfId) {
-            window.statsManager = new StatsManager(parseInt(pdfId));
+        const deckId = statsContainer.dataset.deckId;
+        if (deckId) {
+            window.statsManager = new StatsManager(parseInt(deckId));
         }
     }
 });
