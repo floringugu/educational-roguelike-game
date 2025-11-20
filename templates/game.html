@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Educational Roguelike - {{ pdf.title }}</title>
+    <title>Educational Roguelike - {{ deck.deck_name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pixel-style.css') }}">
 </head>
 <body>
-    <div class="container" id="game-container" data-pdf-id="{{ pdf.id }}">
+    <div class="container" id="game-container" data-deck-id="{{ deck.id }}">
         <!-- Header -->
         <div class="page-header">
-            <h1 class="page-title">⚔️ {{ pdf.title }}</h1>
+            <h1 class="page-title">⚔️ {{ deck.deck_name }}</h1>
             <div class="btn-group">
                 <a href="/" class="btn">🏠 Home</a>
-                <a href="/stats/{{ pdf.id }}" class="btn btn-secondary">📊 Stats</a>
+                <a href="/stats/{{ deck.id }}" class="btn btn-secondary">📊 Stats</a>
             </div>
         </div>
 
@@ -23,7 +23,7 @@
             <div class="card text-center">
                 <div class="card-title text-warning">⚠️ Not Ready</div>
                 <div class="card-content">
-                    <p>{{ message }}</p>
+                    <p>This deck has no cards. Please upload a valid Anki CSV file.</p>
                     <a href="/" class="btn btn-primary mt-lg">← Back to Home</a>
                 </div>
             </div>
@@ -32,13 +32,14 @@
                 <div class="card-title text-primary">🎮 Ready to Play!</div>
                 <div class="card-content">
                     <p class="mb-lg" style="line-height: 2;">
-                        <strong>{{ question_count }}</strong> questions ready<br>
-                        Answer correctly to damage enemies<br>
-                        Wrong answers = enemy attacks you<br>
+                        <strong>{{ card_count }}</strong> cards ready<br>
+                        Study cards using spaced repetition<br>
+                        Rate your recall: Again, Hard, Good, Easy<br>
+                        Better recall = More damage!<br>
                         Survive 10 encounters to win!
                     </p>
                     <button id="new-game-btn" class="btn btn-primary">⚔️ Start New Game</button>
-                    <a href="/saves/{{ pdf.id }}" class="btn mt-md">💾 Load Saved Game</a>
+                    <a href="/saves/{{ deck.id }}" class="btn mt-md">💾 Load Saved Game</a>
                 </div>
             </div>
             {% endif %}
@@ -108,8 +109,8 @@
                         <div class="card-title">📈 Session Stats</div>
                         <div class="card-content">
                             <div class="character-stat">
-                                <span>Questions:</span>
-                                <span id="questions-answered">0</span>
+                                <span>Cards Reviewed:</span>
+                                <span id="cards-reviewed">0</span>
                             </div>
                             <div class="character-stat">
                                 <span>Accuracy:</span>
@@ -133,38 +134,60 @@
                     </button>
                 </div>
 
-                <!-- Right Column: Questions -->
+                <!-- Right Column: Flashcard -->
                 <div>
-                    <!-- Question Panel -->
-                    <div id="question-panel" class="question-panel hidden">
+                    <!-- Flashcard Panel -->
+                    <div id="card-panel" class="question-panel hidden">
                         <div class="question-header">
-                            <div class="question-topic" id="question-topic">Topic</div>
-                            <div class="question-difficulty difficulty-medium" id="question-difficulty">medium</div>
+                            <div class="question-topic" id="card-tags">🏷️ Tags</div>
+                            <div class="question-difficulty" id="card-status" style="font-size: 9px;">New Card</div>
                         </div>
 
-                        <div class="question-text" id="question-text">
-                            Question will appear here...
+                        <!-- Card Front (Question) -->
+                        <div id="card-front-container">
+                            <div class="question-text" id="card-front">
+                                Card front will appear here...
+                            </div>
+                            <div class="btn-group mt-lg">
+                                <button id="reveal-btn" class="btn btn-primary">
+                                    👁️ Reveal Answer
+                                </button>
+                            </div>
                         </div>
 
-                        <div class="answer-options" id="answer-options">
-                            <!-- Options will be inserted by JavaScript -->
-                        </div>
+                        <!-- Card Back (Answer) - Hidden until revealed -->
+                        <div id="card-back-container" class="hidden">
+                            <div class="feedback-panel">
+                                <div class="feedback-title">📝 Answer</div>
+                                <div class="feedback-text" id="card-back">
+                                    Card back will appear here...
+                                </div>
+                            </div>
 
-                        <div class="btn-group mt-lg">
-                            <button id="submit-answer-btn" class="btn btn-primary">
-                                ⚔️ Submit Answer
-                            </button>
-                            <button id="next-question-btn" class="btn btn-secondary hidden">
-                                ➡️ Next Question
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Feedback Panel -->
-                    <div id="feedback-panel" class="feedback-panel hidden">
-                        <div class="feedback-title" id="feedback-title">Result</div>
-                        <div class="feedback-text" id="feedback-text">
-                            Explanation will appear here...
+                            <!-- Anki-style Response Buttons -->
+                            <div class="mt-lg">
+                                <p style="font-size: 10px; text-align: center; margin-bottom: 12px; color: var(--color-text-muted);">
+                                    How well did you remember this card?
+                                </p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                                    <button id="response-again" class="btn" style="background: var(--color-danger); border-color: var(--color-danger);">
+                                        🔴 AGAIN<br>
+                                        <span style="font-size: 8px;">0 damage</span>
+                                    </button>
+                                    <button id="response-hard" class="btn" style="background: #ff8800; border-color: #ff8800;">
+                                        🟡 HARD<br>
+                                        <span style="font-size: 8px;">~6-10 damage</span>
+                                    </button>
+                                    <button id="response-good" class="btn" style="background: var(--color-hp-high); border-color: var(--color-hp-high);">
+                                        🟢 GOOD<br>
+                                        <span style="font-size: 8px;">~16-24 damage</span>
+                                    </button>
+                                    <button id="response-easy" class="btn" style="background: var(--color-primary); border-color: var(--color-primary);">
+                                        🔵 EASY<br>
+                                        <span style="font-size: 8px;">~32-48 damage!</span>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
 

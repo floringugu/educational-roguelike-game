@@ -3,20 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Statistics - {{ pdf.title }}</title>
+    <title>Statistics - {{ deck.deck_name }}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pixel-style.css') }}">
 </head>
 <body>
-    <div class="container" id="stats-container" data-pdf-id="{{ pdf.id }}">
+    <div class="container" id="stats-container" data-deck-id="{{ deck.id }}">
         <!-- Header -->
         <div class="page-header">
             <h1 class="page-title">📊 STATISTICS</h1>
-            <p class="page-subtitle">{{ pdf.title }}</p>
+            <p class="page-subtitle">{{ deck.deck_name }}</p>
         </div>
 
         <div class="btn-group mb-xl">
             <a href="/" class="btn">🏠 Home</a>
-            <a href="/game/{{ pdf.id }}" class="btn btn-primary">⚔️ Play</a>
+            <a href="/game/{{ deck.id }}" class="btn btn-primary">⚔️ Play</a>
             <button id="refresh-stats" class="btn btn-secondary">🔄 Refresh</button>
         </div>
 
@@ -26,7 +26,7 @@
         <div class="stats-grid">
             <div class="stat-box">
                 <span class="stat-value" id="total-answers">0</span>
-                <span class="stat-label">Questions Answered</span>
+                <span class="stat-label">Cards Reviewed</span>
             </div>
             <div class="stat-box">
                 <span class="stat-value" id="correct-answers">0</span>
@@ -90,14 +90,14 @@
         </div>
         {% endif %}
 
-        <!-- Topic Performance -->
-        <h2 class="text-center text-primary mb-lg mt-xl">📚 Performance by Topic</h2>
+        <!-- Tag Performance -->
+        <h2 class="text-center text-primary mb-lg mt-xl">🏷️ Performance by Tag</h2>
         <div id="topic-performance" class="card-grid">
             <!-- Will be populated by JavaScript -->
         </div>
 
         <!-- Weak Areas -->
-        <h2 class="text-center text-warning mb-lg mt-xl">⚠️ Areas Needing Improvement</h2>
+        <h2 class="text-center text-warning mb-lg mt-xl">⚠️ Cards Needing Practice</h2>
         <div id="weak-areas">
             <!-- Will be populated by JavaScript -->
         </div>

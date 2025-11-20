@@ -1,31 +1,10 @@
 """
-Configuration file for Educational Roguelike Game
-Contains game constants, API settings, and game balance parameters
+Configuration file for Educational Roguelike Game - Anki System
+Contains game constants and game balance parameters
 """
 
 import os
 from pathlib import Path
-
-# ═══════════════════════════════════════════════════════════════════
-# 🔑 API CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════
-
-# Hugging Face Configuration - FREE!
-HUGGINGFACE_API_KEY = os.environ.get('HUGGINGFACE_API_KEY', '')
-# Recommended free models:
-# - 'mistralai/Mixtral-8x7B-Instruct-v0.1' - Excellent for instructions (recommended)
-# - 'meta-llama/Meta-Llama-3-8B-Instruct' - Fast and good quality
-# - 'HuggingFaceH4/zephyr-7b-beta' - Lightweight and fast
-# - 'mistralai/Mistral-7B-Instruct-v0.2' - Great balance of speed/quality
-HUGGINGFACE_MODEL = os.environ.get('HUGGINGFACE_MODEL', 'mistralai/Mixtral-8x7B-Instruct-v0.1')
-MAX_TOKENS = 4096
-TEMPERATURE = 0.7
-
-# Legacy API support (optional)
-XAI_API_KEY = os.environ.get('XAI_API_KEY', '')
-GROK_MODEL = 'grok-2-latest'
-ANTHROPIC_API_KEY = os.environ.get('ANTHROPIC_API_KEY', '')
-CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
 # ═══════════════════════════════════════════════════════════════════
 # 📁 PATHS
@@ -33,13 +12,25 @@ CLAUDE_MODEL = 'claude-sonnet-4-20250514'
 
 BASE_DIR = Path(__file__).parent
 DATA_DIR = BASE_DIR / 'data'
-PDF_DIR = DATA_DIR / 'pdfs'
+CSV_DIR = DATA_DIR / 'anki_decks'  # Directorio para CSVs de Anki
 EXPORT_DIR = DATA_DIR / 'exports'
-DATABASE_PATH = DATA_DIR / 'questions.db'
+DATABASE_PATH = DATA_DIR / 'anki_game.db'
 
 # Create directories if they don't exist
-for directory in [DATA_DIR, PDF_DIR, EXPORT_DIR]:
+for directory in [DATA_DIR, CSV_DIR, EXPORT_DIR]:
     directory.mkdir(parents=True, exist_ok=True)
+
+# ═══════════════════════════════════════════════════════════════════
+# 🃏 ANKI CONFIGURATION
+# ═══════════════════════════════════════════════════════════════════
+
+# Upload settings para CSVs
+MAX_CONTENT_LENGTH = 10 * 1024 * 1024  # 10MB max file size
+ALLOWED_EXTENSIONS = {'csv'}
+
+# Repetición espaciada
+NEW_CARDS_PER_SESSION = 20  # Máximo de tarjetas nuevas por sesión
+REVIEW_AHEAD_MINUTES = 20  # Minutos adelante para considerar revisiones
 
 # ═══════════════════════════════════════════════════════════════════
 # 🎮 GAME CONFIGURATION
@@ -47,38 +38,125 @@ for directory in [DATA_DIR, PDF_DIR, EXPORT_DIR]:
 
 # Player Stats
 PLAYER_MAX_HP = 100
-PLAYER_BASE_DAMAGE = 20
+PLAYER_BASE_DAMAGE = 20  # Daño base (usado con Good)
 PLAYER_STARTING_LEVEL = 1
+
+# Damage multipliers para las 4 opciones Anki
+# AGAIN: 0 daño (0%)
+# HARD: 30% del daño base
+# GOOD: 100% del daño base
+# EASY: 200% del daño base (crítico)
 
 # Game Progression
 TOTAL_ENCOUNTERS = 10
-DIFFICULTY_SCALING = 1.2  # Multiplier per level
+DIFFICULTY_SCALE_FACTOR = 0.2  # 20% más difícil por encuentro
 
-# Power-ups
+# Power-ups e Items (el jugador debe hacer clic para usarlos)
 POWERUPS = {
+    # Pociones de Vida
     'health_potion': {
         'name': '💚 Health Potion',
-        'effect': 'heal',
-        'value': 30,
-        'chance': 0.3
+        'emoji': '💚',
+        'type': 'consumable',
+        'effect': {'heal': 30},
+        'drop_chance': 50.0
     },
-    'shield': {
-        'name': '🛡️ Shield',
-        'effect': 'shield',
-        'value': 20,
-        'chance': 0.25
+    'mega_potion': {
+        'name': '💗 Mega Potion',
+        'emoji': '💗',
+        'type': 'consumable',
+        'effect': {'heal': 50},
+        'drop_chance': 25.0
     },
-    'double_damage': {
-        'name': '⚔️ Double Damage',
-        'effect': 'damage_boost',
-        'value': 2,
-        'chance': 0.2
+    'max_restore': {
+        'name': '✨ Max Restore',
+        'emoji': '✨',
+        'type': 'consumable',
+        'effect': {'heal': 999},
+        'drop_chance': 15.0
+    },
+
+    # Escudos
+    'shield_potion': {
+        'name': '🛡️ Shield Potion',
+        'emoji': '🛡️',
+        'type': 'consumable',
+        'effect': {'shield': 20},
+        'drop_chance': 45.0
+    },
+    'iron_shield': {
+        'name': '🔰 Iron Shield',
+        'emoji': '🔰',
+        'type': 'consumable',
+        'effect': {'shield': 35},
+        'drop_chance': 30.0
+    },
+
+    # Buffs
+    'damage_boost': {
+        'name': '⚔️ Damage Boost',
+        'emoji': '⚔️',
+        'type': 'consumable',
+        'effect': {'damage_boost': 2.0, 'duration': 3},
+        'drop_chance': 40.0
     },
     'lucky_coin': {
         'name': '💰 Lucky Coin',
-        'effect': 'score_boost',
-        'value': 1.5,
-        'chance': 0.25
+        'emoji': '💰',
+        'type': 'consumable',
+        'effect': {'score_boost': 1.5, 'duration': 3},
+        'drop_chance': 40.0
+    },
+    'energy_drink': {
+        'name': '🧃 Energy Drink',
+        'emoji': '🧃',
+        'type': 'consumable',
+        'effect': {'heal': 20, 'shield': 10},
+        'drop_chance': 35.0
+    },
+
+    # Hechizos (Spells) - Hacen daño instantáneo al enemigo
+    'fireball': {
+        'name': '🔥 Fireball',
+        'emoji': '🔥',
+        'type': 'spell',
+        'effect': {'instant_damage': 40},
+        'drop_chance': 35.0
+    },
+    'lightning': {
+        'name': '⚡ Lightning',
+        'emoji': '⚡',
+        'type': 'spell',
+        'effect': {'instant_damage': 50},
+        'drop_chance': 30.0
+    },
+    'ice_shard': {
+        'name': '❄️ Ice Shard',
+        'emoji': '❄️',
+        'type': 'spell',
+        'effect': {'instant_damage': 35},
+        'drop_chance': 35.0
+    },
+    'meteor': {
+        'name': '☄️ Meteor',
+        'emoji': '☄️',
+        'type': 'spell',
+        'effect': {'instant_damage': 80},
+        'drop_chance': 20.0
+    },
+    'holy_light': {
+        'name': '✨ Holy Light',
+        'emoji': '✨',
+        'type': 'spell',
+        'effect': {'instant_damage': 30, 'heal': 20},
+        'drop_chance': 25.0
+    },
+    'poison_dart': {
+        'name': '🧪 Poison Dart',
+        'emoji': '🧪',
+        'type': 'spell',
+        'effect': {'instant_damage': 25},
+        'drop_chance': 40.0
     }
 }
 
@@ -184,25 +262,6 @@ BOSS_TYPES = {
 }
 
 # ═══════════════════════════════════════════════════════════════════
-# ❓ QUESTION GENERATION CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════
-
-# Question Types
-QUESTION_TYPES = ['multiple_choice', 'true_false']
-
-# Question Difficulty Levels
-DIFFICULTY_LEVELS = ['easy', 'medium', 'hard']
-
-# Number of questions to generate per batch
-QUESTIONS_PER_BATCH = 30
-
-# Minimum questions before starting game
-MIN_QUESTIONS_TO_START = 10
-
-# Question repeat prevention (how many questions before repeating)
-QUESTION_BUFFER = 20
-
-# ═══════════════════════════════════════════════════════════════════
 # 🎨 UI CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════
 
@@ -236,10 +295,6 @@ COLORS = {
 TRACK_STATS = True
 EXPORT_FORMATS = ['json', 'csv', 'markdown']
 
-# Spaced repetition settings
-SPACED_REPETITION_INTERVALS = [1, 3, 7, 14, 30]  # Days
-MINIMUM_CORRECT_STREAK = 3
-
 # ═══════════════════════════════════════════════════════════════════
 # 🔧 FLASK CONFIGURATION
 # ═══════════════════════════════════════════════════════════════════
@@ -248,58 +303,3 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'dev-secret-key-change-in-production')
 DEBUG = os.environ.get('FLASK_DEBUG', 'True').lower() == 'true'
 HOST = os.environ.get('HOST', '0.0.0.0')
 PORT = int(os.environ.get('PORT', 5000))
-
-# Upload settings
-MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16MB max file size
-ALLOWED_EXTENSIONS = {'pdf'}
-
-# ═══════════════════════════════════════════════════════════════════
-# 🔍 OCR CONFIGURATION
-# ═══════════════════════════════════════════════════════════════════
-
-# Enable OCR for scanned PDFs and images
-OCR_ENABLED = os.environ.get('OCR_ENABLED', 'True').lower() == 'true'
-
-# OCR Engine: 'tesseract', 'easyocr', or 'paddleocr'
-OCR_ENGINE = os.environ.get('OCR_ENGINE', 'tesseract')
-
-# Tesseract Configuration
-TESSERACT_CMD = os.environ.get('TESSERACT_CMD', None)  # Path to tesseract executable
-TESSERACT_LANG = os.environ.get('TESSERACT_LANG', 'spa+eng')  # Languages: spa=Spanish, eng=English
-TESSERACT_CONFIG = '--psm 3 --oem 3'  # Page segmentation mode and OCR engine mode
-
-# OCR Processing Settings
-OCR_DPI = 300  # DPI for image extraction (higher = better quality but slower)
-OCR_MIN_CONFIDENCE = 60  # Minimum confidence score (0-100) to accept OCR text
-OCR_PREPROCESSING = True  # Apply image preprocessing (denoise, contrast, etc.)
-OCR_BATCH_SIZE = 5  # Number of pages to process in parallel
-
-# Image preprocessing options
-OCR_PREPROCESS_OPTIONS = {
-    'grayscale': True,       # Convert to grayscale
-    'denoise': True,         # Remove noise
-    'deskew': True,          # Correct skewed images
-    'remove_borders': True,  # Remove black borders
-    'enhance_contrast': True # Improve text visibility
-}
-
-# Fallback to text extraction if OCR fails
-OCR_FALLBACK_TO_TEXT = True
-
-# OCR Cache (to avoid re-processing same pages)
-OCR_CACHE_ENABLED = True
-OCR_CACHE_DIR = DATA_DIR / 'ocr_cache'
-if OCR_CACHE_ENABLED:
-    OCR_CACHE_DIR.mkdir(parents=True, exist_ok=True)
-
-# ═══════════════════════════════════════════════════════════════════
-# 💰 COST ESTIMATION
-# ═══════════════════════════════════════════════════════════════════
-
-# Approximate Claude API costs (update based on current pricing)
-COST_PER_1M_INPUT_TOKENS = 3.00  # USD
-COST_PER_1M_OUTPUT_TOKENS = 15.00  # USD
-
-# Average tokens per question generation
-AVG_INPUT_TOKENS_PER_QUESTION = 1000
-AVG_OUTPUT_TOKENS_PER_QUESTION = 300

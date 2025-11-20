@@ -1,6 +1,6 @@
 """
-Flask Application for Educational Roguelike Game
-Main server with routes for game, PDF upload, and statistics
+Flask Application for Educational Roguelike Game - Anki System
+Main server with routes for Anki CSV upload, game, and statistics
 """
 
 from flask import Flask, render_template, request, jsonify, send_file, session
@@ -10,11 +10,9 @@ from pathlib import Path
 import os
 
 import config
-from database import pdf_manager, question_manager, save_manager, stats_manager
-from pdf_processor import PDFProcessor, PDFManager as PDFMgr, allowed_file, save_uploaded_file
-from question_generator import QuestionGenerator, process_pdf_and_generate_questions
-from game_engine import GameEngine, validate_pdf_ready
-from stats_exporter import StatsExporter, LearningAnalyzer, export_stats_for_pdf
+from database import deck_manager, card_db_manager, save_manager, stats_manager, review_state_manager
+from anki_csv_parser import AnkiCSVParser
+from game_engine import GameEngine
 
 # ═══════════════════════════════════════════════════════════════════
 # 🚀 FLASK APP INITIALIZATION
@@ -33,97 +31,113 @@ game_sessions = {}
 
 
 # ═══════════════════════════════════════════════════════════════════
+# 🔧 HELPER FUNCTIONS
+# ═══════════════════════════════════════════════════════════════════
+
+def allowed_file(filename):
+    """Check if file extension is allowed"""
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in config.ALLOWED_EXTENSIONS
+
+
+def save_uploaded_file(file):
+    """Save uploaded CSV file to disk"""
+    filename = secure_filename(file.filename)
+    filepath = config.CSV_DIR / filename
+
+    # Handle duplicates
+    counter = 1
+    base_name = filepath.stem
+    while filepath.exists():
+        filepath = config.CSV_DIR / f"{base_name}_{counter}.csv"
+        counter += 1
+
+    file.save(str(filepath))
+    return filepath
+
+
+# ═══════════════════════════════════════════════════════════════════
 # 🏠 PAGE ROUTES
 # ═══════════════════════════════════════════════════════════════════
 
 @app.route('/')
 def index():
-    """Home page - show available PDFs"""
-    pdfs = pdf_manager.get_all_pdfs()
+    """Home page - show available Anki decks"""
+    decks = deck_manager.get_all_decks()
 
-    # Enrich with question counts
-    for pdf in pdfs:
-        pdf['question_count'] = question_manager.get_question_count(pdf['id'])
-        pdf['ready_to_play'] = pdf['question_count'] >= config.MIN_QUESTIONS_TO_START
+    # Enrich with card counts
+    for deck in decks:
+        card_count = card_db_manager.get_card_count(deck['id'])
+        deck['card_count'] = card_count
+        deck['ready_to_play'] = card_count > 0
 
-    return render_template('index.html', pdfs=pdfs)
+    return render_template('index.html', decks=decks)
 
 
 @app.route('/upload')
 def upload_page():
-    """PDF upload page"""
+    """CSV upload page"""
     return render_template('upload.html')
 
 
-@app.route('/game/<int:pdf_id>')
-def game_page(pdf_id):
-    """Game page for a specific PDF"""
-    pdf_info = pdf_manager.get_pdf(pdf_id)
+@app.route('/game/<int:deck_id>')
+def game_page(deck_id):
+    """Game page for a specific deck"""
+    deck_info = deck_manager.get_deck(deck_id)
 
-    if not pdf_info:
-        return "PDF not found", 404
+    if not deck_info:
+        return "Deck not found", 404
 
-    # Check if ready to play
-    is_ready, message = validate_pdf_ready(pdf_id)
-
-    question_count = question_manager.get_question_count(pdf_id)
+    card_count = card_db_manager.get_card_count(deck_id)
 
     return render_template(
         'game.html',
-        pdf=pdf_info,
-        ready=is_ready,
-        message=message,
-        question_count=question_count
+        deck=deck_info,
+        ready=card_count > 0,
+        card_count=card_count
     )
 
 
-@app.route('/stats/<int:pdf_id>')
-def stats_page(pdf_id):
-    """Statistics page for a specific PDF"""
-    pdf_info = pdf_manager.get_pdf(pdf_id)
+@app.route('/stats/<int:deck_id>')
+def stats_page(deck_id):
+    """Statistics page for a specific deck"""
+    deck_info = deck_manager.get_deck(deck_id)
 
-    if not pdf_info:
-        return "PDF not found", 404
+    if not deck_info:
+        return "Deck not found", 404
 
     # Get overall stats
-    overall = stats_manager.get_overall_stats(pdf_id)
-    topic_performance = stats_manager.get_topic_performance(pdf_id)
-    weak_areas = stats_manager.get_weak_areas(pdf_id)
-
-    # Get learning insights
-    analyzer = LearningAnalyzer(pdf_id)
-    insights = analyzer.get_learning_insights()
+    overall = stats_manager.get_overall_stats(deck_id)
+    progress = stats_manager.get_deck_progress(deck_id)
 
     return render_template(
         'stats.html',
-        pdf=pdf_info,
+        deck=deck_info,
         overall=overall,
-        topics=topic_performance,
-        weak_areas=weak_areas,
-        insights=insights
+        progress=progress
     )
 
 
-@app.route('/saves/<int:pdf_id>')
-def saves_page(pdf_id):
+@app.route('/saves/<int:deck_id>')
+def saves_page(deck_id):
     """Saved games page"""
-    pdf_info = pdf_manager.get_pdf(pdf_id)
+    deck_info = deck_manager.get_deck(deck_id)
 
-    if not pdf_info:
-        return "PDF not found", 404
+    if not deck_info:
+        return "Deck not found", 404
 
-    saves = save_manager.get_saves_for_pdf(pdf_id)
+    saves = save_manager.get_saves_for_deck(deck_id)
 
-    return render_template('saves.html', pdf=pdf_info, saves=saves)
+    return render_template('saves.html', deck=deck_info, saves=saves)
 
 
 # ═══════════════════════════════════════════════════════════════════
-# 📤 PDF UPLOAD & PROCESSING API
+# 📤 CSV UPLOAD & PROCESSING API
 # ═══════════════════════════════════════════════════════════════════
 
 @app.route('/api/upload', methods=['POST'])
-def upload_pdf():
-    """Upload and process a PDF file"""
+def upload_csv():
+    """Upload and process an Anki CSV file"""
     try:
         if 'file' not in request.files:
             return jsonify({'error': 'No file provided'}), 400
@@ -134,22 +148,65 @@ def upload_pdf():
             return jsonify({'error': 'No file selected'}), 400
 
         if not allowed_file(file.filename):
-            return jsonify({'error': 'Only PDF files are allowed'}), 400
+            return jsonify({'error': 'Only CSV files are allowed'}), 400
+
+        # Read file content
+        file_content = file.read()
+
+        # Parse CSV
+        parser = AnkiCSVParser()
+
+        # Validate first
+        is_valid, validation_msg = parser.validate_file_content(file_content)
+        if not is_valid:
+            return jsonify({'error': validation_msg}), 400
+
+        # Parse cards
+        success, parse_msg = parser.parse_file(file_content)
+        if not success:
+            return jsonify({'error': parse_msg}), 400
 
         # Save file
+        file.seek(0)  # Reset file pointer
         filepath = save_uploaded_file(file)
 
-        # Process PDF
-        pdf_mgr = PDFMgr()
-        result = pdf_mgr.process_and_store_pdf(filepath)
+        # Get deck name from filename
+        deck_name = filepath.stem
+
+        # Get stats
+        stats = parser.get_stats()
+
+        # Create deck in database
+        deck_id = deck_manager.add_deck(
+            deck_name=deck_name,
+            filename=filepath.name,
+            filepath=str(filepath),
+            total_cards=stats['total_cards'],
+            tags=stats['unique_tags']
+        )
+
+        # Add cards to database
+        cards_data = []
+        for card in parser.get_cards():
+            cards_data.append({
+                'deck_id': deck_id,
+                'front': card.front,
+                'back': card.back,
+                'tags': card.tags,
+                'note_type': card.note_type
+            })
+
+        cards_saved = card_db_manager.add_cards_batch(cards_data)
+
+        logger.info(f"Deck {deck_id} created with {cards_saved} cards")
 
         return jsonify({
             'success': True,
-            'pdf_id': result['pdf_id'],
-            'title': result['title'],
-            'num_pages': result['num_pages'],
-            'estimated_questions': result['estimated_questions'],
-            'message': 'PDF uploaded successfully'
+            'deck_id': deck_id,
+            'deck_name': deck_name,
+            'cards_imported': cards_saved,
+            'total_tags': stats['total_tags'],
+            'message': parse_msg
         })
 
     except Exception as e:
@@ -157,101 +214,41 @@ def upload_pdf():
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/generate-questions/<int:pdf_id>', methods=['POST'])
-def generate_questions(pdf_id):
-    """Generate questions from a PDF using Claude API"""
-    try:
-        data = request.get_json() or {}
-        num_questions = data.get('num_questions', config.QUESTIONS_PER_BATCH)
-
-        # Get PDF info
-        pdf_info = pdf_manager.get_pdf(pdf_id)
-        if not pdf_info:
-            return jsonify({'error': 'PDF not found'}), 404
-
-        # Check if already processed
-        existing_count = question_manager.get_question_count(pdf_id)
-        if existing_count >= num_questions:
-            return jsonify({
-                'success': True,
-                'message': f'Already have {existing_count} questions',
-                'questions_generated': 0,
-                'total_questions': existing_count
-            })
-
-        # Re-process PDF to get text
-        pdf_processor = PDFProcessor()
-        extracted = pdf_processor.extract_text_from_pdf(pdf_info['filepath'])
-
-        # Generate questions
-        result = process_pdf_and_generate_questions(
-            pdf_id=pdf_id,
-            text=extracted['text'],
-            chunks=extracted['chunks'],
-            num_questions=num_questions
-        )
-
-        return jsonify({
-            'success': True,
-            'questions_generated': result['questions_generated'],
-            'questions_saved': result['questions_saved'],
-            'cost_estimate': result['cost_estimate'],
-            'message': f"Generated {result['questions_saved']} questions"
-        })
-
-    except Exception as e:
-        logger.error(f"Question generation error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/pdf/<int:pdf_id>/estimate', methods=['GET'])
-def estimate_cost(pdf_id):
-    """Estimate cost of generating questions for a PDF"""
-    try:
-        pdf_info = pdf_manager.get_pdf(pdf_id)
-        if not pdf_info:
-            return jsonify({'error': 'PDF not found'}), 404
-
-        num_questions = request.args.get('num_questions', config.QUESTIONS_PER_BATCH, type=int)
-
-        generator = QuestionGenerator()
-        estimate = generator.estimate_cost(pdf_info['total_chars'], num_questions)
-
-        return jsonify({
-            'success': True,
-            'estimate': estimate,
-            'pdf_chars': pdf_info['total_chars']
-        })
-
-    except Exception as e:
-        logger.error(f"Cost estimation error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-
 # ═══════════════════════════════════════════════════════════════════
 # 🎮 GAME API
 # ═══════════════════════════════════════════════════════════════════
 
-@app.route('/api/game/new/<int:pdf_id>', methods=['POST'])
-def new_game(pdf_id):
-    """Start a new game"""
+@app.route('/api/game/new/<int:deck_id>', methods=['POST'])
+def new_game(deck_id):
+    """Start a new game with an Anki deck"""
     try:
-        # Check if PDF has enough questions
-        is_ready, message = validate_pdf_ready(pdf_id)
-        if not is_ready:
-            return jsonify({'error': message}), 400
+        # Check if deck has cards
+        card_count = card_db_manager.get_card_count(deck_id)
+        if card_count == 0:
+            return jsonify({'error': 'Deck has no cards'}), 400
 
         # Create game engine
-        game = GameEngine(pdf_id)
+        game = GameEngine(deck_id)
         state = game.new_game()
 
         # Store in session
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
         game_sessions[session_key] = game
+
+        # Get first card data
+        card_data = {
+            'card': {
+                'id': state.current_card['id'],
+                'front': state.current_card['front'],
+                'tags': state.current_card.get('tags', [])
+            },
+            'revealed': False
+        }
 
         return jsonify({
             'success': True,
-            'game_status': game.get_game_status(),
+            'state': state.to_dict(),
+            'card': card_data,
             'message': 'New game started!'
         })
 
@@ -260,101 +257,114 @@ def new_game(pdf_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/game/status/<int:pdf_id>', methods=['GET'])
-def game_status(pdf_id):
+@app.route('/api/game/status/<int:deck_id>', methods=['GET'])
+def game_status(deck_id):
     """Get current game status"""
     try:
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
 
         if session_key not in game_sessions:
             return jsonify({'active': False})
 
         game = game_sessions[session_key]
-        status = game.get_game_status()
+        state = game.get_state()
 
-        return jsonify(status)
+        if not state:
+            return jsonify({'active': False})
+
+        # Debug logging
+        logger.info(f"Game status check: encounter={state.current_encounter}/{state.total_encounters}, enemy={state.current_enemy.name if state.current_enemy else 'None'}")
+
+        response_data = {
+            'active': True,
+            'state': state.to_dict(),
+            'deck_stats': game.get_deck_stats(),
+            'progress': game.get_progress()
+        }
+
+        return jsonify(response_data)
 
     except Exception as e:
         logger.error(f"Game status error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/game/question/<int:pdf_id>', methods=['GET'])
-def get_question(pdf_id):
-    """Get next question for the game"""
+@app.route('/api/game/reveal/<int:deck_id>', methods=['POST'])
+def reveal_card(deck_id):
+    """Reveal the answer of the current card"""
     try:
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
 
         if session_key not in game_sessions:
             return jsonify({'error': 'No active game'}), 400
 
         game = game_sessions[session_key]
-        question = game.get_question()
+        result = game.reveal_card()
 
-        if not question:
-            return jsonify({'error': 'No questions available'}), 404
+        if not result['success']:
+            return jsonify(result), 400
 
-        # Don't send correct answer to client!
-        safe_question = {
-            'id': question['id'],
-            'question_text': question['question_text'],
-            'question_type': question['question_type'],
-            'options': question['options'],
-            'topic': question.get('topic'),
-            'difficulty': question.get('difficulty')
-        }
-
-        return jsonify(safe_question)
+        return jsonify(result)
 
     except Exception as e:
-        logger.error(f"Get question error: {str(e)}")
+        logger.error(f"Reveal card error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/game/answer/<int:pdf_id>', methods=['POST'])
-def answer_question(pdf_id):
-    """Submit an answer to a question"""
+@app.route('/api/game/answer/<int:deck_id>', methods=['POST'])
+def answer_card(deck_id):
+    """Submit user's self-assessment (again/hard/good/easy)"""
     try:
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
 
         if session_key not in game_sessions:
             return jsonify({'error': 'No active game'}), 400
 
         data = request.get_json()
-        question_id = data.get('question_id')
-        user_answer = data.get('answer')
+        response = data.get('response')  # 'again', 'hard', 'good', 'easy'
 
-        if not question_id or user_answer is None:
-            return jsonify({'error': 'Missing question_id or answer'}), 400
+        if not response:
+            return jsonify({'error': 'Missing response'}), 400
 
-        # Get correct answer from database
-        question = question_manager.get_question(question_id)
-        if not question:
-            return jsonify({'error': 'Question not found'}), 404
+        if response not in ['again', 'hard', 'good', 'easy']:
+            return jsonify({'error': 'Invalid response. Must be: again, hard, good, or easy'}), 400
 
         # Process answer
         game = game_sessions[session_key]
-        result = game.answer_question(question_id, user_answer, question['correct_answer'])
+        result = game.answer_card(response)
 
-        # Add explanation and correct answer to result
-        result['explanation'] = question['explanation']
-        result['correct_answer'] = question['correct_answer']
+        if not result['success']:
+            return jsonify(result), 400
 
-        # Get updated game status
-        result['game_status'] = game.get_game_status()
+        # Debug logging
+        logger.info(f"Answer processed: game_won={result.get('game_won')}, player_defeated={result.get('player_defeated')}")
+
+        # Add next card data if game continues
+        state = game.get_state()
+        if state and state.current_card and not result.get('game_won') and not result.get('player_defeated'):
+            result['next_card'] = {
+                'id': state.current_card['id'],
+                'front': state.current_card['front'],
+                'tags': state.current_card.get('tags', [])
+            }
+
+        # Add updated state
+        result['state'] = state.to_dict() if state else None
+
+        logger.info(f"Returning response with game_won={result.get('game_won')}, has_next_card={'next_card' in result}")
 
         return jsonify(result)
 
     except Exception as e:
-        logger.error(f"Answer question error: {str(e)}")
+        logger.error(f"Answer card error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/game/use-powerup/<int:pdf_id>', methods=['POST'])
-def use_powerup(pdf_id):
+@app.route('/api/game/use-powerup/<int:deck_id>', methods=['POST'])
+def use_powerup(deck_id):
     """Use a powerup from inventory"""
     try:
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
 
         if session_key not in game_sessions:
             return jsonify({'error': 'No active game'}), 400
@@ -368,6 +378,13 @@ def use_powerup(pdf_id):
         game = game_sessions[session_key]
         result = game.use_powerup(powerup_id)
 
+        if not result['success']:
+            return jsonify(result), 400
+
+        # Añadir estado actualizado del juego
+        state = game.get_state()
+        result['state'] = state.to_dict() if state else None
+
         return jsonify(result)
 
     except ValueError as e:
@@ -377,11 +394,11 @@ def use_powerup(pdf_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/game/save/<int:pdf_id>', methods=['POST'])
-def save_game(pdf_id):
+@app.route('/api/game/save/<int:deck_id>', methods=['POST'])
+def save_game(deck_id):
     """Save current game"""
     try:
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
 
         if session_key not in game_sessions:
             return jsonify({'error': 'No active game'}), 400
@@ -411,23 +428,23 @@ def load_game(save_id):
         if not save_data:
             return jsonify({'error': 'Save not found'}), 404
 
-        pdf_id = save_data['pdf_id']
+        deck_id = save_data['deck_id']
 
         # Create game engine and load
-        game = GameEngine(pdf_id)
+        game = GameEngine(deck_id)
         state = game.load_game(save_id)
 
         if not state:
             return jsonify({'error': 'Failed to load game'}), 500
 
         # Store in session
-        session_key = f"game_{pdf_id}_{session.get('user_id', 'default')}"
+        session_key = f"game_{deck_id}_{session.get('user_id', 'default')}"
         game_sessions[session_key] = game
 
         return jsonify({
             'success': True,
-            'pdf_id': pdf_id,
-            'game_status': game.get_game_status(),
+            'deck_id': deck_id,
+            'state': state.to_dict(),
             'message': 'Game loaded successfully'
         })
 
@@ -440,18 +457,27 @@ def load_game(save_id):
 # 📊 STATISTICS API
 # ═══════════════════════════════════════════════════════════════════
 
-@app.route('/api/stats/<int:pdf_id>', methods=['GET'])
-def get_stats(pdf_id):
-    """Get statistics for a PDF"""
+@app.route('/api/stats/<int:deck_id>', methods=['GET'])
+def get_stats(deck_id):
+    """Get statistics for a deck"""
     try:
-        overall = stats_manager.get_overall_stats(pdf_id)
-        topics = stats_manager.get_topic_performance(pdf_id)
-        weak = stats_manager.get_weak_areas(pdf_id)
+        overall = stats_manager.get_overall_stats(deck_id)
+        progress = stats_manager.get_deck_progress(deck_id)
+
+        # Get weak cards that need practice
+        weak_cards = review_state_manager.get_weak_cards(deck_id, limit=10)
+
+        # Enrich with card data
+        for weak_card in weak_cards:
+            card = card_db_manager.get_card(weak_card['card_id'])
+            if card:
+                weak_card['front'] = card['front']
+                weak_card['tags'] = card.get('tags', [])
 
         return jsonify({
             'overall': overall,
-            'topics': topics,
-            'weak_areas': weak
+            'progress': progress,
+            'weak_cards': weak_cards
         })
 
     except Exception as e:
@@ -459,60 +485,26 @@ def get_stats(pdf_id):
         return jsonify({'error': str(e)}), 500
 
 
-@app.route('/api/stats/export/<int:pdf_id>/<format>', methods=['GET'])
-def export_stats(pdf_id, format):
-    """Export statistics in specified format"""
-    try:
-        if format not in ['json', 'csv', 'markdown', 'all']:
-            return jsonify({'error': 'Invalid format'}), 400
-
-        result = export_stats_for_pdf(pdf_id, format)
-
-        return jsonify({
-            'success': True,
-            'files': result
-        })
-
-    except Exception as e:
-        logger.error(f"Export stats error: {str(e)}")
-        return jsonify({'error': str(e)}), 500
-
-
-@app.route('/api/stats/download/<path:filename>')
-def download_export(filename):
-    """Download an exported statistics file"""
-    try:
-        filepath = config.EXPORT_DIR / filename
-
-        if not filepath.exists():
-            return "File not found", 404
-
-        return send_file(filepath, as_attachment=True)
-
-    except Exception as e:
-        logger.error(f"Download error: {str(e)}")
-        return "Error downloading file", 500
-
-
 # ═══════════════════════════════════════════════════════════════════
 # 🔧 UTILITY ROUTES
 # ═══════════════════════════════════════════════════════════════════
 
-@app.route('/api/pdfs', methods=['GET'])
-def get_pdfs():
-    """Get list of all PDFs"""
+@app.route('/api/decks', methods=['GET'])
+def get_decks():
+    """Get list of all decks"""
     try:
-        pdfs = pdf_manager.get_all_pdfs()
+        decks = deck_manager.get_all_decks()
 
-        # Enrich with question counts
-        for pdf in pdfs:
-            pdf['question_count'] = question_manager.get_question_count(pdf['id'])
-            pdf['ready_to_play'] = pdf['question_count'] >= config.MIN_QUESTIONS_TO_START
+        # Enrich with card counts
+        for deck in decks:
+            card_count = card_db_manager.get_card_count(deck['id'])
+            deck['card_count'] = card_count
+            deck['ready_to_play'] = card_count > 0
 
-        return jsonify(pdfs)
+        return jsonify(decks)
 
     except Exception as e:
-        logger.error(f"Get PDFs error: {str(e)}")
+        logger.error(f"Get decks error: {str(e)}")
         return jsonify({'error': str(e)}), 500
 
 
@@ -525,6 +517,7 @@ def get_config():
         'powerups': config.POWERUPS,
         'total_encounters': config.TOTAL_ENCOUNTERS,
         'player_max_hp': config.PLAYER_MAX_HP,
+        'player_base_damage': config.PLAYER_BASE_DAMAGE,
         'animation_durations': config.ANIMATION_DURATIONS,
         'colors': config.COLORS
     })
@@ -533,7 +526,7 @@ def get_config():
 @app.errorhandler(413)
 def too_large(e):
     """Handle file too large error"""
-    return jsonify({'error': 'File too large. Maximum size is 16MB.'}), 413
+    return jsonify({'error': 'File too large. Maximum size is 10MB.'}), 413
 
 
 @app.errorhandler(500)
@@ -548,8 +541,9 @@ def internal_error(e):
 # ═══════════════════════════════════════════════════════════════════
 
 if __name__ == '__main__':
-    logger.info("Starting Educational Roguelike Game Server")
+    logger.info("Starting Educational Roguelike Game Server - Anki System")
     logger.info(f"Server running on {config.HOST}:{config.PORT}")
+    logger.info("Upload Anki CSV files to start learning!")
 
     app.run(
         host=config.HOST,

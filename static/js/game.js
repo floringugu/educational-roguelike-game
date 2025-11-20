@@ -1,15 +1,16 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 🎮 EDUCATIONAL ROGUELIKE - GAME LOGIC
+ * 🎮 EDUCATIONAL ROGUELIKE - GAME LOGIC (Anki Flashcard System)
  * Frontend game controller
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class RoguelikeGame {
-    constructor(pdfId) {
-        this.pdfId = pdfId;
-        this.currentQuestion = null;
-        this.gameStatus = null;
+    constructor(deckId) {
+        this.deckId = deckId;
+        this.currentCard = null;
+        this.cardRevealed = false;
+        this.gameState = null;
         this.battleLog = [];
         this.powerupsConfig = {};
         this.init();
@@ -44,24 +45,29 @@ class RoguelikeGame {
             saveGameBtn.addEventListener('click', () => this.saveGame());
         }
 
-        // Submit answer button
-        const submitBtn = document.getElementById('submit-answer-btn');
-        if (submitBtn) {
-            submitBtn.addEventListener('click', () => this.submitAnswer());
+        // Reveal button (show card back)
+        const revealBtn = document.getElementById('reveal-btn');
+        if (revealBtn) {
+            revealBtn.addEventListener('click', () => this.revealCard());
         }
 
-        // Next question button
-        const nextBtn = document.getElementById('next-question-btn');
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.loadNextQuestion());
-        }
+        // Response buttons (again/hard/good/easy)
+        const responseAgain = document.getElementById('response-again');
+        const responseHard = document.getElementById('response-hard');
+        const responseGood = document.getElementById('response-good');
+        const responseEasy = document.getElementById('response-easy');
+
+        if (responseAgain) responseAgain.addEventListener('click', () => this.submitResponse('again'));
+        if (responseHard) responseHard.addEventListener('click', () => this.submitResponse('hard'));
+        if (responseGood) responseGood.addEventListener('click', () => this.submitResponse('good'));
+        if (responseEasy) responseEasy.addEventListener('click', () => this.submitResponse('easy'));
     }
 
     async startNewGame() {
         try {
             this.showLoading('Starting new game...');
 
-            const response = await fetch(`/api/game/new/${this.pdfId}`, {
+            const response = await fetch(`/api/game/new/${this.deckId}`, {
                 method: 'POST'
             });
 
@@ -71,11 +77,15 @@ class RoguelikeGame {
                 throw new Error(data.error || 'Failed to start game');
             }
 
-            this.gameStatus = data.game_status;
+            this.gameState = data.state;
             this.showGameScreen();
             this.updateUI();
             this.addBattleLog('⚔️ A new adventure begins!', 'info');
-            await this.loadNextQuestion();
+
+            // Display first card
+            if (data.card) {
+                this.displayCard(data.card);
+            }
 
             this.hideLoading();
         } catch (error) {
@@ -87,189 +97,211 @@ class RoguelikeGame {
 
     async checkGameStatus() {
         try {
-            const response = await fetch(`/api/game/status/${this.pdfId}`);
+            const response = await fetch(`/api/game/status/${this.deckId}`);
             const data = await response.json();
 
-            if (data.active) {
-                this.gameStatus = data;
+            if (data.active && data.state) {
+                this.gameState = data.state;
+                this.showGameScreen();
                 this.updateUI();
-                await this.loadNextQuestion();
+
+                // Display current card if available
+                if (this.gameState.current_card) {
+                    this.displayCard({
+                        card: {
+                            id: this.gameState.current_card.id,
+                            front: this.gameState.current_card.front,
+                            tags: this.gameState.current_card.tags || []
+                        },
+                        revealed: this.gameState.card_revealed || false
+                    });
+                }
             } else {
                 this.showWelcomeScreen();
             }
         } catch (error) {
             console.error('Error checking game status:', error);
+            this.showWelcomeScreen();
         }
     }
 
-    async loadNextQuestion() {
-        try {
-            this.showLoading('Loading question...');
+    displayCard(cardData) {
+        const cardPanel = document.getElementById('card-panel');
+        if (!cardPanel) return;
 
-            const response = await fetch(`/api/game/question/${this.pdfId}`);
+        // Show card panel
+        cardPanel.classList.remove('hidden');
+
+        const card = cardData.card;
+        this.currentCard = card;
+        this.cardRevealed = cardData.revealed || false;
+
+        // Set tags
+        const tagsEl = document.getElementById('card-tags');
+        if (tagsEl) {
+            if (card.tags && card.tags.length > 0) {
+                tagsEl.textContent = '🏷️ ' + card.tags.join(', ');
+            } else {
+                tagsEl.textContent = '🏷️ No tags';
+            }
+        }
+
+        // Set card status
+        const statusEl = document.getElementById('card-status');
+        if (statusEl && this.gameState && this.gameState.current_card) {
+            const cardState = this.gameState.current_card;
+            if (cardState.repetitions === 0) {
+                statusEl.textContent = 'New Card';
+            } else {
+                statusEl.textContent = `Review ${cardState.repetitions}`;
+            }
+        }
+
+        // Set card front (question)
+        const cardFront = document.getElementById('card-front');
+        if (cardFront) {
+            cardFront.innerHTML = this.formatCardContent(card.front);
+        }
+
+        // Handle card back (answer)
+        const cardFrontContainer = document.getElementById('card-front-container');
+        const cardBackContainer = document.getElementById('card-back-container');
+
+        if (this.cardRevealed) {
+            // Show answer
+            if (cardFrontContainer) cardFrontContainer.classList.add('hidden');
+            if (cardBackContainer) cardBackContainer.classList.remove('hidden');
+
+            const cardBack = document.getElementById('card-back');
+            if (cardBack && this.gameState && this.gameState.current_card) {
+                cardBack.innerHTML = this.formatCardContent(this.gameState.current_card.back);
+            }
+        } else {
+            // Hide answer, show reveal button
+            if (cardFrontContainer) cardFrontContainer.classList.remove('hidden');
+            if (cardBackContainer) cardBackContainer.classList.add('hidden');
+        }
+    }
+
+    formatCardContent(content) {
+        // Basic HTML formatting for card content
+        // Convert newlines to <br> and preserve basic HTML
+        if (!content) return '';
+
+        // Replace newlines with <br> if content doesn't already have HTML tags
+        if (!content.includes('<')) {
+            return content.replace(/\n/g, '<br>');
+        }
+
+        return content;
+    }
+
+    async revealCard() {
+        try {
+            this.showLoading('Revealing answer...');
+
+            const response = await fetch(`/api/game/reveal/${this.deckId}`, {
+                method: 'POST'
+            });
+
+            const data = await response.json();
 
             if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.error || 'Failed to load question');
+                throw new Error(data.error || 'Failed to reveal card');
             }
 
-            const question = await response.json();
-            this.currentQuestion = question;
-            this.displayQuestion(question);
+            this.cardRevealed = true;
+
+            // Update display
+            const cardFrontContainer = document.getElementById('card-front-container');
+            const cardBackContainer = document.getElementById('card-back-container');
+
+            if (cardFrontContainer) cardFrontContainer.classList.add('hidden');
+            if (cardBackContainer) cardBackContainer.classList.remove('hidden');
+
+            // Set card back content
+            const cardBack = document.getElementById('card-back');
+            if (cardBack) {
+                cardBack.innerHTML = this.formatCardContent(data.back);
+            }
 
             this.hideLoading();
+
         } catch (error) {
-            console.error('Error loading question:', error);
+            console.error('Error revealing card:', error);
             this.showNotification(error.message, 'error');
             this.hideLoading();
         }
     }
 
-    displayQuestion(question) {
-        const questionPanel = document.getElementById('question-panel');
-        if (!questionPanel) return;
-
-        // Show question panel
-        questionPanel.classList.remove('hidden');
-
-        // Set topic and difficulty
-        const topicEl = document.getElementById('question-topic');
-        const difficultyEl = document.getElementById('question-difficulty');
-
-        if (topicEl) topicEl.textContent = question.topic || 'General';
-        if (difficultyEl) {
-            difficultyEl.textContent = question.difficulty || 'medium';
-            difficultyEl.className = `question-difficulty difficulty-${question.difficulty}`;
-        }
-
-        // Set question text
-        const questionText = document.getElementById('question-text');
-        if (questionText) {
-            questionText.textContent = question.question_text;
-        }
-
-        // Display options
-        this.displayOptions(question);
-
-        // Hide feedback panel
-        const feedbackPanel = document.getElementById('feedback-panel');
-        if (feedbackPanel) {
-            feedbackPanel.classList.add('hidden');
-        }
-
-        // Enable submit button
-        const submitBtn = document.getElementById('submit-answer-btn');
-        if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('hidden');
-        }
-
-        // Hide next button
-        const nextBtn = document.getElementById('next-question-btn');
-        if (nextBtn) {
-            nextBtn.classList.add('hidden');
-        }
-    }
-
-    displayOptions(question) {
-        const optionsContainer = document.getElementById('answer-options');
-        if (!optionsContainer) return;
-
-        optionsContainer.innerHTML = '';
-
-        if (question.question_type === 'true_false') {
-            question.options = ['true', 'false'];
-        }
-
-        question.options.forEach((option, index) => {
-            const optionEl = document.createElement('div');
-            optionEl.className = 'answer-option';
-            optionEl.textContent = option;
-            optionEl.dataset.value = option;
-
-            optionEl.addEventListener('click', () => this.selectOption(optionEl));
-
-            optionsContainer.appendChild(optionEl);
-        });
-    }
-
-    selectOption(optionEl) {
-        // Deselect all options
-        const allOptions = document.querySelectorAll('.answer-option');
-        allOptions.forEach(opt => opt.classList.remove('selected'));
-
-        // Select this option
-        optionEl.classList.add('selected');
-    }
-
-    async submitAnswer() {
-        const selectedOption = document.querySelector('.answer-option.selected');
-
-        if (!selectedOption) {
-            this.showNotification('Please select an answer!', 'error');
+    async submitResponse(response) {
+        if (!this.cardRevealed) {
+            this.showNotification('Please reveal the answer first!', 'error');
             return;
         }
 
-        const userAnswer = selectedOption.dataset.value;
-
         try {
-            this.showLoading('Checking answer...');
+            this.showLoading('Processing response...');
 
-            // Disable submit button
-            const submitBtn = document.getElementById('submit-answer-btn');
-            if (submitBtn) submitBtn.disabled = true;
+            // Disable response buttons
+            this.disableResponseButtons();
 
-            const response = await fetch(`/api/game/answer/${this.pdfId}`, {
+            const apiResponse = await fetch(`/api/game/answer/${this.deckId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({
-                    question_id: this.currentQuestion.id,
-                    answer: userAnswer
-                })
+                body: JSON.stringify({ response: response })
             });
 
-            const result = await response.json();
+            const result = await apiResponse.json();
 
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to submit answer');
+            if (!apiResponse.ok) {
+                throw new Error(result.error || 'Failed to submit response');
             }
 
-            this.processAnswerResult(result, selectedOption);
+            await this.processResponseResult(result, response);
             this.hideLoading();
 
         } catch (error) {
-            console.error('Error submitting answer:', error);
+            console.error('Error submitting response:', error);
             this.showNotification(error.message, 'error');
+            this.enableResponseButtons();
             this.hideLoading();
         }
     }
 
-    processAnswerResult(result, selectedOption) {
-        // Update game status
-        this.gameStatus = result.game_status;
+    async processResponseResult(result, response) {
+        console.log('Processing response result:', {
+            game_won: result.game_won,
+            player_defeated: result.player_defeated,
+            enemy_defeated: result.enemy_defeated,
+            has_next_card: !!result.next_card
+        });
 
-        // Show feedback
-        this.showFeedback(result);
+        // Update game state
+        this.gameState = result.state;
 
-        // Mark correct/incorrect option
-        if (result.is_correct) {
-            selectedOption.classList.add('correct');
+        // Show feedback based on response quality
+        const responseLabels = {
+            'again': '🔴 AGAIN',
+            'hard': '🟡 HARD',
+            'good': '🟢 GOOD',
+            'easy': '🔵 EASY'
+        };
+
+        const responseLabel = responseLabels[response] || response.toUpperCase();
+
+        // Log the response
+        if (result.damage_dealt > 0) {
             playAnimation('correct');
-            this.addBattleLog(`⚔️ You dealt ${result.damage_dealt} damage!`, 'damage');
+            this.addBattleLog(`${responseLabel} - You dealt ${result.damage_dealt} damage!`, 'damage');
         } else {
-            selectedOption.classList.add('incorrect');
             playAnimation('incorrect');
-            this.addBattleLog(`💔 You took ${result.damage_received} damage!`, 'damage');
-
-            // Highlight correct answer
-            const allOptions = document.querySelectorAll('.answer-option');
-            allOptions.forEach(opt => {
-                if (opt.dataset.value === result.correct_answer) {
-                    opt.classList.add('correct');
-                }
-            });
+            this.addBattleLog(`${responseLabel} - Enemy attacks you!`, 'damage');
+            if (result.damage_received > 0) {
+                this.addBattleLog(`💔 You took ${result.damage_received} damage!`, 'damage');
+            }
         }
 
         // Show powerup notification
@@ -284,7 +316,7 @@ class RoguelikeGame {
         }
 
         // Check for player death
-        if (result.player_died) {
+        if (result.player_defeated) {
             this.addBattleLog('💀 You have been defeated...', 'info');
             playAnimation('defeat');
             this.showGameOver();
@@ -292,82 +324,96 @@ class RoguelikeGame {
         }
 
         // Check for game won
+        console.log('Victory check:', result.game_won, 'Current encounter:', this.gameState?.progress?.current_encounter);
+        console.log('Full result:', result);
         if (result.game_won) {
-            this.addBattleLog('🌟 Victory! You completed the dungeon!', 'info');
-            this.showVictory();
+            console.log('VICTORY DETECTED! Showing victory screen...');
+            try {
+                this.addBattleLog('🌟 Victory! You completed the dungeon!', 'info');
+                playAnimation('victory');
+                this.showVictory();
+            } catch (error) {
+                console.error('Error showing victory screen:', error);
+                // Fallback: redirect immediately
+                window.location.href = `/stats/${this.deckId}`;
+            }
             return;
         }
 
         // Update UI
         this.updateUI();
 
-        // Show next question button
-        const nextBtn = document.getElementById('next-question-btn');
-        if (nextBtn) {
-            nextBtn.classList.remove('hidden');
-        }
+        // Wait a moment before showing next card
+        await this.sleep(1000);
 
-        // Hide submit button
-        const submitBtn = document.getElementById('submit-answer-btn');
-        if (submitBtn) {
-            submitBtn.classList.add('hidden');
+        // Load next card
+        if (result.next_card) {
+            this.cardRevealed = false;
+            this.displayCard({
+                card: result.next_card,
+                revealed: false
+            });
+            this.enableResponseButtons();
         }
     }
 
-    showFeedback(result) {
-        const feedbackPanel = document.getElementById('feedback-panel');
-        if (!feedbackPanel) return;
+    disableResponseButtons() {
+        const buttons = ['response-again', 'response-hard', 'response-good', 'response-easy'];
+        buttons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.disabled = true;
+        });
+    }
 
-        feedbackPanel.classList.remove('hidden');
-        feedbackPanel.className = `feedback-panel ${result.is_correct ? 'correct' : 'incorrect'}`;
-
-        const feedbackTitle = document.getElementById('feedback-title');
-        const feedbackText = document.getElementById('feedback-text');
-
-        if (feedbackTitle) {
-            feedbackTitle.textContent = result.is_correct ? '✅ Correct!' : '❌ Incorrect';
-        }
-
-        if (feedbackText) {
-            feedbackText.textContent = result.explanation || '';
-        }
+    enableResponseButtons() {
+        const buttons = ['response-again', 'response-hard', 'response-good', 'response-easy'];
+        buttons.forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) btn.disabled = false;
+        });
     }
 
     showPowerupNotification(powerupId) {
         // Get powerup info from config
-        fetch('/api/config')
-            .then(res => res.json())
-            .then(config => {
-                const powerup = config.powerups[powerupId];
-                if (powerup) {
-                    this.showNotification(`${powerup.name} obtained!`, 'success');
-                    this.addBattleLog(`✨ ${powerup.name} obtained!`, 'heal');
-                }
-            });
+        const powerup = this.powerupsConfig[powerupId];
+        if (powerup) {
+            this.showNotification(`${powerup.name} obtained!`, 'success');
+            this.addBattleLog(`✨ ${powerup.name} obtained!`, 'heal');
+        }
     }
 
     updateUI() {
-        if (!this.gameStatus) return;
+        if (!this.gameState) return;
 
         // Update player info
-        this.updatePlayer(this.gameStatus.player);
+        if (this.gameState.player) {
+            this.updatePlayer(this.gameState.player);
+        }
 
         // Update enemy info
-        if (this.gameStatus.enemy) {
-            this.updateEnemy(this.gameStatus.enemy);
+        if (this.gameState.enemy) {
+            this.updateEnemy(this.gameState.enemy);
         }
 
         // Update progress
-        this.updateProgress(this.gameStatus.progress);
+        if (this.gameState.progress) {
+            this.updateProgress(this.gameState.progress);
+        }
 
         // Update stats
-        this.updateStats(this.gameStatus.stats);
+        if (this.gameState.stats) {
+            this.updateStats(this.gameState.stats);
+        }
 
         // Update inventory
-        this.updateInventory(this.gameStatus.inventory);
+        if (this.gameState.inventory) {
+            this.updateInventory(this.gameState.inventory);
+        }
     }
 
     updatePlayer(player) {
+        if (!player) return;
+
         // Reset player sprite animations to ensure visibility
         const playerSprite = document.getElementById('player-sprite');
         if (playerSprite) {
@@ -381,7 +427,7 @@ class RoguelikeGame {
         const playerHpFill = document.getElementById('player-hp-fill');
         const playerHpText = document.getElementById('player-hp-text');
 
-        if (playerHpFill) {
+        if (playerHpFill && player.hp_percent !== undefined) {
             playerHpFill.style.width = `${player.hp_percent}%`;
 
             // Change color based on HP
@@ -392,13 +438,13 @@ class RoguelikeGame {
             }
         }
 
-        if (playerHpText) {
+        if (playerHpText && player.hp !== undefined && player.max_hp !== undefined) {
             playerHpText.textContent = `${player.hp}/${player.max_hp}`;
         }
 
         // Update shield
         const shieldIndicator = document.getElementById('player-shield');
-        if (shieldIndicator) {
+        if (shieldIndicator && player.shield !== undefined) {
             if (player.shield > 0) {
                 shieldIndicator.textContent = `🛡️ Shield: ${player.shield}`;
                 shieldIndicator.classList.remove('hidden');
@@ -409,15 +455,17 @@ class RoguelikeGame {
 
         // Update score
         const scoreEl = document.getElementById('player-score');
-        if (scoreEl) {
+        if (scoreEl && player.score !== undefined) {
             scoreEl.textContent = player.score.toLocaleString();
         }
     }
 
     updateEnemy(enemy) {
+        if (!enemy) return;
+
         // Update sprite
         const enemySprite = document.getElementById('enemy-sprite');
-        if (enemySprite) {
+        if (enemySprite && enemy.emoji) {
             enemySprite.textContent = enemy.emoji;
             // Reset animations and styles to fix sprite visibility
             enemySprite.style.animation = '';
@@ -464,27 +512,33 @@ class RoguelikeGame {
     }
 
     updateProgress(progress) {
+        if (!progress) return;
+
         const progressFill = document.getElementById('progress-fill');
         const progressText = document.getElementById('progress-text');
 
-        if (progressFill) {
+        if (progressFill && progress.percent !== undefined) {
             progressFill.style.width = `${progress.percent}%`;
         }
 
-        if (progressText) {
+        if (progressText && progress.current_encounter !== undefined && progress.total_encounters !== undefined) {
             progressText.textContent = `Encounter ${progress.current_encounter}/${progress.total_encounters}`;
         }
     }
 
     updateStats(stats) {
+        if (!stats) return;
+
+        // Update accuracy
         const accuracyEl = document.getElementById('session-accuracy');
-        if (accuracyEl) {
+        if (accuracyEl && stats.accuracy !== undefined) {
             accuracyEl.textContent = `${stats.accuracy.toFixed(1)}%`;
         }
 
-        const answeredEl = document.getElementById('questions-answered');
-        if (answeredEl) {
-            answeredEl.textContent = stats.questions_answered;
+        // Update cards reviewed (changed from questions answered)
+        const cardsReviewedEl = document.getElementById('cards-reviewed');
+        if (cardsReviewedEl) {
+            cardsReviewedEl.textContent = stats.cards_reviewed || 0;
         }
     }
 
@@ -542,7 +596,7 @@ class RoguelikeGame {
         try {
             this.showLoading('Using powerup...');
 
-            const response = await fetch(`/api/game/use-powerup/${this.pdfId}`, {
+            const response = await fetch(`/api/game/use-powerup/${this.deckId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -556,15 +610,24 @@ class RoguelikeGame {
                 throw new Error(result.error || 'Failed to use powerup');
             }
 
-            // Update game status
-            this.gameStatus = result.game_status;
-            this.updateUI();
+            // Update game state
+            if (result.state) {
+                this.gameState = result.state;
+                this.updateUI();
+            }
 
-            // Show notification
-            const powerupData = this.powerupsConfig[powerupId];
-            if (powerupData) {
-                this.showNotification(`Used ${powerupData.name}!`, 'success');
-                this.addBattleLog(`✨ Used ${powerupData.name}`, 'heal');
+            // Show notification with effects
+            if (result.message) {
+                this.showNotification(result.message, 'success');
+
+                // Determinar color del log según tipo de item
+                const logType = result.item_type === 'spell' ? 'damage' : 'heal';
+                this.addBattleLog(`✨ ${result.message}`, logType);
+            }
+
+            // Si fue un hechizo que hizo daño, mostrar animación
+            if (result.damage_dealt && result.damage_dealt > 0) {
+                playAnimation('correct');
             }
 
             this.hideLoading();
@@ -604,7 +667,7 @@ class RoguelikeGame {
 
             this.showLoading('Saving game...');
 
-            const response = await fetch(`/api/game/save/${this.pdfId}`, {
+            const response = await fetch(`/api/game/save/${this.deckId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -643,20 +706,19 @@ class RoguelikeGame {
 
         if (welcomeScreen) welcomeScreen.classList.add('hidden');
         if (gameScreen) gameScreen.classList.remove('hidden');
-
     }
 
     showGameOver() {
         setTimeout(() => {
             alert('Game Over! Your progress has been saved.');
-            window.location.href = `/stats/${this.pdfId}`;
+            window.location.href = `/stats/${this.deckId}`;
         }, 2000);
     }
 
     showVictory() {
         setTimeout(() => {
             alert('🎉 Victory! You completed the dungeon! Check your stats.');
-            window.location.href = `/stats/${this.pdfId}`;
+            window.location.href = `/stats/${this.deckId}`;
         }, 2000);
     }
 
@@ -686,15 +748,19 @@ class RoguelikeGame {
             notification.remove();
         }, 3000);
     }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
 }
 
 // Initialize game when page loads
 document.addEventListener('DOMContentLoaded', () => {
     const gameContainer = document.getElementById('game-container');
     if (gameContainer) {
-        const pdfId = gameContainer.dataset.pdfId;
-        if (pdfId) {
-            window.roguelikeGame = new RoguelikeGame(parseInt(pdfId));
+        const deckId = gameContainer.dataset.deckId;
+        if (deckId) {
+            window.roguelikeGame = new RoguelikeGame(parseInt(deckId));
         }
     }
 });

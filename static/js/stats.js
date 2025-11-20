@@ -1,13 +1,13 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- * 📊 EDUCATIONAL ROGUELIKE - STATISTICS
+ * 📊 EDUCATIONAL ROGUELIKE - STATISTICS (Anki Flashcard System)
  * Statistics visualization and management
  * ═══════════════════════════════════════════════════════════════════
  */
 
 class StatsManager {
-    constructor(pdfId) {
-        this.pdfId = pdfId;
+    constructor(deckId) {
+        this.deckId = deckId;
         this.stats = null;
         this.init();
     }
@@ -46,7 +46,7 @@ class StatsManager {
         try {
             this.showLoading();
 
-            const response = await fetch(`/api/stats/${this.pdfId}`);
+            const response = await fetch(`/api/stats/${this.deckId}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -69,20 +69,20 @@ class StatsManager {
 
         this.displayOverallStats(this.stats.overall);
         this.displayTopicPerformance(this.stats.topics);
-        this.displayWeakAreas(this.stats.weak_areas);
+        this.displayWeakAreas(this.stats.weak_cards);
     }
 
     displayOverallStats(overall) {
-        // Total answers
+        // Total reviews (cards answered)
         const totalEl = document.getElementById('total-answers');
-        if (totalEl && overall.total_answers !== undefined) {
-            animateNumber(totalEl, 0, overall.total_answers, 1000);
+        if (totalEl && overall.total_reviews !== undefined) {
+            animateNumber(totalEl, 0, overall.total_reviews, 1000);
         }
 
         // Correct answers
         const correctEl = document.getElementById('correct-answers');
-        if (correctEl && overall.correct_answers !== undefined) {
-            animateNumber(correctEl, 0, overall.correct_answers, 1000);
+        if (correctEl && overall.correct_reviews !== undefined) {
+            animateNumber(correctEl, 0, overall.correct_reviews, 1000);
         }
 
         // Accuracy
@@ -156,45 +156,63 @@ class StatsManager {
         });
     }
 
-    displayWeakAreas(weakAreas) {
+    displayWeakAreas(weakCards) {
         const container = document.getElementById('weak-areas');
         if (!container) return;
 
-        if (!weakAreas || weakAreas.length === 0) {
-            container.innerHTML = '<p class="text-primary">🌟 Great job! No weak areas identified.</p>';
+        if (!weakCards || weakCards.length === 0) {
+            container.innerHTML = '<p class="text-primary">🌟 Great job! No weak cards identified. Keep practicing!</p>';
             return;
         }
 
-        container.innerHTML = '<p class="text-warning mb-md">📚 Focus your study on these areas:</p>';
+        container.innerHTML = '<p class="text-warning mb-md">📚 These cards need more practice:</p>';
 
         const list = document.createElement('div');
         list.className = 'card-grid';
 
-        weakAreas.forEach((area, index) => {
-            const areaCard = document.createElement('div');
-            areaCard.className = 'card';
-            areaCard.style.borderColor = 'var(--color-warning)';
-            areaCard.style.animationDelay = `${index * 100}ms`;
+        weakCards.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.className = 'card';
+            cardEl.style.borderColor = 'var(--color-warning)';
+            cardEl.style.animationDelay = `${index * 100}ms`;
 
-            areaCard.innerHTML = `
-                <div class="card-title text-warning">${area.topic || 'Unknown'}</div>
+            // Truncate front text if too long
+            const frontText = (card.front || 'Unknown card').substring(0, 80);
+            const displayText = card.front && card.front.length > 80 ? frontText + '...' : frontText;
+
+            // Get color based on accuracy
+            const accuracy = card.accuracy || 0;
+            const accuracyColor = accuracy < 30 ? 'text-danger' : accuracy < 50 ? 'text-warning' : 'text-accent';
+
+            cardEl.innerHTML = `
+                <div class="card-title text-warning">${displayText}</div>
                 <div class="card-content">
-                    <div class="character-stat">
-                        <span>Difficulty:</span>
-                        <span class="difficulty-${area.difficulty}">${(area.difficulty || 'unknown').toUpperCase()}</span>
-                    </div>
+                    ${card.tags && card.tags.length > 0 ? `
+                        <div class="character-stat">
+                            <span>Tags:</span>
+                            <span>${card.tags.join(', ')}</span>
+                        </div>
+                    ` : ''}
                     <div class="character-stat">
                         <span>Accuracy:</span>
-                        <span class="text-danger">${(area.accuracy || 0).toFixed(1)}%</span>
+                        <span class="${accuracyColor}">${accuracy.toFixed(1)}%</span>
                     </div>
                     <div class="character-stat">
-                        <span>Attempts:</span>
-                        <span>${area.attempts || 0}</span>
+                        <span>Reviews:</span>
+                        <span>${card.total_reviews || 0}</span>
+                    </div>
+                    <div class="character-stat">
+                        <span>Incorrect:</span>
+                        <span class="text-danger">${card.total_incorrect || 0}</span>
+                    </div>
+                    <div class="character-stat">
+                        <span>Ease:</span>
+                        <span>${(card.ease_factor || 2.5).toFixed(2)}</span>
                     </div>
                 </div>
             `;
 
-            list.appendChild(areaCard);
+            list.appendChild(cardEl);
         });
 
         container.appendChild(list);
@@ -204,7 +222,7 @@ class StatsManager {
         try {
             this.showLoading('Exporting...');
 
-            const response = await fetch(`/api/stats/export/${this.pdfId}/${format}`);
+            const response = await fetch(`/api/stats/export/${this.deckId}/${format}`);
             const data = await response.json();
 
             if (!response.ok) {
@@ -288,9 +306,9 @@ class StatsManager {
 document.addEventListener('DOMContentLoaded', () => {
     const statsContainer = document.getElementById('stats-container');
     if (statsContainer) {
-        const pdfId = statsContainer.dataset.pdfId;
-        if (pdfId) {
-            window.statsManager = new StatsManager(parseInt(pdfId));
+        const deckId = statsContainer.dataset.deckId;
+        if (deckId) {
+            window.statsManager = new StatsManager(parseInt(deckId));
         }
     }
 });

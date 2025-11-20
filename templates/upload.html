@@ -3,15 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Upload PDF - Educational Roguelike</title>
+    <title>Upload Anki Deck - Educational Roguelike</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/pixel-style.css') }}">
 </head>
 <body>
     <div class="container">
         <!-- Header -->
         <div class="page-header">
-            <h1 class="page-title">📤 UPLOAD PDF</h1>
-            <p class="page-subtitle">Add Study Material</p>
+            <h1 class="page-title">📤 UPLOAD ANKI DECK</h1>
+            <p class="page-subtitle">Import Your Flashcards</p>
         </div>
 
         <div class="btn-group mb-xl">
@@ -20,19 +20,19 @@
 
         <!-- Upload Form -->
         <div class="card" style="max-width: 600px; margin: 0 auto;">
-            <div class="card-title">📄 Upload Study PDF</div>
+            <div class="card-title">🃏 Upload Anki CSV File</div>
             <div class="card-content">
                 <form id="upload-form" enctype="multipart/form-data" style="text-align: center;">
                     <div class="mb-lg">
                         <input
                             type="file"
-                            id="pdf-file"
+                            id="csv-file"
                             name="file"
-                            accept=".pdf"
+                            accept=".csv"
                             required
                             style="display: none;">
-                        <label for="pdf-file" class="btn btn-primary" style="cursor: pointer;">
-                            📁 Choose PDF File
+                        <label for="csv-file" class="btn btn-primary" style="cursor: pointer;">
+                            📁 Choose CSV File
                         </label>
                         <div id="file-name" class="mt-md text-accent" style="font-size: 10px;"></div>
                     </div>
@@ -40,15 +40,15 @@
                     <div id="upload-info" class="mb-lg" style="font-size: 9px; line-height: 2; text-align: left;">
                         <p class="text-primary">ℹ️ Upload Instructions:</p>
                         <ul style="list-style: none; padding-left: 20px;">
-                            <li>✓ Maximum file size: 16 MB</li>
-                            <li>✓ Only PDF files accepted</li>
-                            <li>✓ Text-based PDFs work best</li>
-                            <li>✓ Scanned PDFs may not work</li>
+                            <li>✓ Maximum file size: 10 MB</li>
+                            <li>✓ Only CSV files accepted</li>
+                            <li>✓ Export from Anki in CSV format</li>
+                            <li>✓ Format: Front,Back or Front,Back,Tags</li>
                         </ul>
                     </div>
 
                     <button type="submit" class="btn btn-primary" id="upload-btn">
-                        🚀 Upload & Process
+                        🚀 Upload Deck
                     </button>
                 </form>
 
@@ -67,17 +67,33 @@
 
         <!-- Info Card -->
         <div class="card mt-xl" style="max-width: 600px; margin: var(--spacing-xl) auto 0;">
-            <div class="card-title">🤖 AI Question Generation</div>
+            <div class="card-title">📖 How to Export from Anki</div>
             <div class="card-content" style="font-size: 10px; line-height: 2;">
-                <p class="mb-md">After uploading, questions will be generated using Claude AI:</p>
-                <ul style="list-style: none; padding-left: 20px;">
-                    <li>• Multiple choice questions</li>
-                    <li>• True/False questions</li>
-                    <li>• Varying difficulty levels</li>
-                    <li>• Detailed explanations</li>
-                </ul>
+                <p class="mb-md"><strong>Steps to export your Anki deck:</strong></p>
+                <ol style="padding-left: 30px; line-height: 2;">
+                    <li>Open Anki and select your deck</li>
+                    <li>Click <strong>File → Export</strong></li>
+                    <li>Choose <strong>"Notes in Plain Text"</strong></li>
+                    <li>Select <strong>".csv" format</strong></li>
+                    <li>Include <strong>fields</strong> and optionally <strong>tags</strong></li>
+                    <li>Save the file</li>
+                    <li>Upload it here!</li>
+                </ol>
+
                 <p class="text-accent mt-md">
-                    ⚠️ Note: Requires ANTHROPIC_API_KEY environment variable to be set.
+                    <strong>Supported formats:</strong><br>
+                    • <code>Front,Back</code><br>
+                    • <code>Front,Back,Tags</code><br>
+                    • <code>Front,Back,Tags,NoteType</code>
+                </p>
+
+                <p class="mt-md">
+                    <strong>Example CSV content:</strong><br>
+                    <code style="font-size: 8px; background: #0a0a0a; padding: 4px; display: block; margin-top: 8px;">
+                    ¿Qué es Python?,Un lenguaje de programación,programación<br>
+                    ¿Capital de Francia?,París,geografía europa<br>
+                    Traduce: Hello,Hola,inglés vocabulario
+                    </code>
                 </p>
             </div>
         </div>
@@ -86,7 +102,7 @@
     <div id="loading-indicator" class="hidden notification info">Loading...</div>
 
     <script>
-        const fileInput = document.getElementById('pdf-file');
+        const fileInput = document.getElementById('csv-file');
         const fileName = document.getElementById('file-name');
         const uploadForm = document.getElementById('upload-form');
         const uploadBtn = document.getElementById('upload-btn');
@@ -104,7 +120,13 @@
 
             const file = fileInput.files[0];
             if (!file) {
-                alert('Please select a file');
+                alert('Please select a CSV file');
+                return;
+            }
+
+            // Validate file type
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                alert('Please select a CSV file (.csv extension)');
                 return;
             }
 
@@ -128,18 +150,19 @@
                     throw new Error(data.error || 'Upload failed');
                 }
 
-                // Success
+                // Success - redirect to home after showing message
                 uploadResult.innerHTML = `
                     <div class="card" style="border-color: var(--color-hp-high);">
-                        <div class="card-title text-primary">✅ Upload Successful!</div>
+                        <div class="card-title text-primary">✅ Import Successful!</div>
                         <div class="card-content" style="font-size: 10px;">
-                            <p><strong>Title:</strong> ${data.title}</p>
-                            <p><strong>Pages:</strong> ${data.num_pages}</p>
-                            <p><strong>Estimated Questions:</strong> ${data.estimated_questions}</p>
+                            <p><strong>Deck Name:</strong> ${data.deck_name}</p>
+                            <p><strong>Cards Imported:</strong> ${data.cards_imported}</p>
+                            <p><strong>Unique Tags:</strong> ${data.total_tags}</p>
+                            <p class="mt-md text-accent">${data.message}</p>
                             <div class="btn-group mt-md">
-                                <button onclick="generateQuestions(${data.pdf_id})" class="btn btn-primary">
-                                    🤖 Generate Questions Now
-                                </button>
+                                <a href="/game/${data.deck_id}" class="btn btn-primary">
+                                    ⚔️ Play Now
+                                </a>
                                 <a href="/" class="btn btn-secondary">← Back to Home</a>
                             </div>
                         </div>
@@ -151,48 +174,24 @@
                 uploadResult.innerHTML = `
                     <div class="card" style="border-color: var(--color-danger);">
                         <div class="card-title text-danger">❌ Upload Failed</div>
-                        <div class="card-content">
-                            <p>${error.message}</p>
+                        <div class="card-content" style="font-size: 10px;">
+                            <p><strong>Error:</strong> ${error.message}</p>
+                            <p class="mt-md">Please check:</p>
+                            <ul style="padding-left: 20px;">
+                                <li>File is a valid CSV</li>
+                                <li>Format is: Front,Back or Front,Back,Tags</li>
+                                <li>File is not empty</li>
+                                <li>File size is under 10MB</li>
+                            </ul>
                         </div>
                     </div>
                 `;
                 uploadBtn.disabled = false;
-                uploadBtn.textContent = '🚀 Upload & Process';
+                uploadBtn.textContent = '🚀 Upload Deck';
             } finally {
                 progressContainer.classList.add('hidden');
             }
         });
-
-        async function generateQuestions(pdfId) {
-            uploadBtn.disabled = true;
-            uploadBtn.textContent = '⏳ Generating Questions...';
-            progressContainer.classList.remove('hidden');
-
-            try {
-                const response = await fetch(`/api/generate-questions/${pdfId}`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ num_questions: 30 })
-                });
-
-                const data = await response.json();
-
-                if (!response.ok) {
-                    throw new Error(data.error || 'Generation failed');
-                }
-
-                alert(`✅ Generated ${data.questions_saved} questions!\nCost: ~$${data.cost_estimate.estimated_cost_usd.toFixed(4)}`);
-                window.location.href = '/';
-
-            } catch (error) {
-                console.error('Generation error:', error);
-                alert(`❌ Error: ${error.message}`);
-                uploadBtn.disabled = false;
-                uploadBtn.textContent = '🚀 Upload & Process';
-            } finally {
-                progressContainer.classList.add('hidden');
-            }
-        }
     </script>
 </body>
 </html>
