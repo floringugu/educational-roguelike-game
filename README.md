@@ -1,272 +1,259 @@
-# 🎮 Educational Roguelike - Integración OCR Completa
+# 🎮 Educational Roguelike - Anki Flashcard System
 
-## 📦 Entrega de Archivos
+> **¡Aprende mientras juegas!** Un juego roguelike que utiliza tarjetas Anki para crear una experiencia de aprendizaje activa y divertida mediante repetición espaciada.
 
-**Fecha:** Noviembre 17, 2025  
-**Versión:** 1.0  
-**Status:** ✅ Completo y listo para producción
+---
+
+## 🌟 ¿Qué es este proyecto?
+
+Este es un **juego educativo tipo roguelike** que combina:
+- 🃏 **Tarjetas Anki** (formato CSV) para el contenido de aprendizaje
+- 🧠 **Repetición espaciada** (algoritmo SM-2 simplificado)
+- ⚔️ **Combate roguelike** donde tus respuestas determinan el daño
+- 📊 **Tracking de progreso** para optimizar tu aprendizaje
 
 ---
 
 ## 🚀 Quick Start
 
-### 1. Instalación (Ubuntu/Debian)
+### 1. Instalación
+
 ```bash
-# Instalar Tesseract OCR
-sudo apt-get install tesseract-ocr tesseract-ocr-spa tesseract-ocr-eng poppler-utils
+# 1. Clonar repositorio
+git clone https://github.com/floringugu/educational-roguelike-game.git
+cd educational-roguelike-game
 
-# Instalar dependencias Python
-pip install -r requirements_with_ocr.txt
+# 2. Crear entorno virtual
+python -m venv venv
+source venv/bin/activate  # En Windows: venv\Scripts\activate
 
-# Configurar variables de entorno
-cp .env.example .env
-nano .env  # Agregar HUGGINGFACE_API_KEY (opcional pero recomendado)
-```
+# 3. Instalar dependencias (¡solo Flask!)
+pip install -r requirements.txt
 
-### 2. Verificar Instalación
-```bash
-python ocr_processor.py
-```
-
-### 3. Ejecutar Aplicación
-```bash
+# 4. Ejecutar aplicación
 python app.py
 ```
 
----
-
-## 📁 Archivos Entregados (17 archivos | 280 KB)
-
-### 🔧 Configuración (3 archivos)
-- `config.py` (9.9 KB) - Configuración con soporte OCR
-- `.env.example` (7.4 KB) - Template de variables de entorno
-- `requirements_with_ocr.txt` (2.9 KB) - Dependencias con OCR
-
-### 💻 Código Fuente (3 archivos)
-- `ocr_processor.py` (25 KB) ⭐ - Motor OCR completo
-- `pdf_processor.py` (16 KB) - Procesador actualizado
-- `enhanced_pdf_image_processor.py` (23 KB) - Procesador mejorado
-
-### 📚 Documentación Principal (5 archivos)
-- `EXECUTIVE_SUMMARY.md` (14 KB) - Resumen ejecutivo
-- `OCR_INTEGRATION_COMPLETE.md` (13 KB) - Doc técnica completa
-- `OCR_SETUP_GUIDE.md` (9.9 KB) - Guía de instalación
-- `DELIVERABLES_INDEX.md` (18 KB) - Índice detallado
-- `game_improvements_analysis.md` (66 KB) - Análisis completo
-
-### 🧪 Tests y Utilidades (3 archivos)
-- `test_ocr_installation.py` (11 KB) - Tests de verificación
-- `upload_template_updated.html` (16 KB) - Template actualizado
-- `FLASK_INTEGRATION.md` (15 KB) - Guía de integración
-
-### 📖 Documentación Adicional (3 archivos)
-- `GUIA_INSTALACION_OCR.md` (14 KB) - Guía en español
-- `RESUMEN_EJECUTIVO.md` (9.7 KB) - Resumen en español
-- `INDEX.md` (9.0 KB) - Índice general
+### 2. Acceder al juego
+Abre tu navegador en: `http://localhost:5000`
 
 ---
 
-## ✨ Características Implementadas
+## 🎯 Cómo funciona
 
-### ✅ Soporte Multi-Motor OCR
-- Tesseract (rápido y confiable)
-- EasyOCR (deep learning, muy preciso)
-- PaddleOCR (balance velocidad/precisión)
+### Paso 1: Importar tu mazo de Anki
 
-### ✅ Detección Automática
-El sistema detecta automáticamente si un PDF necesita OCR
-
-### ✅ Sistema de Caché
-- Primera vez: ~45 segundos
-- Con caché: ~2 segundos (95% más rápido)
-
-### ✅ Procesamiento Paralelo
-Múltiples páginas procesadas simultáneamente
-
-### ✅ Preprocesamiento Inteligente
-- Conversión a escala de grises
-- Eliminación de ruido
-- Corrección de inclinación
-- Mejora de contraste
-
----
-
-## 📊 Impacto
-
-### Antes
-- ❌ Solo PDFs con texto extraíble
-- ❌ ~60% de PDFs rechazados
-- ❌ No funciona con apuntes escaneados
-
-### Después
-- ✅ Cualquier tipo de PDF
-- ✅ ~95% tasa de éxito
-- ✅ Apuntes, libros, documentos escaneados
-
----
-
-## 📖 Documentos Clave
-
-### Para Empezar
-1. **`EXECUTIVE_SUMMARY.md`** - Lee esto primero
-2. **`OCR_SETUP_GUIDE.md`** - Guía de instalación
-3. **`.env.example`** - Configuración
-
-### Para Desarrolladores
-1. **`OCR_INTEGRATION_COMPLETE.md`** - Documentación técnica
-2. **`DELIVERABLES_INDEX.md`** - Índice completo
-3. **`game_improvements_analysis.md`** - Análisis profundo
-
-### Para Testing
-1. **`test_ocr_installation.py`** - Verificar instalación
-2. **`python ocr_processor.py`** - Test de OCR
-3. **`python ocr_processor.py test.pdf`** - Procesar PDF
-
----
-
-## 🎯 Uso Básico
-
-### Procesar PDF (Automático)
-```python
-from pdf_processor import PDFProcessor
-
-processor = PDFProcessor()
-result = processor.extract_text_from_pdf('documento.pdf')
-
-print(f"Método: {result['extraction_method']}")  # 'text' o 'ocr'
-print(f"Texto: {result['text'][:500]}")
+Exporta tus tarjetas desde Anki en formato CSV:
+```csv
+Front,Back,Tags
+¿Qué es Python?,Un lenguaje de programación,programación python
+¿Qué significa HTML?,HyperText Markup Language,web html
+¿Capital de Francia?,París,geografía europa
 ```
 
-### Forzar OCR
-```python
-result = processor.extract_text_from_pdf('doc.pdf', use_ocr=True)
+**Formatos soportados:**
+- `Front,Back` (básico)
+- `Front,Back,Tags` (recomendado)
+- `Front,Back,Tags,NoteType` (completo)
+
+### Paso 2: Jugar y aprender
+
+**Mecánica del juego:**
+1. **Aparece un enemigo** con HP y daño
+2. **Se muestra una tarjeta** (Front/pregunta)
+3. **Piensas la respuesta** mentalmente
+4. **Presionas "Revelar"** para ver el Back/respuesta
+5. **Evalúas tu conocimiento** con 4 opciones:
+
+#### 🎮 Sistema de 4 Opciones (estilo Anki)
+
+| Opción | Significado | Daño al enemigo | Efecto en aprendizaje |
+|--------|-------------|-----------------|----------------------|
+| **🔴 AGAIN** | No recordé | **0 HP** | Enemigo te ataca. Tarjeta marcada para revisión inmediata |
+| **🟡 HARD** | Recordé con dificultad | **30% daño** | Daño mínimo. Tarjeta se revisa pronto |
+| **🟢 GOOD** | Recordé correctamente | **100% daño** | Daño normal. Tarjeta sigue intervalo estándar |
+| **🔵 EASY** | Recordé fácilmente | **200% daño** | ¡Daño crítico! Tarjeta se revisa en mucho tiempo |
+
+### Paso 3: Progresión
+
+- **Derrota enemigos** respondiendo correctamente
+- **Gana powerups** (pociones, escudos, multiplicadores)
+- **Completa 10 encuentros** para ganar el juego
+- **Enfrenta un boss final** en el último encuentro
+
+---
+
+## 🧠 Repetición Espaciada
+
+El juego utiliza un **algoritmo SM-2 simplificado** (el mismo de Anki) para:
+- 📅 Determinar cuándo revisar cada tarjeta
+- 🎯 Priorizar tarjetas difíciles
+- 📈 Aumentar intervalos para tarjetas fáciles
+- 💾 Guardar tu progreso de aprendizaje
+
+**Estadísticas trackeadas:**
+- Precisión por tarjeta
+- Total de revisiones
+- Tarjetas dominadas (>80% precisión)
+- Tiempo de estudio
+- Tarjetas nuevas vs. revisiones
+
+---
+
+## 📁 Estructura del Proyecto
+
 ```
-
-### Test desde CLI
-```bash
-# Verificar configuración
-python ocr_processor.py
-
-# Procesar PDF
-python ocr_processor.py documento.pdf
+educational-roguelike-game/
+├── 🃏 Sistema Anki
+│   ├── anki_csv_parser.py         # Parser de CSVs de Anki
+│   ├── spaced_repetition.py       # Algoritmo SM-2
+│   └── card_manager.py            # Gestión de tarjetas
+│
+├── 🎮 Motor del Juego
+│   ├── game_engine.py             # Lógica de combate
+│   ├── database.py                # Persistencia (SQLite)
+│   └── config.py                  # Configuración
+│
+├── 🌐 Web App
+│   ├── app.py                     # Servidor Flask
+│   ├── templates/                 # HTML (Jinja2)
+│   └── static/                    # CSS + JavaScript
+│
+└── 📦 Configuración
+    ├── requirements.txt           # Dependencias
+    └── README.md                  # Este archivo
 ```
 
 ---
 
-## 🔧 Configuración Básica
+## 🎨 Características
 
-En tu archivo `.env`:
+### ✅ Sistema de tarjetas Anki
+- Importación de CSVs exportados desde Anki
+- Soporte de tags para categorización
+- Validación automática de formato
 
-```bash
-# ✨ Hugging Face API Key (GRATIS!) - Opcional pero recomendado
-# Obtén tu clave gratis en: https://huggingface.co/settings/tokens
-# Sin API key: funciona con límites de rate más bajos
-# Con API key: sin límites, mejor rendimiento, 100% GRATIS
-HUGGINGFACE_API_KEY=hf_tu_key_aqui
+### ✅ Repetición espaciada
+- Algoritmo SM-2 (base de Anki)
+- Priorización inteligente de tarjetas
+- Intervalos adaptativos según rendimiento
 
-# Modelo (opcional - usa un modelo gratis de HuggingFace)
-# Por defecto: mistralai/Mixtral-8x7B-Instruct-v0.1 (excelente calidad)
-# Alternativas:
-#   - meta-llama/Meta-Llama-3-8B-Instruct (más rápido)
-#   - mistralai/Mistral-7B-Instruct-v0.2 (balance)
-#   - HuggingFaceH4/zephyr-7b-beta (ligero)
-HUGGINGFACE_MODEL=mistralai/Mixtral-8x7B-Instruct-v0.1
+### ✅ Combate roguelike
+- 6 tipos de enemigos normales
+- 4 tipos de bosses épicos
+- Sistema de powerups estratégico
+- Escalado de dificultad progresivo
 
-# OCR (Opcional - defaults son buenos)
-OCR_ENABLED=True
-OCR_ENGINE=tesseract
-TESSERACT_LANG=spa+eng
-```
+### ✅ Estadísticas detalladas
+- Precisión por tarjeta y global
+- Tarjetas difíciles identificadas
+- Progreso de aprendizaje visualizado
+- Exportación de datos
 
-### 🎁 Cómo obtener tu API Key GRATUITA de Hugging Face:
-
-1. Visita https://huggingface.co/join
-2. Crea una cuenta gratis (email, Google, o GitHub)
-3. Ve a https://huggingface.co/settings/tokens
-4. Clic en "New token"
-5. Dale un nombre (ej: "educational-roguelike")
-6. Selecciona "Read" como permiso
-7. Copia el token y pégalo en tu `.env`
-
-**¡Sin costos, sin tarjeta de crédito, sin límites de uso!** 🎉
+### ✅ UI retro pixel-art
+- Diseño nostálgico de 8-bits
+- Animaciones suaves
+- Responsive design
 
 ---
 
-## 📈 Performance
+## 🔧 Tecnologías
 
-| Tipo PDF | Páginas | Sin Caché | Con Caché |
-|----------|---------|-----------|-----------|
-| Texto | 10 | 2s | 2s |
-| Escaneado | 10 | 45s | 2s |
-| Mixto | 20 | 30s | 5s |
+**Backend:**
+- Python 3.8+
+- Flask (web framework)
+- SQLite (base de datos)
+
+**Frontend:**
+- HTML5 + CSS3
+- JavaScript vanilla
+- Pixel-art styling
+
+**Sin dependencias pesadas:**
+- ❌ No OCR
+- ❌ No APIs de IA
+- ❌ No procesamiento de PDFs
+- ✅ Solo Flask y módulos estándar de Python
 
 ---
 
-## 🐛 Troubleshooting
+## 📊 Base de Datos
 
-### Error: "Tesseract not found"
-```bash
-# Ubuntu
-sudo apt-get install tesseract-ocr
+**Tablas:**
+- `anki_decks` - Mazos importados
+- `anki_cards` - Tarjetas individuales
+- `card_review_states` - Estado de repetición espaciada
+- `card_reviews` - Historial de revisiones
+- `game_saves` - Partidas guardadas
+- `statistics` - Sesiones de juego
 
-# macOS
-brew install tesseract
+---
 
-# Windows: Descargar de
-# https://github.com/UB-Mannheim/tesseract/wiki
-```
+## 🚧 Estado del Proyecto
 
-### OCR muy lento
-```python
-# En config.py o .env
-OCR_DPI = 200  # Reducir calidad
-OCR_BATCH_SIZE = 2  # Menos paralelismo
-```
+**✅ Completado:**
+- [x] Sistema de importación de CSV Anki
+- [x] Algoritmo de repetición espaciada
+- [x] Gestor de estado de tarjetas
+- [x] Motor de combate adaptado
+- [x] Base de datos actualizada
+- [x] Configuración simplificada
+- [x] Eliminación de dependencias OCR/IA
 
-### Baja precisión
-```python
-OCR_DPI = 400  # Aumentar calidad
-OCR_ENGINE = 'easyocr'  # Motor más preciso
-OCR_PREPROCESSING = True
-```
+**🚧 En Progreso (WIP):**
+- [ ] Actualización de app.py con rutas para CSV
+- [ ] Templates HTML para sistema Anki
+- [ ] JavaScript para botón "Revelar" y 4 opciones
+- [ ] Testing completo del flujo
 
-Ver `OCR_SETUP_GUIDE.md` para más soluciones.
+---
+
+## 🎓 Casos de Uso
+
+**Perfecto para:**
+- 📚 Estudiantes que usan Anki y quieren gamificar su estudio
+- 🌍 Aprendizaje de idiomas con flashcards
+- 🧪 Memorización de conceptos (ciencia, historia, etc.)
+- 💻 Repaso de términos técnicos (programación, medicina, etc.)
+
+---
+
+## 🤝 Contribuciones
+
+Este proyecto es de código abierto. Las contribuciones son bienvenidas:
+1. Fork el repositorio
+2. Crea una rama para tu feature
+3. Commit tus cambios
+4. Push y crea un Pull Request
+
+---
+
+## 📝 Licencia
+
+MIT License - Ver archivo LICENSE para detalles
+
+---
+
+## 🙏 Créditos
+
+**Inspirado por:**
+- [Anki](https://apps.ankiweb.net/) - Sistema de repetición espaciada
+- [SuperMemo](https://www.supermemo.com/) - Algoritmo SM-2
+- Juegos roguelike clásicos (Rogue, NetHack, etc.)
+
+**Desarrollado por:** @floringugu
 
 ---
 
 ## 📞 Soporte
 
-1. **Leer:** `OCR_SETUP_GUIDE.md`
-2. **Ejecutar:** `python ocr_processor.py`
-3. **Revisar:** Sección de troubleshooting
-4. **Logs:** Verificar console output
+- 🐛 **Issues:** [GitHub Issues](https://github.com/floringugu/educational-roguelike-game/issues)
+- 📧 **Email:** (tu email aquí si deseas)
 
 ---
 
-## ✅ Checklist de Instalación
+<div align="center">
 
-- [ ] Tesseract instalado
-- [ ] Python packages instalados
-- [ ] .env configurado con API key
-- [ ] OCR_ENABLED=True
-- [ ] Test pasado (`python ocr_processor.py`)
-- [ ] PDF de prueba procesado exitosamente
+**¡Aprende, juega, mejora!** 🎮🧠
 
----
-
-## 🎉 Listo!
-
-El sistema está completo y listo para procesar cualquier tipo de PDF, incluyendo documentos escaneados.
-
-**¡Feliz aprendizaje! 🎓📚**
-
----
-
-## 📜 Licencia
-
-Ver archivo LICENSE del proyecto principal.
-
----
-
-**Desarrollado con ❤️ usando Claude (Sonnet 4.5)**  
-**Fecha:** Noviembre 17, 2025
+</div>
