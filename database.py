@@ -5,10 +5,13 @@ Uses SQLite for storing Anki decks, cards, review states, and game progress
 
 import sqlite3
 import json
+import logging
 from datetime import datetime
 from typing import List, Dict, Optional, Tuple
 from contextlib import contextmanager
 import config
+
+logger = logging.getLogger(__name__)
 
 
 class Database:
@@ -467,6 +470,14 @@ class ReviewStateManager:
     def bulk_save_states(self, states: List[Dict]):
         """Save multiple review states at once"""
         for state in states:
+            # Validar que el estado tenga los campos requeridos
+            if 'card_id' not in state:
+                logger.error(f"State missing card_id: {state}")
+                continue
+            if 'deck_id' not in state:
+                logger.error(f"State missing deck_id for card {state.get('card_id')}: {state.keys()}")
+                continue
+
             self.save_state(
                 card_id=state['card_id'],
                 deck_id=state['deck_id'],

@@ -408,6 +408,13 @@ class GameEngine:
         if not player_defeated and not game_won:
             self._load_next_card()
 
+            # Si no hay más tarjetas, terminar el juego
+            if not self.state.current_card:
+                logger.warning("No more cards available - ending game")
+                game_won = True  # Tratar como victoria si completaste todas las cartas
+                battle_log.append("¡No hay más tarjetas! Juego terminado.")
+                self._end_game(completed=True)
+
         # Actualizar estadísticas
         stats_manager.update_session(
             self.state.session_id,

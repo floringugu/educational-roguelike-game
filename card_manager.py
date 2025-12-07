@@ -310,8 +310,13 @@ class CardManager:
         return self.states.get(card_id)
 
     def get_all_states(self) -> List[Dict]:
-        """Obtiene todos los estados como diccionarios"""
-        return [state.to_dict() for state in self.states.values()]
+        """Obtiene todos los estados como diccionarios con deck_id incluido"""
+        states_with_deck = []
+        for state in self.states.values():
+            state_dict = state.to_dict()
+            state_dict['deck_id'] = self.deck_id  # Añadir deck_id para bulk_save
+            states_with_deck.append(state_dict)
+        return states_with_deck
 
     def _calculate_stats(self) -> DeckStats:
         """Calcula estadísticas actuales del mazo"""
