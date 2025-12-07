@@ -324,7 +324,22 @@ class GameEngine:
         player_defeated = False
         powerup_dropped = None  # Track el powerup que se dropea
 
-        if damage > 0:
+        # Check if enemy was already killed (e.g., by a spell)
+        if self.state.current_enemy.hp <= 0:
+            enemy_defeated = True
+            # Añadir score solo si no se había dado antes
+            score_gain = int(self.state.current_enemy.score_value * self.state.player.score_boost)
+            self.state.player.score += score_gain
+            battle_log.append(f"¡Derrotaste al {self.state.current_enemy.name}! +{score_gain} puntos")
+
+            # Drop powerup/item
+            powerup = self._try_drop_powerup()
+            if powerup:
+                powerup_dropped = powerup['id']
+                self.state.inventory.append(powerup['id'])
+                battle_log.append(f"¡Obtuviste {powerup['name']}!")
+        elif damage > 0:
+            # Enemy is alive, apply damage from card response
             self.state.current_enemy.hp = max(0, self.state.current_enemy.hp - damage)
             battle_log.append(f"¡Hiciste {damage} de daño al {self.state.current_enemy.name}!")
 
@@ -345,8 +360,8 @@ class GameEngine:
         # Track damage received for response
         damage_received = 0
 
-        if damage == 0:
-            # Respuesta incorrecta (Again) - el enemigo ataca
+        if damage == 0 and not enemy_defeated:
+            # Respuesta incorrecta (Again) - el enemigo ataca (solo si sigue vivo)
             enemy_damage = self.state.current_enemy.damage
 
             # Absorber con escudo primero
