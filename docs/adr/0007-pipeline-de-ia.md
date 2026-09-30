@@ -24,6 +24,12 @@ Una pregunta incorrecta enseña algo falso. Cada PDF subido cuesta dinero y hay 
    - El procesamiento se hace fuera de la UE: OpenAI para generar y Google para verificar, cada uno con su DPA. Así se declara en la política de privacidad.
    - El contenido de los usuarios no se usa para ningún otro fin.
 
+7. **Configuración de desarrollo (coste cero, SRS R-10).** GPT-6 Luna no tiene plan gratuito en la API: exige un mínimo de 5 $ de saldo. Mientras se desarrolla se usan dos planes gratuitos de familias distintas:
+   - **Generador:** Gemini Flash-Lite. Sus condiciones indican que en la EEE los datos del plan gratuito reciben el mismo trato que los de pago, sin entrenamiento. Hay que confirmarlo en la cuenta antes de procesar datos de terceros.
+   - **Verificador:** GPT-OSS en Groq, que por defecto no retiene los datos.
+
+   Solo se procesan PDFs del dueño. El modelo de producción se elige en H4 con el conjunto de evaluación.
+
 ## Alternativas descartadas
 
 - **Generación en vivo durante la partida:** latencia y coste por pregunta, y no permite verificar antes de mostrar.
