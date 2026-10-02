@@ -14,3 +14,5 @@
 - [ ] Hay un `.gitignore` que excluye bases de datos, artefactos de build, dependencias instaladas, ficheros de entorno con secretos y fuentes subidas por usuarios.
 - [ ] El README describe Empollatro y enlaza al SRS. Las instrucciones de la v0 ya no aparecen.
 - [ ] `git ls-files` no muestra ningún fichero binario generado ni ninguna base de datos.
+- [ ] Las reglas de trabajo ya no mencionan la v0 retirada.
+- [ ] Hay un `.gitattributes` que fija los finales de línea en LF, porque el proyecto se trabaja desde Windows y desde Fedora.

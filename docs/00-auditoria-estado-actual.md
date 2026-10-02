@@ -8,7 +8,7 @@
 
 | Fecha | Commit | Estado |
 |---|---|---|
-| 2025-09-24 → 11-17 | … `83a7640` | PDF → preguntas con LLM (Grok/xAI mediante el SDK de OpenAI; la configuración también referenciaba Claude) |
+| 2025-09-24 → 11-17 | … `83a7640` | PDF → preguntas con LLM (Grok/xAI mediante el SDK de OpenAI) |
 | 2025-11-18 | `ba02c39`, `00281c4` | Cambio a Hugging Face (Mixtral/Mistral) y OCR con Tesseract/OpenCV |
 | 2025-11-20 | `704f188` | **Pivote** a un juego de flashcards Anki (importa CSV) con SM-2. Se reescriben `app.py`, `database.py`, `game_engine.py` y `config.py` |
 
