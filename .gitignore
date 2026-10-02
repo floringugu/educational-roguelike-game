@@ -1,0 +1,49 @@
+# Repo hygiene rules (NFR-MNT-004, V0-D13): never version databases, build
+# artifacts, installed dependencies, secrets or sources uploaded by users.
+
+# Installed dependencies
+node_modules/
+
+# Build artifacts and caches
+dist/
+build/
+coverage/
+.vite/
+*.tsbuildinfo
+.eslintcache
+
+# Local databases
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+*.db-wal
+*.db-shm
+
+# Environment files with secrets. Only the example file without real values
+# is versioned.
+.env
+.env.*
+!.env.example
+
+# Sources (PDF/CSV) uploaded by users while developing locally. The test
+# data in data/ is versioned on purpose (see data/README.md).
+uploads/
+
+# Supabase CLI local state
+supabase/.temp/
+supabase/.branches/
+
+# Logs
+*.log
+npm-debug.log*
+
+# Python leftovers when checking out the v0-flask tag
+__pycache__/
+*.pyc
+
+# Operating system and editor files
+.DS_Store
+Thumbs.db
+.idea/
+*.swp

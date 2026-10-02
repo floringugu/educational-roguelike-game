@@ -1,0 +1,21 @@
+# The project is edited from Windows and from Fedora: Git stores and checks
+# out text files with LF line endings on every system.
+* text=auto eol=lf
+
+# Binary files: no line ending conversion and no text diff.
+*.pdf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+
+# Test data from the v0 is kept byte for byte: both CSV files use CRLF,
+# like real Anki exports made on Windows, and the CSV importer must handle it
+# (see data/README.md).
+data/anki_decks/*.csv -text
