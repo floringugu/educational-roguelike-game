@@ -9,7 +9,7 @@
 | Versión | 1.2 (borrador para aprobación) |
 | Fecha | 2026-09-30 |
 | Dueño | Florin Gugu |
-| Estado | Decisiones de diseño resueltas salvo las de H3/H4 (§10.1). Pendiente de la aprobación final del dueño |
+| Estado | Decisiones de diseño resueltas salvo las de H2 (DP-14) y las del lanzamiento (§10.1). Pendiente de la aprobación final del dueño |
 | Fuente de las decisiones | Entrevista de diseño del 2026-09-29/30 (Q1–Q41), recogida en el [Apéndice A](#apéndice-a-registro-de-decisiones-y-trazabilidad) |
 
 ---
@@ -148,7 +148,7 @@ Las decisiones de arquitectura están en los ADR 0002 a 0007.
 | S-1 | Las fuentes típicas son diapositivas exportadas a PDF, de 20 a 60 páginas, en español | Revisar la extracción (FR-GEN-001/002) y los costes |
 | S-2 | Precios y modelos de LLM vigentes a 2026-09-30 (ADR-0007) | Repetir el conjunto de evaluación y cambiar de modelo a través de la abstracción |
 | S-3 | La operación del MVP se hace desde la consola de Supabase | Añadir un panel de operador (fuera de alcance) |
-| S-4 | El dispositivo de referencia es un Android de gama media de 2023 o posterior; el modelo exacto se fija en H1 (prov.) | Recalibrar NFR-PRF-002/003 |
+| S-4 | El dispositivo de referencia es el móvil del dueño, un **Redmi Note 14 Pro** (Android de gama media, 2025). La variante exacta, 4G o 5G, se anota en el ticket H1-08 | Recalibrar NFR-PRF-002/003 |
 | S-5 | Existe una librería FSRS mantenida para TypeScript (p. ej. `ts-fsrs`) | Adoptar otra implementación probada, nunca una propia |
 
 ---
@@ -474,8 +474,6 @@ Las reglas de detalle (bloqueo, estados, orden de resolución) deberán definirs
 - Usa una variante distinta de la fallada. Si no hay otra, repite la misma, pero solo si ya se cumple la distancia mínima de FR-ANS-004.
 - Si no hay ningún concepto fallado elegible, hace una pregunta normal.
 - Su respuesta se registra como paso de aprendizaje y no puede activar el crítico por rapidez.
-
-
 - *Verificación:* UT.
 
 **FR-STU-002** · M · H2 · Q31
@@ -513,8 +511,6 @@ Así, crear una Carta de Estudio nueva es solo cuestión de datos.
 
 - **Curarse:** responde 3 preguntas y recupera un 10% de la vida máxima por cada acierto (prov.).
 - **Estudiar:** repasa hasta 3 preguntas falladas en la partida viendo su cita, y después vuelve a responderlas (con una variante distinta si existe). Con 2 aciertos o más, mejora una carta.
-
-
 - *Verificación:* UT, E2E.
 
 **FR-NOD-004** · M · H2 · P1
@@ -1009,6 +1005,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | DP-11 | Contenido de la asignatura de demostración | Resuelta | Un texto en español con licencia libre (p. ej. un artículo de Wikipedia, CC BY-SA), convertido en ~30 conceptos y revisado por el dueño | H2 |
 | DP-12 | ¿El invitado puede importar CSV en local? (en Q16 la cuenta solo se exigía para subir PDFs) | Resuelta | Sí: no tiene coste de IA y hace posible H2 sin cuentas | H2 |
 | DP-13 | Presupuesto de lanzamiento: Supabase Pro (R-7), alojamiento del worker (DP-7) y saldo de LLM para usuarios públicos | Abierta | Decidirlo justo antes del lanzamiento, con los costes medidos en H4 (FR-GEN-012, NFR-CST-001) | Lanzamiento |
+| DP-14 | Dónde se aloja la PWA, con HTTPS (lo exigen la instalación y el Service Worker de FR-OFF-004) | Resuelta para H1; abierta para H2 | En H1 se prueba con el servidor de desarrollo del PC del dueño, a través de la wifi de casa (sin coste y sin publicar nada). Antes de H2 hay que elegir un alojamiento estático gratuito con HTTPS (R-10) | H2 |
 
 ### 10.2 Valores provisionales (se calibran jugando)
 
