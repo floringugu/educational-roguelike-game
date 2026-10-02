@@ -46,7 +46,7 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0009](adr/0009-contenido-como-datos.md).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0010](adr/0010-herramientas-de-desarrollo.md).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
 ### 1.5 Convenciones
@@ -1029,6 +1029,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Verificador | rechaza ≥ 90% de las preguntas defectuosas sembradas | FR-GEN-006 | H4 |
 | Coste máximo por PDF | 0,05 $ | NFR-CST-001 | H4 |
 | Rendimiento | 100 ms / 30 fps / 3 s | NFR-PRF-002/003/004 | H1-H2 |
+| JavaScript inicial del build | ≤ 150 kB con gzip | NFR-PRF-004 | H2 |
 
 ---
 

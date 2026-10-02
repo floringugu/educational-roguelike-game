@@ -1,0 +1,21 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  /* The interface is designed for the phone first; 16px keeps the text
+     readable (NFR-ACS-001). */
+  font-size: 16px;
+  /* Stop mobile browsers from enlarging the text on their own. */
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-family: system-ui, sans-serif;
+  line-height: 1.4;
+}

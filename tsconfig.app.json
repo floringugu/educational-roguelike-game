@@ -1,0 +1,28 @@
+// App code that runs in the browser (R-1, NFR-MNT-001).
+{
+  "compilerOptions": {
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo",
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "moduleDetection": "force",
+    "types": ["vite/client"],
+    "jsx": "react-jsx",
+    "noEmit": true,
+    "skipLibCheck": true,
+
+    // Type safety. `strict` is mandatory (R-1); the other flags catch common
+    // mistakes, such as reading past the end of an array without checking.
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+
+    // Only TypeScript syntax that the bundler can strip without rewriting code.
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true
+  },
+  "include": ["src"]
+}

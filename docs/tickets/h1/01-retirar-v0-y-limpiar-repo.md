@@ -6,7 +6,7 @@
 
 **Requisitos:** ADR-0001, NFR-MNT-004, V0-D13, auditoría §4.
 
-**Estado:** listo
+**Estado:** hecho
 
 - [x] Existe la etiqueta `v0-flask` sobre el último commit de la v0 (`33ffd83`) y apunta a ese commit.
 - [x] El código Flask, las plantillas, los estáticos de la v0, las bases de datos SQLite y los `__pycache__` ya no están versionados.

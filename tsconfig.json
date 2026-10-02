@@ -1,0 +1,7 @@
+// Entry point for `tsc -b`. The code is split in two projects because it runs
+// in two different places: the app in the browser (tsconfig.app.json) and the
+// tooling and its tests in Node (tsconfig.node.json).
+{
+  "files": [],
+  "references": [{ "path": "./tsconfig.app.json" }, { "path": "./tsconfig.node.json" }]
+}

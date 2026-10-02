@@ -1,0 +1,52 @@
+# Quality checks on every pull request and on every push to main
+# (NFR-MNT-001, NFR-I18N-001, NFR-SEC-003), plus the size of the production
+# build (NFR-PRF-004). If any step fails, the job fails;
+# with the "checks" job marked as required in the branch rules of main, the
+# pull request cannot be merged.
+#
+# The repository is public, so GitHub Actions runs it for free (R-10).
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+# A new push to the same branch cancels the run that is still going.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Tests
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Bundle size
+        run: npm run bundle-size

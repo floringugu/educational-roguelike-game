@@ -1,0 +1,12 @@
+/*
+ * Design tokens. Every color of the interface is a variable defined here.
+ *
+ * These values are provisional: the final palette is chosen in ticket 03
+ * (FR-VIS-004), which replaces them. Each text/background pair keeps a
+ * contrast of at least 4.5:1 (NFR-ACS-001).
+ */
+:root {
+  --color-background: #1b1d2b;
+  --color-text: #f2efe6;
+  --color-text-muted: #b8b4c8;
+}
