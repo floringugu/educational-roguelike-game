@@ -1,0 +1,4 @@
+.sprite {
+  /* Keep the pixels sharp when the sprite is drawn bigger than 16x16. */
+  image-rendering: pixelated;
+}

@@ -11,7 +11,10 @@
 
 .home-screen__title {
   margin: 0;
-  font-size: 2.5rem;
+  font-family: var(--font-display);
+  font-size: 3.375rem; /* 54px: a multiple of 18px, the size m6x11plus is drawn for */
+  font-weight: normal;
+  color: var(--color-accent);
 }
 
 .home-screen__tagline,
@@ -21,4 +24,23 @@
 
 .home-screen__status {
   color: var(--color-text-muted);
+}
+
+.home-screen__sprites {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.home-screen__credits {
+  /* At least 44x44 px to be easy to tap with a thumb. */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1.5rem;
+  font: inherit;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-text-muted);
 }

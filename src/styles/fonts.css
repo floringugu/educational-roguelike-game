@@ -1,0 +1,26 @@
+/*
+ * The fonts are files of the project, not loaded from a CDN, so the app works
+ * without a connection (FR-VIS-005, R-4). Their licenses are in
+ * src/data/licenses.ts.
+ *
+ * They are served as WOFF2, a compressed format that every current browser
+ * reads, so they take less to download and to store offline.
+ */
+
+/* Pixel font made for a size of 18px and its multiples (18, 36, 54...).
+   The author only publishes it as TTF; the WOFF2 file was made from it with:
+     npx --package=wawoff2@2.0.1 woff2_compress.js m6x11plus.ttf m6x11plus.woff2 */
+@font-face {
+  font-family: 'm6x11plus';
+  src: url('../assets/fonts/m6x11plus.woff2') format('woff2');
+  font-display: swap;
+}
+
+/* One variable font file with all the weights from 400 to 700. It is the
+   WOFF2 file that the authors publish (fonts/webfonts/ in their repository). */
+@font-face {
+  font-family: 'Pixelify Sans';
+  src: url('../assets/fonts/PixelifySans.woff2') format('woff2');
+  font-weight: 400 700;
+  font-display: swap;
+}
