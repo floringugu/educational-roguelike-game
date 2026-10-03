@@ -14,7 +14,7 @@
   - [x] con un literal de texto visible dentro de un componente, porque todo texto sale del catálogo;
   - [x] con un uso de `dangerouslySetInnerHTML` o de `innerHTML`.
 - [x] Hay un test que prueba cada una de esas reglas con un caso que debe fallar.
-- [ ] La integración continua ejecuta en cada PR la comprobación de tipos, el lint, los tests y la compilación. Si cualquiera falla, el PR se bloquea. Debe caber en el plan gratuito (R-10).
+- [x] La integración continua ejecuta en cada PR la comprobación de tipos, el lint, los tests y la compilación. Si cualquiera falla, el PR se bloquea. Debe caber en el plan gratuito (R-10).
 - [x] La integración continua mide con gzip el tamaño del build de producción, lo muestra en el resumen del job y falla si el JavaScript inicial supera 150 kB (prov.).
 - [x] Hay un único comando, documentado en el README, que arranca el servidor de desarrollo accesible desde la red local y muestra la dirección que se abre en el móvil.
-- [ ] El dueño abre esa dirección en su móvil y ve la pantalla.
+- [x] El dueño abre esa dirección en su móvil y ve la pantalla.
