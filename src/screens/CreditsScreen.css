@@ -1,0 +1,66 @@
+.credits-screen {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.credits-screen__title {
+  margin: 0 0 0.5rem;
+  font-family: var(--font-display);
+  font-size: 2.25rem; /* 36px: a multiple of 18px, the size m6x11plus is drawn for */
+  font-weight: normal;
+}
+
+.credits-screen__list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  padding: 0;
+  list-style: none;
+}
+
+.credits-screen__entry {
+  padding: 1rem;
+  background-color: var(--color-surface);
+}
+
+.credits-screen__name {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.125rem; /* 18px */
+  font-weight: normal;
+  color: var(--color-accent);
+}
+
+.credits-screen__attribution {
+  margin: 0.5rem 0;
+}
+
+.credits-screen__details {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 0.25rem 1rem;
+  margin: 0;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.credits-screen__details dd {
+  margin: 0;
+}
+
+.credits-screen__details a {
+  color: var(--color-text-muted);
+}
+
+.credits-screen__back {
+  /* At least 44x44 px to be easy to tap with a thumb. */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1.5rem;
+  font: inherit;
+  color: var(--color-background);
+  background-color: var(--color-accent);
+  border: 0;
+}

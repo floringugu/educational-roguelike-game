@@ -16,6 +16,12 @@ function appNameInHtml(): Plugin {
 
 export default defineConfig({
   plugins: [react(), appNameInHtml()],
+  build: {
+    // Never turn sprites into text inside the JavaScript: each one stays a
+    // separate file, so the initial JavaScript stays small and the browser
+    // can cache sprites on their own.
+    assetsInlineLimit: 0,
+  },
   server: {
     // A fixed port keeps the address that is opened on the phone always the
     // same. If the port is busy, Vite stops instead of picking another one.

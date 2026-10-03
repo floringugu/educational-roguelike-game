@@ -1,14 +1,77 @@
 import { renderToStaticMarkup } from 'react-dom/server';
-import { describe, expect, it } from 'vitest';
-import { App } from './App';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { App, screenFromHistoryState } from './App';
+import { CreditsScreen } from './screens/CreditsScreen';
+import { LICENSES } from './data/licenses';
 import { es } from './i18n/es';
 
+// React writes some characters as HTML entities. Escape a text the same way
+// to look for it in the rendered HTML.
+function escapeLikeReact(text: string): string {
+  return text
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#x27;');
+}
+
 describe('App', () => {
+  // The tests run in Node, without a browser: App reads the open screen from
+  // the browser history, so give it an empty one.
+  beforeEach(() => {
+    vi.stubGlobal('window', { history: { state: null } });
+  });
+  afterEach(() => {
+    vi.unstubAllGlobals();
+  });
+
   it('shows the screen with the texts from the catalog', () => {
     const html = renderToStaticMarkup(<App />);
 
     expect(html).toContain(es.app.name);
     expect(html).toContain(es.home.tagline);
     expect(html).toContain(es.home.status);
+    expect(html).toContain(es.home.creditsButton);
+  });
+
+  it('opens the screen saved in the browser history', () => {
+    vi.stubGlobal('window', { history: { state: { screen: 'credits' } } });
+
+    expect(renderToStaticMarkup(<App />)).toContain(es.credits.title);
+  });
+});
+
+describe('screenFromHistoryState', () => {
+  it('reads the screen saved by the app', () => {
+    expect(screenFromHistoryState({ screen: 'credits' })).toBe('credits');
+  });
+
+  it('falls back to the home screen for anything else', () => {
+    expect(screenFromHistoryState(null)).toBe('home');
+    expect(screenFromHistoryState({ screen: 'unknown' })).toBe('home');
+    expect(screenFromHistoryState('credits')).toBe('home');
+  });
+});
+
+describe('CreditsScreen (FR-VIS-006)', () => {
+  it('credits every entry of the license register', () => {
+    const html = renderToStaticMarkup(<CreditsScreen onBack={() => undefined} />);
+
+    expect(html).toContain(es.credits.title);
+    for (const entry of LICENSES) {
+      expect(html).toContain(escapeLikeReact(entry.name));
+      expect(html).toContain(escapeLikeReact(entry.author));
+      expect(html).toContain(escapeLikeReact(entry.license));
+      expect(html).toContain(escapeLikeReact(entry.attribution));
+      if (entry.modification !== undefined) {
+        expect(html).toContain(escapeLikeReact(entry.modification));
+      }
+    }
+  });
+
+  it('escapes text like React does', () => {
+    const text = `Kenney's "pack" <1> & more`;
+    expect(renderToStaticMarkup(<p>{text}</p>)).toBe(`<p>${escapeLikeReact(text)}</p>`);
   });
 });

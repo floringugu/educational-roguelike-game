@@ -12,10 +12,16 @@ html {
   text-size-adjust: 100%;
 }
 
+/* Screen titles take the focus when the screen changes, so screen readers
+   announce them, but they are not buttons: no focus ring on them. */
+h1[tabindex='-1']:focus {
+  outline: none;
+}
+
 body {
   margin: 0;
   background-color: var(--color-background);
   color: var(--color-text);
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-body);
   line-height: 1.4;
 }
