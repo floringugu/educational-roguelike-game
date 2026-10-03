@@ -809,7 +809,7 @@ Todo el arte deberá usar una única paleta fija de 16 a 24 colores y cargarse d
 **FR-VIS-005** · M · H1 · Q28.1
 Tipografía:
 
-- **m6x11** para títulos y cifras, siempre que tenga los caracteres `áéíóúüñÁÉÍÓÚÜÑ¿¡`. Si no los tiene, se usa Pixelify Sans para todo.
+- **m6x11plus** para títulos y cifras. Es la variante de m6x11 del mismo autor (Daniel Linssen) que tiene los caracteres `áéíóúüñÁÉÍÓÚÜÑ¿¡`; m6x11 no tiene las letras con tilde, diéresis ni eñe (comprobado en H1-03).
 - **Pixelify Sans** para el texto de las preguntas.
 - *Verificación:* MAN (en H1).
 

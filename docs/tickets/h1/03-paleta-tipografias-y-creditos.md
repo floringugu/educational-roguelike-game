@@ -11,7 +11,7 @@
 
 **Requisitos:** FR-VIS-004, FR-VIS-005, FR-VIS-006, R-4, NFR-ACS-001.
 
-**Estado:** listo
+**Estado:** hecho
 
 - [x] Se presentan al dueño 2 o 3 paletas candidatas de 16 a 24 colores, con una muestra visual de cada una. El dueño elige una y la elección queda anotada en el ticket.
   - Paletas presentadas: A «Noche de estudio» (22 colores), B «Pizarra y tiza» (20) y C «Pergamino y tinta» (20).
