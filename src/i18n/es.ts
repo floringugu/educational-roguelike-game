@@ -25,4 +25,9 @@ export const es = {
     sourceLabel: 'Origen',
     modificationLabel: 'Cambios',
   },
+  // Developer tools, only visible in debug mode (`?debug` in the address).
+  debug: {
+    framesPerSecond: 'fps',
+    noFrameRateYet: '--',
+  },
 } as const;

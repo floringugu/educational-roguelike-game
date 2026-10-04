@@ -1,0 +1,17 @@
+/* Fills the screen behind everything else, and stays in place when the page
+   scrolls. It never takes taps: they go to the interface on top. */
+.swirl-background {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.swirl-background__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* The image is drawn smaller than the screen (FR-VIS-001). Stretch it
+     without smoothing, so its pixels stay sharp squares like the sprites. */
+  image-rendering: pixelated;
+}

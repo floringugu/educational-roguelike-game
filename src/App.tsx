@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { SwirlBackground } from './background/SwirlBackground';
+import { FpsCounter } from './debug/FpsCounter';
+import { isDebugMode } from './debug/debugMode';
 import { CreditsScreen } from './screens/CreditsScreen';
 import { HomeScreen } from './screens/HomeScreen';
 
@@ -59,8 +62,15 @@ export function App() {
     window.history.back();
   }
 
-  if (screen === 'credits') {
-    return <CreditsScreen onBack={goBack} />;
-  }
-  return <HomeScreen onOpenCredits={openCredits} />;
+  const screenElement =
+    screen === 'credits' ? <CreditsScreen onBack={goBack} /> : <HomeScreen onOpenCredits={openCredits} />;
+
+  // The background stays in place while the screens change on top of it.
+  return (
+    <>
+      <SwirlBackground />
+      {isDebugMode(window.location.search) && <FpsCounter />}
+      {screenElement}
+    </>
+  );
 }
