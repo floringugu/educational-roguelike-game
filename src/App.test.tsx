@@ -18,9 +18,10 @@ function escapeLikeReact(text: string): string {
 
 describe('App', () => {
   // The tests run in Node, without a browser: App reads the open screen from
-  // the browser history, so give it an empty one.
+  // the browser history and debug mode from the address, so give it an empty
+  // history and an address without query string.
   beforeEach(() => {
-    vi.stubGlobal('window', { history: { state: null } });
+    vi.stubGlobal('window', { history: { state: null }, location: { search: '' } });
   });
   afterEach(() => {
     vi.unstubAllGlobals();
@@ -36,9 +37,20 @@ describe('App', () => {
   });
 
   it('opens the screen saved in the browser history', () => {
-    vi.stubGlobal('window', { history: { state: { screen: 'credits' } } });
+    vi.stubGlobal('window', { history: { state: { screen: 'credits' } }, location: { search: '' } });
 
     expect(renderToStaticMarkup(<App />)).toContain(es.credits.title);
+  });
+
+  it('draws the swirl background behind the screen (FR-VIS-001)', () => {
+    expect(renderToStaticMarkup(<App />)).toContain('data-background="animated"');
+  });
+
+  it('shows the frame rate counter only in debug mode', () => {
+    expect(renderToStaticMarkup(<App />)).not.toContain('fps-counter');
+
+    vi.stubGlobal('window', { history: { state: null }, location: { search: '?debug' } });
+    expect(renderToStaticMarkup(<App />)).toContain('fps-counter');
   });
 });
 

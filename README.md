@@ -42,6 +42,17 @@ Si el móvil no carga la página, el cortafuegos del PC está bloqueando el puer
 - **Fedora:** la zona por defecto de Fedora Workstation ya permite los puertos 1025-65535. Si se usa otra zona, se abre hasta el siguiente reinicio con `sudo firewall-cmd --add-port=5173/tcp`.
 - **Windows:** la primera vez, Windows pregunta si Node.js puede usar la red. Hay que permitirlo en redes privadas, y la wifi de casa tiene que estar marcada como red privada.
 
+### Medir los fps en el móvil
+
+Si se añade `?debug` a la dirección (por ejemplo, `http://192.168.0.6:5173/?debug`), aparece arriba a la derecha un contador de fps con la media de los últimos 5 segundos (NFR-PRF-003). La medida más fiel es la del build de producción:
+
+```sh
+npm run build
+npx vite preview --host
+```
+
+En el móvil se abre la dirección de la línea `Network` (puerto 4173) con `?debug` al final.
+
 ### Otros comandos
 
 | Comando | Qué hace |
