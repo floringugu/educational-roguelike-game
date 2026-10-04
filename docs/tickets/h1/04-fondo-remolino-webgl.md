@@ -6,7 +6,7 @@
 
 **Requisitos:** FR-VIS-001, FR-VIS-007 (la parte del fondo), NFR-PRF-003, R-3.
 
-**Estado:** listo
+**Estado:** hecho
 
 - [x] El shader está escrito desde cero. No se basa en ports de los shaders de Balatro ni en código GPL o AGPL (R-3). El PR explica en un párrafo la técnica que usa.
   - El párrafo para el PR está en las notas, en «Técnica del shader».
@@ -22,7 +22,8 @@
   - En los dos últimos casos, el fondo estático es un fotograma congelado del propio remolino. Sin WebGL no se puede dibujar ese fotograma, así que se usa un degradado CSS (ver «Fondo estático» en las notas).
 - [x] Hay un contador de fps que solo aparece en modo depuración y que muestra la media de los últimos segundos.
   - Se activa con `?debug` en la dirección y muestra la media de los últimos 5 s.
-- [ ] En el móvil del dueño, el fondo solo mantiene ≥ 30 fps. El valor medido queda anotado en el ticket.
+- [x] En el móvil del dueño, el fondo solo mantiene ≥ 30 fps. El valor medido queda anotado en el ticket.
+  - Medido en el Redmi Note 14 Pro con el contador de `?debug`: 60 fps de media.
 
 **Notas:**
 
