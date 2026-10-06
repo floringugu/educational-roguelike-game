@@ -31,16 +31,15 @@
      check the textures and the contrast of the text on them. */
   --color-card-diploma: #ece0c6;
   --color-card-crease: #cdb896;
-  --color-card-diploma-edge: #9c8266;
-  --color-card-certificate-edge: #3b4577;
+  --color-card-sheet-edge: #9c8266;
   --color-card-coffee: #cdb896;
   --color-card-coffee-edge: #9c8266;
   --color-card-seal-edge: #4a3a2c;
   --color-foil-seal: #f2c94c;
   --color-foil-seal-ring: #e8933e;
   --color-foil-shine: #faf4e2;
-  --color-holo-seal: #3b4577;
-  --color-holo-seal-ring: #5d6bb0;
+  --color-holo-seal: #4a3a2c;
+  --color-holo-seal-ring: #6f5a44;
   --color-holo-emblem: #faf4e2;
   --color-holo-band1: #98a6e0;
   --color-holo-band2: #a4d17a;

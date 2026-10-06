@@ -258,7 +258,8 @@
   background-image: url('../assets/textures/crumpled-parchment.png');
 }
 
-/* Holo: a certificate on crumpled paper with an indigo edge. */
+/* Holo: a certificate on crumpled paper with the same tan edge. Its seal
+   is not blue: blue is the color of defense cards. */
 .card--holo::before {
   background-image: url('../assets/textures/crumpled-paper.png');
 }
@@ -346,7 +347,7 @@
   clip-path: polygon(0 0, 100% 0, 100% 100%, 86% 80%, 58% 100%, 58% 0, 42% 0, 42% 100%, 14% 80%, 0 100%);
 }
 
-/* Holo: the seal of the university, indigo with a mortarboard. A band of
+/* Holo: the seal of the university, dark brown with a mortarboard. A band of
    holographic stripes crosses it as the card turns, like the light on the
    gold seal. */
 .card--holo .card__seal::after {
