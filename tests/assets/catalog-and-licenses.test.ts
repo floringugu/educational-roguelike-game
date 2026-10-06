@@ -69,12 +69,12 @@ describe('FR-VIS-002: the textures of the cards', () => {
     'textures/crumpled-parchment.png': {
       width: 87,
       height: 122,
-      colors: [...sheetInside, colorOf('cardDiplomaEdge'), colorOf('cardShadow')],
+      colors: [...sheetInside, colorOf('cardSheetEdge'), colorOf('cardShadow')],
     },
     'textures/crumpled-paper.png': {
       width: 87,
       height: 122,
-      colors: [...sheetInside, colorOf('cardCertificateEdge'), colorOf('cardShadow')],
+      colors: [...sheetInside, colorOf('cardSheetEdge'), colorOf('cardShadow')],
     },
     // The stains are drawn at half size: 44x44 and 56x40 on the card.
     'textures/coffee-ring.png': { width: 22, height: 22, colors: coffee },

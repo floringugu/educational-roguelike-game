@@ -59,23 +59,23 @@ export const colorRoles = {
   cardSkill: 'forest',
   cardSkillLight: 'leaf',
   // The editions of a card. Foil is a diploma: crumpled parchment with a
-  // gold seal that shines. Holo is a certificate: crumpled paper with an
-  // indigo edge and the indigo seal of the university, with a mortarboard on
-  // it, crossed by holographic stripes. The crumpled sheets are textures
+  // gold seal that shines. Holo is a certificate: crumpled paper with a thin
+  // tan edge, like the diploma, and the brown seal of the university, with a mortarboard on
+  // it, crossed by holographic stripes. The seal is not blue, the color
+  // of defense, since a certificate can be of any type. The crumpled sheets are textures
   // (src/assets/textures/): their inside uses `card`, `cardDiploma` and
   // `cardCrease` (the shaded side of the creases), their edge
-  // `cardDiplomaEdge` or `cardCertificateEdge`, and their shadow
+  // `cardSheetEdge`, and their shadow
   // `cardShadow`. No text reaches the edge.
   cardDiploma: 'parchment',
   cardCrease: 'sand',
-  cardDiplomaEdge: 'tan',
-  cardCertificateEdge: 'indigo',
+  cardSheetEdge: 'tan',
   cardSealEdge: 'umber',
   foilSeal: 'gold',
   foilSealRing: 'amber',
   foilShine: 'paper',
-  holoSeal: 'indigo',
-  holoSealRing: 'periwinkle',
+  holoSeal: 'umber',
+  holoSealRing: 'leather',
   holoEmblem: 'paper',
   holoBand1: 'lavender',
   holoBand2: 'lime',
