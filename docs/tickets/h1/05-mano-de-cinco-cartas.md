@@ -6,7 +6,7 @@
 
 **Requisitos:** FR-VIS-002, FR-VIS-004, NFR-USA-002, NFR-ACS-001.
 
-**Estado:** listo
+**Estado:** hecho
 
 - [x] Se ven 5 cartas en abanico y se pueden usar con el pulgar de una mano en vertical.
   - La mano está abajo de la pantalla de Inicio. Cada carta gira 4° más que la anterior, y las de los lados quedan más bajas, así que los bordes de arriba dibujan un arco. A 320 y a 393 px de ancho caben las 5 sin scroll.
@@ -23,8 +23,8 @@
   - Medido en el navegador: la parte que se ve de cada carta mide al menos 47 px de ancho a 320 px de pantalla, 57 px a 360 px y 65 px a 393 px. Las cartas miden 84×118 px.
 - [x] Las cartas son datos de prueba en un JSON, no componentes escritos uno a uno.
   - Están en `src/prototype/cards.json`, con `id`, `type`, `cost`, `art`, `edition` y, si la tiene, `stain` (la mancha de café). `parseCards` los valida al cargar y dice qué carta falla.
-- [ ] Con el fondo del ticket 04 activo y la mano en pantalla, el móvil del dueño mantiene ≥ 30 fps. El valor queda anotado en el ticket, si el 04 ya está terminado.
-  - Falta medirlo en el móvil (ver «Cómo medir los fps en el móvil» en las notas).
+- [x] Con el fondo del ticket 04 activo y la mano en pantalla, el móvil del dueño mantiene ≥ 30 fps. El valor queda anotado en el ticket, si el 04 ya está terminado.
+  - Medido en el Redmi Note 14 Pro con el contador de `?debug`, tocando y arrastrando cartas sin parar: 60 fps de media.
 
 **Notas:**
 
