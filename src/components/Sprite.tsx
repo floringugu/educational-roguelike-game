@@ -3,7 +3,8 @@ import './Sprite.css';
 
 type SpriteProps = {
   id: SpriteId;
-  // Description for screen readers. It comes from the text catalog.
+  // Description for screen readers. It comes from the text catalog, or is
+  // empty when the sprite is only decoration and screen readers skip it.
   description: string;
   // Size on screen in CSS pixels. Sprites are 16x16, so multiples of 16 keep
   // every pixel the same size.

@@ -9,6 +9,9 @@
 //
 // Each pixel takes the closest color of the palette, so the sprites look like
 // the rest of the interface. Transparent pixels stay transparent.
+//
+// The project's own sprites (ADR-0011) are not generated here: their PNG
+// files in src/assets/sprites/ are the source and are edited directly.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -25,9 +28,6 @@ const OUTPUT_DIRECTORY = fileURLToPath(new URL('../src/assets/sprites/', import.
 // identifier that the catalog (src/assets/catalog.ts) uses; typing it as
 // SpriteId makes the type check fail if an id is renamed in only one place.
 export const SPRITES: ReadonlyArray<{ id: SpriteId; column: number; row: number }> = [
-  { id: 'card-art-attack', column: 8, row: 8 }, // sword
-  { id: 'card-art-defense', column: 6, row: 8 }, // round shield
-  { id: 'card-art-heal', column: 7, row: 9 }, // red potion
   { id: 'enemy-brute', column: 2, row: 9 }, // red monster
 ];
 

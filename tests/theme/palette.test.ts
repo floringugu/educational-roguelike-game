@@ -39,11 +39,13 @@ function readCssRules(css: string): CssRule[] {
 
 // Properties that paint a color.
 const colorProperty =
-  /^(?:color|background(?:-color)?|border(?:-[a-z]+)*|outline(?:-color)?|fill|stroke|(?:box|text)-shadow|caret-color|accent-color|text-decoration(?:-color)?)$/;
+  /^(?:color|background(?:-color|-image)?|border(?:-[a-z]+)*|outline(?:-color)?|fill|stroke|(?:box|text)-shadow|caret-color|accent-color|text-decoration(?:-color)?)$/;
 // Words that may appear in those properties without being a color.
 const wordsThatAreNotColors = new Set([
   'none', 'inherit', 'initial', 'unset', 'currentcolor', 'transparent',
   'solid', 'dashed', 'dotted', 'double', 'inset', 'thin', 'medium', 'thick', 'underline',
+  // Gradients, such as the editions of the cards.
+  'linear', 'repeating', 'gradient', 'calc',
 ]);
 
 // Returns the words used as colors in a CSS file without going through a
@@ -55,9 +57,12 @@ function findColorWords(css: string): string[] {
       if (!colorProperty.test(property)) {
         continue;
       }
-      // Remove the variables and the numbers ('2px', '0', '50%'): the words
-      // that are left must be keywords, not colors.
-      const withoutVariablesOrNumbers = value.replace(/var\([^)]*\)/g, '').replace(/-?[\d.]+[a-z%]*/g, '');
+      // Remove the variables, the images ('url(../paper.png)') and the
+      // numbers ('2px', '0', '50%'): the words that are left must be
+      // keywords, not colors.
+      const withoutVariablesOrNumbers = value
+        .replace(/(?:var|url)\([^)]*\)/g, '')
+        .replace(/-?[\d.]+[a-z%]*/g, '');
       const words = withoutVariablesOrNumbers.match(/[a-zA-Z]+/g) ?? [];
       found.push(...words.filter((word) => !wordsThatAreNotColors.has(word.toLowerCase())));
     }
@@ -135,6 +140,11 @@ describe('FR-VIS-004: the colors of the interface come from the palette', () => 
     const css = 'a { color: white; border: 1px solid black; background: var(--color-surface); }';
     expect(findColorWords(css)).toEqual(['white', 'black']);
   });
+
+  it('does not take the name of an image for a color', () => {
+    const css = "a { background-image: url('../assets/textures/crumpled-paper.png'); }";
+    expect(findColorWords(css)).toEqual([]);
+  });
 });
 
 describe('NFR-ACS-001: contrast of text and background', () => {
@@ -169,6 +179,9 @@ describe('NFR-ACS-001: contrast of text and background', () => {
   //     rules, and so does the page (body). Every text color that is set
   //     without a background can end up on any of them, so every such
   //     combination is a pair.
+  //   - A ::before or ::after with empty content is only a drawing (the
+  //     mortarboard of a seal): it holds no text, so its background is not
+  //     one of those.
   it('lists every pair of text and background that the CSS uses', () => {
     const usedPairs = new Set<string>();
     const textColorsWithoutBackground = new Set<ColorRole>();
@@ -189,7 +202,13 @@ describe('NFR-ACS-001: contrast of text and background', () => {
         if (text !== undefined && (background === undefined || rule.selector === 'body')) {
           textColorsWithoutBackground.add(text);
         }
-        if (background !== undefined && (text === undefined || rule.selector === 'body')) {
+        const isEmptyPseudoElement =
+          /::(?:before|after)$/.test(rule.selector) && valueOf(/^content$/) === "''";
+        if (
+          background !== undefined &&
+          !isEmptyPseudoElement &&
+          (text === undefined || rule.selector === 'body')
+        ) {
           containerBackgrounds.add(background);
         }
       }

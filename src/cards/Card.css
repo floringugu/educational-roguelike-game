@@ -1,0 +1,385 @@
+/* A card of the hand (FR-VIS-002), drawn as a page of a school notebook:
+   paper with ruled lines, holes for the spiral along the top, a margin line,
+   a photo of the art taped on, and the cost circled in red pen. The color of
+   its type (attack, defense or skill) marks the margin line, the tape, the
+   name, the label and the numbers.
+
+   Its width comes from the hand (--card-width in Hand.css). The movement is
+   set by Card.tsx in `transform`. The small sizes inside the card are in
+   pixels: the ruled lines must match the height of the lines of text, and
+   the pixel fonts are only sharp at whole pixels. */
+.card {
+  /* How much the card turns in 3D, in degrees, set by Card.tsx. The shine
+     of the seal of the editions moves 2% of the seal for each degree. */
+  --edition-shift: 0;
+  --band-shift: calc(var(--edition-shift) * 2%);
+  /* The coffee stains: none, unless a .card--stain-… class below sets them. */
+  --stain-images: none;
+  --stain-positions: 0 0;
+  --stain-sizes: auto;
+  /* --type-color and --type-light-color, the colors of its type, are set by
+     .card--attack and the others below. They only paint lines, the tape and
+     the ribbons of the seal, never text. */
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  width: var(--card-width);
+  aspect-ratio: 5 / 7;
+  /* The wide padding on the left leaves room for the margin line. */
+  padding: 8px 3px 3px 11px;
+  font: inherit;
+  text-align: center;
+  color: var(--color-card-text);
+  background-color: var(--color-card);
+  /* The margin line, a ruled line every 14px (the height of a line of the
+     description, so the text sits on the lines) and, under them, the coffee
+     stain of the card if it has one (see "Coffee stains" below). A color
+     stop at 0 starts where the one before it ends, which makes a hard edge.
+     No layer repeats: each gradient already covers the whole card. */
+  background-image:
+    linear-gradient(90deg, transparent 7px, var(--type-color) 0 9px, transparent 0),
+    repeating-linear-gradient(180deg, transparent 0 13px, var(--color-card-rule) 0 14px),
+    var(--stain-images);
+  background-position: 0 0, 0 4px, var(--stain-positions);
+  background-size: auto, auto, var(--stain-sizes);
+  background-repeat: no-repeat;
+  /* Sharp pixels when the textures and the sprites are scaled, instead of a
+     blur. */
+  image-rendering: pixelated;
+  /* Square corners, like the pixels of the art. A border-image (the
+     editions) cannot be rounded either. */
+  border: 2px solid var(--color-card-frame);
+  box-shadow: 3px 4px 0 var(--color-card-shadow);
+  /* The card turns and grows from the middle of its bottom edge, so a held
+     card grows upwards, away from the thumb. */
+  transform-origin: 50% 100%;
+  /* The finger drags the card instead of scrolling the page, and holding it
+     does not select its text or open the menu of the browser. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+}
+
+/* The holes of the spiral, along the top edge. */
+.card::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  right: 6px;
+  left: 8px;
+  height: 4px;
+  background-image: repeating-linear-gradient(90deg, var(--color-card-shadow) 0 4px, transparent 0 9px);
+}
+
+/* The pointer always lands on the card itself, never on its parts: dragging
+   the art would otherwise start the browser's own image drag. */
+.card > * {
+  pointer-events: none;
+}
+
+.card:active {
+  cursor: grabbing;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+/* The cost, circled in red pen in the top left corner. */
+.card__cost {
+  position: absolute;
+  top: -10px;
+  left: -8px;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  font-family: var(--font-display);
+  font-size: 18px; /* the size m6x11plus is drawn for */
+  line-height: 1;
+  color: var(--color-card-cost);
+  background-color: var(--color-card);
+  border: 2px solid var(--color-card-cost);
+  border-radius: 50%;
+  transform: rotate(-8deg);
+}
+
+/* "Coste" is read by screen readers but not shown: the circle already says
+   it. */
+.card__cost-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.card__name {
+  font-family: var(--font-display);
+  font-size: 18px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* The art, as a photo taped to the page: a dark window with the sprite, a
+   paper edge and a strip of tape in the light color of the type. */
+.card__art {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: 0 6px;
+  background-color: var(--color-card-art);
+  border: 3px solid var(--color-card);
+  outline: 1px solid var(--color-card-photo-edge);
+  transform: rotate(-3deg);
+}
+
+.card__art::after {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 22px;
+  height: 7px;
+  margin-left: -11px;
+  background-color: var(--type-light-color);
+  transform: rotate(4deg);
+}
+
+.card__type {
+  font-size: 10px;
+  line-height: 1;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.card__description {
+  font-size: 12px; /* read at 18px while the card is held */
+  line-height: 14px;
+}
+
+.card__number {
+  font-family: var(--font-display);
+  font-size: 18px;
+  /* Less than the line, so the bigger number does not push the lines of
+     text apart. */
+  line-height: 0.6;
+}
+
+/*
+ * Types. The texts in the color of the type get the paper as their own
+ * background: the ruled lines stop under them, because those colors are not
+ * readable on the lines (NFR-ACS-001). The ink text can go on the lines.
+ */
+.card--attack {
+  --type-color: var(--color-card-attack);
+  --type-light-color: var(--color-card-attack-light);
+}
+
+.card--attack :is(.card__name, .card__type, .card__number) {
+  color: var(--color-card-attack);
+  background-color: var(--color-card);
+}
+
+.card--defense {
+  --type-color: var(--color-card-defense);
+  --type-light-color: var(--color-card-defense-light);
+}
+
+.card--defense :is(.card__name, .card__type, .card__number) {
+  color: var(--color-card-defense);
+  background-color: var(--color-card);
+}
+
+.card--skill {
+  --type-color: var(--color-card-skill);
+  --type-light-color: var(--color-card-skill-light);
+}
+
+.card--skill :is(.card__name, .card__type, .card__number) {
+  color: var(--color-card-skill);
+  background-color: var(--color-card);
+}
+
+/*
+ * Editions (FR-VIS-002). A special card is not a page of the notebook but an
+ * academic document: foil is a diploma and holo is a certificate. Both are
+ * crumpled, as if they had spent the course at the bottom of a backpack, and
+ * both carry a seal whose shine moves as the card turns.
+ *
+ * A crumpled sheet is not a rectangle, so it cannot be the background and the
+ * border of the card. It is a texture of our own (src/assets/textures/) with
+ * everything in it: the bent outline, the edge, the small facets of the
+ * creases and the hard shadow. Its pixels are the same size as the pixels of
+ * the card, and it is 3px wider and 4px taller than the card, for the
+ * shadow. The card itself only holds the texts: no background, no border
+ * color and no shadow of its own.
+ *
+ * The inside of the sheet only uses paper, parchment and sand, and the ink
+ * text is readable on all of them. The texts in the color of the type keep
+ * their patch of paper from the rules of the types (NFR-ACS-001). The edge
+ * stays out of the padding, so no text reaches it.
+ */
+.card--foil,
+.card--holo {
+  /* No margin line here, so the padding is the same on both sides. The
+     bottom one keeps the text above the bent edge. */
+  padding: 8px 9px 6px;
+  background: none;
+  border-color: transparent;
+  box-shadow: none;
+  /* The sheet is drawn behind the texts (z-index: -1) but in front of
+     whatever is behind the card. */
+  isolation: isolate;
+}
+
+/* The sheet, from the outer corner of the border to the end of the shadow.
+   It takes the place of the spiral holes. */
+.card--foil::before,
+.card--holo::before {
+  z-index: -1;
+  top: -2px;
+  right: auto;
+  left: -2px;
+  width: calc(100% + 7px);
+  height: calc(100% + 8px);
+  background-size: 100% 100%;
+}
+
+/* Foil: a diploma on crumpled parchment with a tan edge. */
+.card--foil::before {
+  background-image: url('../assets/textures/crumpled-parchment.png');
+}
+
+/* Holo: a certificate on crumpled paper with the same tan edge. Its seal
+   is not blue: blue is the color of defense cards. */
+.card--holo::before {
+  background-image: url('../assets/textures/crumpled-paper.png');
+}
+
+/*
+ * Coffee stains (FR-VIS-002), a wink on the cards of long hours of study:
+ * the ring of a cup, a ring with a splash, a corner soaked by spilled coffee,
+ * or the corner and a ring. Only a page of the notebook has them, never a
+ * crumpled diploma or certificate (cardData.ts checks it). They are textures
+ * of our own drawn at half size, so each of their pixels covers 2x2 of the
+ * card, like the sprites. They only use sand and tan, and the ink text is
+ * readable on both. They go under the ruled lines, at the bottom, under the description and
+ * partly off the card: on the left, the side that the next card of the hand
+ * does not cover, and the ring of "corner-ring" on the right, next to the
+ * soaked corner.
+ */
+.card--stain-ring {
+  --stain-images: url('../assets/textures/coffee-ring.png');
+  --stain-positions: -4px calc(100% + 6px);
+  --stain-sizes: 44px 44px;
+}
+
+.card--stain-ring-splash {
+  --stain-images: url('../assets/textures/coffee-ring-splash.png');
+  --stain-positions: -4px calc(100% + 6px);
+  --stain-sizes: 44px 44px;
+}
+
+.card--stain-corner {
+  --stain-images: url('../assets/textures/coffee-corner.png');
+  --stain-positions: -2px calc(100% + 2px);
+  --stain-sizes: 56px 40px;
+}
+
+.card--stain-corner-ring {
+  --stain-images: url('../assets/textures/coffee-corner.png'), url('../assets/textures/coffee-ring.png');
+  --stain-positions: -2px calc(100% + 2px), 42px calc(100% + 4px);
+  --stain-sizes: 56px 40px, 44px 44px;
+}
+
+/* The seal, stamped on the bottom left corner of the photo: the left side of
+   a card is the part that its neighbor in the hand does not cover. It is only
+   a holder: its ::before draws the ribbons and its ::after the disc, so the
+   disc is painted over the ribbons. */
+.card__seal {
+  position: absolute;
+  top: 30px;
+  left: 4px;
+  width: 22px;
+  height: 22px;
+}
+
+/* The disc. Its shine is a band of light that crosses it as the card turns. */
+.card__seal::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  box-shadow: 0 0 0 1px var(--color-card-seal-edge);
+}
+
+.card--foil .card__seal::after {
+  background-image: linear-gradient(
+    115deg,
+    var(--color-foil-seal) calc(20% + var(--band-shift)),
+    var(--color-foil-shine) 0 calc(42% + var(--band-shift)),
+    var(--color-foil-seal) 0
+  );
+  border: 2px solid var(--color-foil-seal-ring);
+  /* The dashed ring of a wax seal, inside the disc. */
+  outline: 1px dashed var(--color-foil-seal-ring);
+  outline-offset: -6px;
+}
+
+/* Two ribbons in the color of the type hang from the gold seal. The
+   clip-path cuts the notch at the end of each one. */
+.card--foil .card__seal::before {
+  content: '';
+  position: absolute;
+  top: 16px;
+  left: 4px;
+  width: 14px;
+  height: 14px;
+  background-image: linear-gradient(90deg, var(--type-color) 0 6px, transparent 0 8px, var(--type-color) 0);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 86% 80%, 58% 100%, 58% 0, 42% 0, 42% 100%, 14% 80%, 0 100%);
+}
+
+/* Holo: the seal of the university, dark brown with a mortarboard. A band of
+   holographic stripes crosses it as the card turns, like the light on the
+   gold seal. */
+.card--holo .card__seal::after {
+  background-image: linear-gradient(
+    115deg,
+    var(--color-holo-seal) calc(20% + var(--band-shift)),
+    var(--color-holo-band1) 0 calc(26% + var(--band-shift)),
+    var(--color-holo-band2) 0 calc(32% + var(--band-shift)),
+    var(--color-holo-band3) 0 calc(38% + var(--band-shift)),
+    var(--color-holo-band4) 0 calc(44% + var(--band-shift)),
+    var(--color-holo-seal) 0
+  );
+  border: 2px solid var(--color-holo-seal-ring);
+}
+
+/* The mortarboard, cut by clip-path out of an 18x11 box: the board seen
+   from above as a wide flat diamond, the narrower cap under it, and the
+   tassel hanging on the right with its knot. It goes over the disc
+   (z-index), in the middle of it. */
+.card--holo .card__seal::before {
+  content: '';
+  position: absolute;
+  z-index: 1;
+  top: 5px;
+  left: 2px;
+  width: 18px;
+  height: 11px;
+  background-color: var(--color-holo-emblem);
+  clip-path: polygon(
+    9px 0, 18px 3.5px,
+    16px 4.28px, 16px 9px, 17px 9px, 17px 11px, 14px 11px, 14px 9px, 15px 9px, 15px 4.67px,
+    13px 5.44px, 13px 10.5px, 5px 10.5px, 5px 5.44px,
+    0 3.5px
+  );
+}

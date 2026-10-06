@@ -36,6 +36,30 @@ describe('App', () => {
     expect(html).toContain(es.home.creditsButton);
   });
 
+  it('shows the hand of 5 test cards, with their texts from the catalog (FR-VIS-002)', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html.match(/class="card card--/g)).toHaveLength(5);
+    expect(html).toContain('data-edition="foil"');
+    expect(html).toContain('data-edition="holo"');
+    // The numbers of a description are in their own span, so the texts are
+    // looked for in the text of the page, without its tags.
+    const text = html.replace(/<[^>]*>/g, '');
+    for (const texts of Object.values(es.cards)) {
+      expect(text).toContain(texts.name);
+      expect(text).toContain(texts.description);
+    }
+    for (const label of Object.values(es.cardTypes)) {
+      expect(text).toContain(label);
+    }
+  });
+
+  it('makes the numbers of a card description stand out', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html).toContain('Hace <span class="card__number">6</span> de daño.');
+  });
+
   it('opens the screen saved in the browser history', () => {
     vi.stubGlobal('window', { history: { state: { screen: 'credits' } }, location: { search: '' } });
 

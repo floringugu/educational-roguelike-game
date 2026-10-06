@@ -46,7 +46,7 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0010](adr/0010-herramientas-de-desarrollo.md).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0011](adr/0011-arte-propio.md).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
 ### 1.5 Convenciones

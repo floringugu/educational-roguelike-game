@@ -62,11 +62,28 @@ export const LICENSES: LicenseEntry[] = [
     sourceUrl: 'https://kenney.nl/assets/tiny-dungeon',
     attribution: 'Tiny Dungeon by Kenney (kenney.nl)',
     modification: 'Cut from the tile sheet and recolored to the game palette.',
+    files: ['sprites/enemy-brute.png'],
+  },
+  {
+    // The project's own pixel art (ADR-0011): drawn for Empollatro, with
+    // palette colors only. The PNG files are the source.
+    name: 'Empollatro sprites',
+    author: 'Florin Gugu',
+    license: 'Creative Commons Zero (CC0 1.0)',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+    sourceUrl: 'https://github.com/floringugu/educational-roguelike-game',
+    attribution: 'Empollatro sprites by Florin Gugu',
     files: [
-      'sprites/card-art-attack.png',
-      'sprites/card-art-defense.png',
-      'sprites/card-art-heal.png',
-      'sprites/enemy-brute.png',
+      'sprites/card-art-books.png',
+      'sprites/card-art-chalk.png',
+      'sprites/card-art-cheat-sheet.png',
+      'sprites/card-art-coffee.png',
+      'sprites/card-art-empty-desk.png',
+      'textures/coffee-corner.png',
+      'textures/coffee-ring-splash.png',
+      'textures/coffee-ring.png',
+      'textures/crumpled-paper.png',
+      'textures/crumpled-parchment.png',
     ],
   },
 ];
