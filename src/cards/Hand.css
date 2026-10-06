@@ -1,0 +1,32 @@
+/* The 5 cards fit the width of the phone held upright (NFR-USA-002).
+   The cards are always 84px wide, the size their inside is drawn for: a
+   narrower card would not fit its texts, and the pixel fonts would blur.
+   What changes with the screen is how much each card covers the one on its
+   left: 15% on wide screens, more on narrow ones, so the 5 cards fit in the
+   width of the screen minus 3rem. Those 3rem are left free because the fan
+   turns the outer corners outwards, and the cost sticks out of each card.
+   On a 320px screen each card still shows 47px to the thumb, more than the
+   44px it needs. */
+.hand {
+  --card-width: 5.25rem;
+
+  display: flex;
+  justify-content: center;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hand__slot {
+  flex: none;
+}
+
+/* The second term spreads over the 4 gaps between cards the width that the
+   5 cards take beyond the free space. It is negative when they do not fit,
+   and then it is the larger overlap of the two. */
+.hand__slot + .hand__slot {
+  margin-inline-start: min(
+    calc(var(--card-width) * -0.15),
+    calc((100vw - 3rem - 5 * var(--card-width)) / 4)
+  );
+}

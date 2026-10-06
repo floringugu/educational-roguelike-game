@@ -10,11 +10,27 @@ export const es = {
     status: 'Prototipo visual en construcción',
     creditsButton: 'Créditos',
     enemyDescription: 'Un monstruo rojo con pinzas',
-    cardDescriptions: {
-      'card-art-attack': 'Una espada',
-      'card-art-defense': 'Un escudo redondo',
-      'card-art-heal': 'Una poción roja',
-    },
+  },
+  // The hand of cards at the bottom of the screen (FR-VIS-002).
+  hand: {
+    label: 'Mano',
+    costLabel: 'Coste',
+  },
+  // Name and description of each test card, by the id it has in
+  // src/prototype/cards.json.
+  cards: {
+    chalkThrow: { name: 'Tizazo', description: 'Hace 6 de daño.' },
+    skipClass: { name: 'Faltar', description: 'Ganas 5 de bloqueo.' },
+    coffee: { name: 'Cafelito', description: 'Recuperas 4 de vida.' },
+    cheatSheet: { name: 'Chuleta', description: 'Hace 10 de daño.' },
+    tome: { name: 'Tocho', description: 'Ganas 9 de bloqueo.' },
+  },
+  // The label of each card type, shown on the card (see CARD_TYPES in
+  // src/cards/cardData.ts).
+  cardTypes: {
+    attack: 'Ataque',
+    defense: 'Defensa',
+    skill: 'Habilidad',
   },
   credits: {
     title: 'Créditos',

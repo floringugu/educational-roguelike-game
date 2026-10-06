@@ -1,0 +1,7 @@
+[
+  { "id": "chalkThrow", "type": "attack", "cost": 1, "art": "card-art-chalk", "edition": "base" },
+  { "id": "skipClass", "type": "defense", "cost": 1, "art": "card-art-empty-desk", "edition": "foil" },
+  { "id": "coffee", "type": "skill", "cost": 2, "art": "card-art-coffee", "edition": "base", "stain": "ring-splash" },
+  { "id": "cheatSheet", "type": "attack", "cost": 2, "art": "card-art-cheat-sheet", "edition": "holo" },
+  { "id": "tome", "type": "defense", "cost": 2, "art": "card-art-books", "edition": "base", "stain": "corner-ring" }
+]

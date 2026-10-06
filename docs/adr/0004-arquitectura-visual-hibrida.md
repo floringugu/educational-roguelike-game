@@ -13,7 +13,7 @@ Se busca una estética lo más cercana posible a *Balatro*. Su aspecto depende s
 - **Fondo:** un `<canvas>` WebGL a pantalla completa con un shader de remolino **escrito desde cero**. Se renderiza por debajo de la resolución nativa del dispositivo, se pausa cuando la pestaña está oculta y respeta `prefers-reduced-motion`.
 - **Interfaz:** React + Motion para la inclinación 3D de las cartas, los muelles y el temblor de pantalla. Los efectos de edición (foil, holo) son CSS propio.
 - **CRT:** superposición en CSS (scanlines + viñeta), que se puede desactivar. No se hace curvatura de pantalla.
-- **Arte:** packs CC0 (Kenney, 0x72) recoloreados a una única paleta de 16-24 colores. Se cargan desde un catálogo, así que cambiar el arte no toca el código.
+- **Arte:** packs CC0 (Kenney, 0x72) recoloreados a una única paleta de 16-24 colores. Se cargan desde un catálogo, así que cambiar el arte no toca el código. Ampliado por [ADR-0011](0011-arte-propio.md): también se admite arte propio.
 - **Fuentes:** m6x11 para títulos y cifras (si cubre tildes y ñ) y Pixelify Sans (OFL) para el texto de las preguntas.
 
 ## Alternativas descartadas

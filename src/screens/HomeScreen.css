@@ -1,11 +1,22 @@
 .home-screen {
   display: flex;
   flex-direction: column;
+  min-height: 100dvh;
+  /* At the bottom, room for the arc of the fan and for the gesture bar of
+     the phone. */
+  padding: 1.5rem 1rem max(1.5rem, env(safe-area-inset-bottom));
+  /* A card dragged past the edge of the screen must not make the page
+     scroll sideways. */
+  overflow: clip;
+}
+
+.home-screen__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  min-height: 100dvh;
-  padding: 1.5rem;
   text-align: center;
 }
 
@@ -24,14 +35,6 @@
 
 .home-screen__status {
   color: var(--color-text-muted);
-}
-
-.home-screen__sprites {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
 }
 
 .home-screen__credits {

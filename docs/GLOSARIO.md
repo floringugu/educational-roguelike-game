@@ -38,6 +38,7 @@ Estos son los términos canónicos del proyecto. El [SRS](SRS.md), los ADRs, la 
 | **Mazo** | `Deck` | Cartas de acción que tiene el jugador durante la partida. Empieza con 10. |
 | **Pool de cartas** | `CardPool` | Todas las cartas que pueden aparecer como recompensa o en la tienda (~20 en el MVP). |
 | **Carta de acción** | `Card` | Carta jugable con un coste y unos efectos. **Solo tiene efecto si se acierta la pregunta asociada.** Cada una define en sus datos su versión mejorada. |
+| **Tipo de carta** | `CardType` | Clase de efecto de una carta de acción: **Ataque** (`attack`), **Defensa** (`defense`) o **Habilidad** (`skill`). Cada tipo tiene su color en la carta. |
 | **Carta de Estudio** | `StudyCard` | Carta de acción cuyo efecto depende del conocimiento: de dónde sale su pregunta o cómo se modifica al acertar (p. ej. *Repaso*, *Apuesta*). |
 | **Carta fallida** | — | Carta jugada cuya pregunta se ha fallado. No aplica efecto, consume su energía y va al descarte. |
 | **Mejorar carta** | `UpgradeCard` | Cambiar una carta del mazo por su versión mejorada, definida en los datos de la carta. |
