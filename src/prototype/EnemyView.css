@@ -1,0 +1,132 @@
+/* The enemy of the combat screen (ticket 06): its intent, its sprite, its
+   name and its health bar, one under the other. */
+.enemy {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  width: min(100%, 12rem);
+}
+
+/* The intent, in a speech bubble over the head of the enemy: the icon of the
+   action and its value, big, so it is read at a glance (FR-CMB-005). */
+.enemy__intent {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin: 0;
+  padding: 2px 10px 2px 6px;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-text-muted);
+  box-shadow: 2px 2px 0 var(--color-background);
+}
+
+.enemy__intent-value {
+  font-family: var(--font-display);
+  font-size: 36px; /* twice the size m6x11plus is drawn for */
+  line-height: 1;
+}
+
+/* Read by screen readers, not shown: the icon already says it. */
+.enemy__hidden-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.enemy__body {
+  display: grid;
+}
+
+/* A hit: the enemy flashes and is pushed back. */
+.enemy__body--hit {
+  animation: enemy-hit 300ms ease-out;
+}
+
+/* Defeated: after the hit, it falls over and fades away. When this animation
+   ends, EnemyView.tsx brings it back. */
+.enemy__body--defeated {
+  animation:
+    enemy-hit 300ms ease-out,
+    enemy-fall 600ms ease-in 300ms forwards;
+}
+
+/* A new enemy comes in, with full health. */
+.enemy__body--arrived {
+  animation: enemy-rise 400ms ease-out;
+}
+
+@keyframes enemy-hit {
+  0% {
+    filter: brightness(3);
+    transform: translateX(0);
+  }
+  30% {
+    filter: brightness(3);
+    transform: translateX(10px) rotate(6deg);
+  }
+  60% {
+    filter: none;
+    transform: translateX(-4px) rotate(-2deg);
+  }
+  100% {
+    transform: none;
+  }
+}
+
+@keyframes enemy-fall {
+  to {
+    opacity: 0;
+    transform: translateY(24px) rotate(80deg) scale(0.6);
+  }
+}
+
+@keyframes enemy-rise {
+  from {
+    opacity: 0;
+    transform: translateY(-16px) scale(0.8);
+  }
+}
+
+/* The damage of the last hit floats up from the enemy and fades. */
+.enemy__damage {
+  position: absolute;
+  top: 40%;
+  right: 0;
+  animation: tag-float 900ms ease-out forwards;
+}
+
+/* The name, just over the health bar. A long name, such as that of a
+   character, wraps to a second line instead of widening the enemy. */
+.enemy__name {
+  margin: 0 0 -0.25rem;
+  color: var(--color-text);
+  font-family: var(--font-display);
+  font-size: 18px; /* the size m6x11plus is drawn for */
+  line-height: 1;
+  text-align: center;
+}
+
+.enemy__health {
+  width: 100%;
+}
+
+/* Without movement, the animations still happen, so their end can be
+   waited for, but they take no time. */
+@media (prefers-reduced-motion: reduce) {
+  .enemy__body--hit,
+  .enemy__body--defeated,
+  .enemy__body--arrived {
+    animation-duration: 1ms;
+    animation-delay: 0s;
+  }
+
+  .enemy__damage {
+    animation-name: tag-fade;
+  }
+}

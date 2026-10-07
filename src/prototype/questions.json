@@ -1,0 +1,82 @@
+[
+  {
+    "id": "berlinWall",
+    "prompt": "¿En qué año cayó el muro de Berlín?",
+    "answer": "1989",
+    "distractors": ["1985", "1987", "1991"],
+    "citation": {
+      "text": "La noche del 9 de noviembre de 1989 los berlineses cruzaron el muro, que dividía la ciudad desde 1961.",
+      "page": 112
+    }
+  },
+  {
+    "id": "mitochondria",
+    "prompt": "¿Qué orgánulo produce la mayor parte de la energía de la célula?",
+    "answer": "La mitocondria",
+    "distractors": ["El ribosoma", "El aparato de Golgi", "El lisosoma"],
+    "citation": {
+      "text": "Las mitocondrias producen la mayor parte del ATP de la célula mediante la respiración celular.",
+      "page": 23
+    }
+  },
+  {
+    "id": "sodiumSymbol",
+    "prompt": "¿Cuál es el símbolo químico del sodio?",
+    "answer": "Na",
+    "distractors": ["So", "S", "Sd"],
+    "citation": {
+      "text": "El sodio (Na, del latín natrium) es un metal alcalino muy reactivo que nunca se encuentra libre en la naturaleza.",
+      "page": 47
+    }
+  },
+  {
+    "id": "longestRiver",
+    "prompt": "¿Cuál es el río más largo de la península ibérica?",
+    "answer": "El Tajo",
+    "distractors": ["El Ebro", "El Duero", "El Guadalquivir"],
+    "citation": {
+      "text": "Con algo más de 1.000 km, el Tajo es el río más largo de la península ibérica y desemboca en Lisboa.",
+      "page": 8
+    }
+  },
+  {
+    "id": "bernardaAlba",
+    "prompt": "¿Quién escribió «La casa de Bernarda Alba»?",
+    "answer": "Federico García Lorca",
+    "distractors": ["Antonio Machado", "Miguel Hernández", "Rafael Alberti"],
+    "citation": {
+      "text": "Federico García Lorca terminó «La casa de Bernarda Alba» en junio de 1936, dos meses antes de ser asesinado.",
+      "page": 201
+    }
+  },
+  {
+    "id": "triangleAngles",
+    "prompt": "¿Cuánto suman los ángulos interiores de un triángulo?",
+    "answer": "180 grados",
+    "distractors": ["90 grados", "270 grados", "360 grados"],
+    "citation": {
+      "text": "En la geometría euclídea, los tres ángulos interiores de un triángulo suman siempre 180 grados.",
+      "page": 64
+    }
+  },
+  {
+    "id": "forceUnit",
+    "prompt": "¿En qué unidad se mide la fuerza en el Sistema Internacional?",
+    "answer": "El newton (N)",
+    "distractors": ["El julio (J)", "El vatio (W)", "El pascal (Pa)"],
+    "citation": {
+      "text": "La unidad de fuerza del Sistema Internacional es el newton (N): la fuerza que da a una masa de 1 kg una aceleración de 1 m/s².",
+      "page": 31
+    }
+  },
+  {
+    "id": "guernica",
+    "prompt": "¿Qué pintor terminó el «Guernica» en 1937, pocas semanas después del bombardeo de la villa vasca que le da nombre?",
+    "answer": "Pablo Picasso",
+    "distractors": ["Salvador Dalí", "Joan Miró", "Juan Gris"],
+    "citation": {
+      "text": "Picasso pintó el «Guernica» en París entre mayo y junio de 1937, por encargo del Gobierno de la República para el pabellón español de la Exposición Internacional.",
+      "page": 158
+    }
+  }
+]

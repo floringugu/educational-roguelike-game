@@ -1,0 +1,71 @@
+/* A health bar of the combat screen (ticket 06). The element is the empty
+   track; ::after is the health that is left and ::before the lighter trail
+   behind it. Both are the whole width of the track, scaled down to the
+   fraction of health that HealthBar.tsx sets in --health-fraction: a scale
+   moves smoothly without making the browser lay out the page again. */
+.health-bar {
+  --health-fraction: 1;
+
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 18px;
+  color: var(--color-text);
+  background-color: var(--color-health-track);
+  border: 2px solid var(--color-background);
+  box-shadow: 2px 2px 0 var(--color-background);
+}
+
+.health-bar::before,
+.health-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: scaleX(var(--health-fraction));
+  transform-origin: 0 50%;
+}
+
+/* The trail waits a moment, then shrinks slowly to the new health.
+   The empty content is repeated in each rule that paints a part of the bar:
+   it says that the part holds no text, so the contrast test of the palette
+   does not look for text on it. */
+.health-bar::before {
+  content: '';
+  background-color: var(--color-health-trail);
+  transition: transform 400ms ease-in 300ms;
+}
+
+.health-bar::after {
+  transition: transform 150ms ease-out;
+}
+
+.health-bar--enemy::after {
+  content: '';
+  background-color: var(--color-enemy-health);
+}
+
+.health-bar--player::after {
+  content: '';
+  background-color: var(--color-player-health);
+}
+
+/* The numbers go over the bar, on a patch of the track so they can always be
+   read, whatever color is under them (NFR-ACS-001). */
+.health-bar__numbers {
+  position: relative;
+  z-index: 1;
+  padding: 0 4px;
+  font-family: var(--font-display);
+  font-size: 18px; /* the size m6x11plus is drawn for */
+  line-height: 14px;
+  color: var(--color-text);
+  background-color: var(--color-health-track);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .health-bar::before,
+  .health-bar::after {
+    transition: none;
+  }
+}

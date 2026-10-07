@@ -15,7 +15,8 @@ type SwirlBackgroundProps = {
   colors?: SwirlColors;
 };
 
-// The animated swirl behind every screen (FR-VIS-001). It stops moving and
+// The animated background behind every screen (FR-VIS-001): the wood of a
+// school desk whose grain flows slowly around its knots. It stops moving and
 // shows a single frame when the frame rate is too low or when the system asks
 // for reduced motion (FR-VIS-007). Without WebGL there is no frame to show,
 // so it is replaced by the static CSS stripes.

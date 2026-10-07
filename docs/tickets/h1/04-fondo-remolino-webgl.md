@@ -47,3 +47,16 @@
   2. En el móvil, abrir la dirección `Network` (puerto 4173) con `?debug` al final.
   3. Esperar al menos 10 s y anotar el valor del contador. Si el remolino se queda quieto, es que la media ha bajado de 30 fps.
   4. La pantalla del Redmi Note 14 Pro puede ir a 120 Hz, así que el contador puede pasar de 60.
+- **Pupitre (cambio posterior, durante el ticket 06).** El remolino de pintura no encajaba con el tema de estudiante, así que el mismo shader dibuja ahora la tapa de madera de un pupitre visto desde arriba. Se mantienen FR-VIS-001, los colores y el resto del ticket. Solo cambia lo que dibuja `swirl.frag.glsl`:
+  - **Veta.** Es un valor que crece de abajo arriba y cuyas líneas de igual valor son las vetas. Unas ondas senoidales lentas las doblan y cambian la distancia entre ellas, y tres nudos las hacen rodear y cerrarse en anillos. Los nudos se desplazan un poco en cada bucle. Las bandas siguen eligiendo `bark`, `umber` o `ink` sin mezclarlos.
+  - **Garabatos a boli negro (`ink`).** Hay uno en cada esquina:
+    - arriba a la izquierda, bajo el título, una calavera con dos tibias;
+    - arriba a la derecha, bajo «Créditos», unas rayitas contando días;
+    - abajo a la izquierda, un corazón con «F+D» atravesado por una flecha;
+    - abajo a la derecha, una estrella.
+
+    Los de abajo pueden quedar en parte bajo la mano. No se mueven y están hechos de líneas medidas en píxeles del fondo. Junto a cada trazo la madera se pinta en `umber`, como si estuviera grabado, para que el negro no se pierda entre las vetas oscuras. Los dos colores pasan de 4,5:1 con todos los textos.
+  - **Goma.** Una goma blanca (`paper`) con funda `periwinkle`, cortada por el borde izquierdo, con tres virutas. Es la única excepción al 4,5:1 (NFR-ACS-001): una goma oscura no se reconocía. Por eso va en el hueco entre el enemigo y el jugador, donde ninguna pantalla pone texto. En los créditos, al desplazar la página, el título podría pasar un momento por encima.
+  - **Fondo estático sin WebGL.** Son franjas horizontales de veta con los mismos tres colores, sin garabatos ni goma.
+  - **Colores.** Los de la madera siguen en `SWIRL_COLORS`, y los del boli y la goma están en `DESK_DETAIL_COLORS` (`src/background/swirlColors.ts`). Un test comprueba el contraste del boli.
+  - **Pendiente:** volver a medir los fps en el móvil con `?debug`. Los 60 fps anotados arriba eran del remolino, y el pupitre hace algo más de trabajo por píxel en las zonas de los garabatos.

@@ -44,6 +44,14 @@ export type CardData = {
   stain?: CardStain;
 };
 
+// A card in the hand. The same card can be twice in a hand, so each one
+// has a key of its own: it tells React which card is which when one leaves
+// the hand, so the others keep their state and move to their new place.
+export type HandCard = {
+  key: string;
+  card: CardData;
+};
+
 // Checks that a list read from JSON has the shape of CardData and returns it
 // with that type. TypeScript cannot check the contents of a JSON file, so a
 // mistake in it (a typo in an id, a missing field) would only show up as a

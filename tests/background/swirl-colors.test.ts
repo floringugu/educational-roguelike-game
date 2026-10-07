@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { SWIRL_COLORS, staticSwirlBackground } from '../../src/background/swirlColors.ts';
+import { DESK_DETAIL_COLORS, SWIRL_COLORS, staticSwirlBackground } from '../../src/background/swirlColors.ts';
 import { MINIMUM_TEXT_CONTRAST, contrastRatio } from '../../src/theme/contrast.ts';
 import { PALETTE, colorRoles, textOnBackgroundPairs } from '../../src/theme/palette.ts';
 
@@ -26,6 +26,15 @@ describe('FR-VIS-001: colors of the swirl', () => {
     for (const role of textRolesOnTheBackground) {
       const ratio = contrastRatio(PALETTE[colorRoles[role]], PALETTE[name]);
       expect(ratio, `${role} on ${name}`).toBeGreaterThanOrEqual(MINIMUM_TEXT_CONTRAST);
+    }
+  });
+
+  // The pen doodles lie on the wood, so text can be drawn on them as well.
+  // The eraser is the exception: see DESK_DETAIL_COLORS.
+  it('keeps a contrast of at least 4.5:1 for every text color on the pen doodles', () => {
+    for (const role of textRolesOnTheBackground) {
+      const ratio = contrastRatio(PALETTE[colorRoles[role]], PALETTE[DESK_DETAIL_COLORS.pen]);
+      expect(ratio, `${role} on ${DESK_DETAIL_COLORS.pen}`).toBeGreaterThanOrEqual(MINIMUM_TEXT_CONTRAST);
     }
   });
 
