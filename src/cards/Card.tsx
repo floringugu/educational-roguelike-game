@@ -1,5 +1,5 @@
 import { m, useMotionValueEvent, useSpring, useTransform, useVelocity } from 'motion/react';
-import { useRef, type PointerEvent } from 'react';
+import { useEffect, useRef, type MouseEvent, type PointerEvent } from 'react';
 import { Sprite } from '../components/Sprite';
 import { es } from '../i18n/es';
 import type { CardData } from './cardData';
@@ -22,6 +22,19 @@ const MAX_PRESS_TILT_DEGREES = 14;
 const TILT_DEGREES_PER_SPEED = 0.02;
 const MAX_SPEED_TILT_DEGREES = 20;
 
+// A press counts as a tap, which plays the card, when the finger lets go
+// before this time and without moving more than this. A longer press only
+// holds the card up to read it.
+const TAP_MAX_MILLISECONDS = 300;
+const TAP_MAX_MOVE_PIXELS = 10;
+
+// Dragging the card up by more than this and letting it go also plays it:
+// it has left the hand, towards the enemy.
+const PLAY_DRAG_UP_PIXELS = 120;
+
+// A new card comes into the hand from this far below its place.
+const DEAL_FROM_BELOW_PIXELS = 160;
+
 // Springs (FR-VIS-002). Stiffness pulls the value towards its target and
 // damping slows it down; with this little damping it goes a bit past the
 // target and comes back, which is the bounce.
@@ -33,26 +46,32 @@ type CardProps = {
   card: CardData;
   // Where the card rests in the fan of the hand.
   restPose: FanPose;
+  // Called when the player plays the card: with a tap, by dragging it up or
+  // with the keyboard. Without it, the card can only be held.
+  onPlay?: () => void;
 };
 
 // A card of the hand (FR-VIS-002). While a finger holds it, the card rises,
 // grows so its text can be read and turns in 3D towards the finger; if the
 // finger moves, the card follows it and leans as it goes. When the finger
-// lets go, the card springs back to its place in the fan.
+// lets go, the card springs back to its place in the fan. A quick tap, or
+// letting it go after dragging it up, plays it.
 //
 // Every movement is a spring of Motion. The values change many times per
 // second, so they go straight to the `transform` of the element without
 // rendering the component again with React.
-export function Card({ card, restPose }: CardProps) {
+export function Card({ card, restPose, onPlay }: CardProps) {
   const texts = es.cards[card.id];
   const cardElement = useRef<HTMLButtonElement>(null);
-  // Where the finger first pressed, while the card is held.
-  const pressStart = useRef<{ x: number; y: number } | null>(null);
+  // Where and when the finger first pressed, while the card is held.
+  const pressStart = useRef<{ x: number; y: number; time: number } | null>(null);
 
   // useSpring gives a value that, each time it is set, moves to the new
   // target with a spring instead of jumping to it.
   const x = useSpring(0, POSITION_SPRING);
-  const y = useSpring(restPose.dropPixels, POSITION_SPRING);
+  // A new card starts below its place and springs up to it (see the effect
+  // below), so a new hand is dealt in.
+  const y = useSpring(restPose.dropPixels + DEAL_FROM_BELOW_PIXELS, POSITION_SPRING);
   const rotate = useSpring(restPose.rotateDegrees, POSITION_SPRING);
   const scale = useSpring(1, POSITION_SPRING);
   const pressTiltX = useSpring(0, TILT_SPRING);
@@ -67,12 +86,25 @@ export function Card({ card, restPose }: CardProps) {
   const rotateX = useTransform(() => pressTiltX.get() - speedTilt(speedY.get()));
 
   // A card out of its place is drawn over the others, also while it flies
-  // back, so it never passes under its neighbors.
+  // back, so it never passes under its neighbors. Its place can change, so
+  // the transform reads it from a ref that the effect below keeps up to date.
+  const restDropPixels = useRef(restPose.dropPixels);
   const zIndex = useTransform(() => {
     const isAway =
-      scale.get() > 1.01 || Math.abs(x.get()) > 1 || Math.abs(y.get() - restPose.dropPixels) > 1;
+      scale.get() > 1.01 || Math.abs(x.get()) > 1 || Math.abs(y.get() - restDropPixels.current) > 1;
     return isAway ? 1 : 0;
   });
+
+  // Send the card to its place in the fan when it comes in and each time its
+  // place changes, as when a card on its left is played. Not while a finger
+  // holds it: it goes back to its place when let go.
+  useEffect(() => {
+    restDropPixels.current = restPose.dropPixels;
+    if (pressStart.current === null) {
+      y.set(restPose.dropPixels);
+      rotate.set(restPose.rotateDegrees);
+    }
+  }, [restPose.dropPixels, restPose.rotateDegrees, y, rotate]);
 
   // The shine of the seal of the foil and holo editions moves as the card
   // turns (Card.css). Motion cannot type a CSS variable in `style`, so it is set
@@ -84,7 +116,7 @@ export function Card({ card, restPose }: CardProps) {
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
     // Keep receiving the moves of this finger even when it leaves the card.
     event.currentTarget.setPointerCapture(event.pointerId);
-    pressStart.current = { x: event.clientX, y: event.clientY };
+    pressStart.current = { x: event.clientX, y: event.clientY, time: event.timeStamp };
 
     // From -1 (left or top edge) to 1 (right or bottom edge).
     const box = event.currentTarget.getBoundingClientRect();
@@ -106,7 +138,35 @@ export function Card({ card, restPose }: CardProps) {
     y.set(event.clientY - pressStart.current.y - HELD_LIFT_PIXELS);
   }
 
-  // Also when the browser takes the finger away (a call, a system gesture).
+  function handlePointerUp(event: PointerEvent<HTMLButtonElement>) {
+    const start = pressStart.current;
+    handleRelease();
+    if (start === null || onPlay === undefined) {
+      return;
+    }
+    const movedX = event.clientX - start.x;
+    const movedY = event.clientY - start.y;
+    const isTap =
+      event.timeStamp - start.time < TAP_MAX_MILLISECONDS &&
+      Math.hypot(movedX, movedY) < TAP_MAX_MOVE_PIXELS;
+    const isDraggedUp = movedY < -PLAY_DRAG_UP_PIXELS;
+    if (isTap || isDraggedUp) {
+      onPlay();
+    }
+  }
+
+  // The keyboard (Enter or Space on the focused card) plays the card with a
+  // click. A finger or a mouse makes a click too, after letting go, but those
+  // are already handled by handlePointerUp; the browser marks the click of
+  // the keyboard with a `detail` of 0, the number of presses it counted.
+  function handleClick(event: MouseEvent<HTMLButtonElement>) {
+    if (event.detail === 0) {
+      onPlay?.();
+    }
+  }
+
+  // Also when the browser takes the finger away (a call, a system gesture):
+  // then the card goes back to the hand without being played.
   function handleRelease() {
     pressStart.current = null;
     x.set(0);
@@ -118,7 +178,7 @@ export function Card({ card, restPose }: CardProps) {
   }
 
   // A button, so it can be reached with the keyboard and read by screen
-  // readers. Playing a card when it is tapped comes in ticket 06.
+  // readers.
   return (
     <m.button
       ref={cardElement}
@@ -131,8 +191,9 @@ export function Card({ card, restPose }: CardProps) {
       style={{ x, y, rotate, scale, rotateX, rotateY, zIndex, transformPerspective: 600 }}
       onPointerDown={handlePointerDown}
       onPointerMove={handlePointerMove}
-      onPointerUp={handleRelease}
+      onPointerUp={handlePointerUp}
       onPointerCancel={handleRelease}
+      onClick={handleClick}
     >
       <span className="card__cost">
         <span className="card__cost-label">{es.hand.costLabel} </span>

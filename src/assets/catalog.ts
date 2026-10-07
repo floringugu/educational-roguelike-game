@@ -9,7 +9,7 @@ import { type SpriteId } from './sprite-ids';
 export { SPRITE_IDS, type SpriteId } from './sprite-ids';
 
 // Vite replaces this with the URL of every PNG in the folder. The key is the
-// file path, for example './sprites/enemy-brute.png'.
+// file path, for example './sprites/enemy-midterm.png'.
 const spriteUrls = import.meta.glob<string>('./sprites/*.png', {
   eager: true,
   query: '?url',

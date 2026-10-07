@@ -31,6 +31,16 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
     expect([...spriteFiles].sort()).toEqual([...catalogFiles].sort());
   });
 
+  // The art of a card is 16x16 drawn at 32 px, and an enemy is 96x96 drawn
+  // at 192 px: both at 2 px per pixel, so they look like the same game.
+  it('draws the enemies at 96x96 and every other sprite at 16x16', () => {
+    for (const id of SPRITE_IDS) {
+      const image = decodePng(readFileSync(`${assetsDirectory}sprites/${id}.png`));
+      const side = id.startsWith('enemy-') ? 96 : 16;
+      expect([image.width, image.height], id).toEqual([side, side]);
+    }
+  });
+
   it('draws every sprite with colors of the palette only', () => {
     const paletteColors = new Set(Object.values(PALETTE));
     for (const id of SPRITE_IDS) {
@@ -76,6 +86,23 @@ describe('FR-VIS-002: the textures of the cards', () => {
       height: 122,
       colors: [...sheetInside, colorOf('cardSheetEdge'), colorOf('cardShadow')],
     },
+    // The question sheet of a diploma or a certificate (ticket 06): the
+    // creases of the same sheets as tiles that repeat without a seam, and
+    // its bent outline as strips that repeat along the top, the left and the
+    // right side. Each side has the strip with the edge (and, on the right,
+    // the shadow) and the strip that cuts the tile off outside the sheet.
+    'textures/crumpled-parchment-tile.png': { width: 128, height: 128, colors: sheetInside },
+    'textures/crumpled-paper-tile.png': { width: 128, height: 128, colors: sheetInside },
+    'textures/crumpled-sheet-top.png': { width: 120, height: 6, colors: [colorOf('cardSheetEdge')] },
+    'textures/crumpled-sheet-left.png': { width: 6, height: 120, colors: [colorOf('cardSheetEdge')] },
+    'textures/crumpled-sheet-right.png': {
+      width: 9,
+      height: 120,
+      colors: [colorOf('cardSheetEdge'), colorOf('cardShadow')],
+    },
+    'textures/crumpled-sheet-top-cut.png': { width: 120, height: 6, colors: [colorOf('cardShadow')] },
+    'textures/crumpled-sheet-left-cut.png': { width: 6, height: 120, colors: [colorOf('cardShadow')] },
+    'textures/crumpled-sheet-right-cut.png': { width: 9, height: 120, colors: [colorOf('cardShadow')] },
     // The stains are drawn at half size: 44x44 and 56x40 on the card.
     'textures/coffee-ring.png': { width: 22, height: 22, colors: coffee },
     'textures/coffee-ring-splash.png': { width: 22, height: 22, colors: coffee },
@@ -87,11 +114,11 @@ describe('FR-VIS-002: the textures of the cards', () => {
     return `#${[red, green, blue].map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   }
 
-  it('has the sheets of the diploma and the certificate, and the coffee stains', () => {
+  it('has the sheets of the diploma and the certificate, those of the question sheet, and the coffee stains', () => {
     expect([...textureFiles].sort()).toEqual(Object.keys(textures).sort());
   });
 
-  it('has the size that Card.css draws them at', () => {
+  it('has the size that the CSS draws them at', () => {
     for (const [file, { width, height }] of Object.entries(textures)) {
       const image = decodePng(readFileSync(`${assetsDirectory}${file}`));
       expect({ width: image.width, height: image.height }, file).toEqual({ width, height });
@@ -109,6 +136,40 @@ describe('FR-VIS-002: the textures of the cards', () => {
             expect(colors, `${file} uses ${hexAt(image, x, y)}`).toContain(hexAt(image, x, y));
           }
         }
+      }
+    }
+  });
+
+  // A hole in a tile would show the page through the question sheet.
+  it('fills the tiles completely', () => {
+    for (const file of ['textures/crumpled-parchment-tile.png', 'textures/crumpled-paper-tile.png']) {
+      const image = decodePng(readFileSync(`${assetsDirectory}${file}`));
+      for (let y = 0; y < image.height; y += 1) {
+        for (let x = 0; x < image.width; x += 1) {
+          expect(pixelAt(image, x, y).alpha, `${file} at ${x},${y}`).toBe(255);
+        }
+      }
+    }
+  });
+
+  // The outline of the question sheet ends before the inner side of its
+  // strips, where the padding of the sheet keeps the texts (QuestionSheet.css):
+  // there, the strips leave the tile as it is.
+  it('keeps the outline of the question sheet inside its strips', () => {
+    const innerLines: Record<string, (image: ReturnType<typeof decodePng>, along: number) => [number, number]> = {
+      'textures/crumpled-sheet-top.png': (image, along) => [along, image.height - 1],
+      'textures/crumpled-sheet-top-cut.png': (image, along) => [along, image.height - 1],
+      'textures/crumpled-sheet-left.png': (image, along) => [image.width - 1, along],
+      'textures/crumpled-sheet-left-cut.png': (image, along) => [image.width - 1, along],
+      'textures/crumpled-sheet-right.png': (_image, along) => [0, along],
+      'textures/crumpled-sheet-right-cut.png': (_image, along) => [0, along],
+    };
+    for (const [file, innerPixel] of Object.entries(innerLines)) {
+      const image = decodePng(readFileSync(`${assetsDirectory}${file}`));
+      const length = Math.max(image.width, image.height);
+      for (let along = 0; along < length; along += 1) {
+        const [x, y] = innerPixel(image, along);
+        expect(pixelAt(image, x, y).alpha, `${file} at ${x},${y}`).toBe(0);
       }
     }
   });

@@ -12,7 +12,7 @@ La v0 usaba SM-2 con autoevaluación. Bastaba con pulsar siempre "Easy" para gan
 
 - **Algoritmo:** FSRS mediante una librería mantenida (p. ej. `ts-fsrs`), no una implementación propia.
 - **Unidad:** los repasos se programan **por concepto**, no por pregunta.
-- **Calificación objetiva:** fallo = *Again*; acierto lento = *Good*; acierto rápido = *Easy*. El umbral de rapidez es el mismo que el del crítico por rapidez.
+- **Calificación objetiva:** fallo = *Again*; acierto lento = *Good*; acierto rápido = *Easy*. El umbral de rapidez es el mismo que el del crítico por rapidez. Ampliado por [ADR-0012](0012-calificacion-hard-con-comodin.md): un acierto con comodín se califica *Hard*.
 - **Repeticiones en la misma partida:** las respuestas repetidas a un concepto dentro de una partida se registran como **pasos de aprendizaje** (repasos del mismo día).
 
 ## Alternativas descartadas

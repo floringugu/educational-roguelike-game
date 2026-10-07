@@ -12,7 +12,8 @@ Estos son los términos canónicos del proyecto. El [SRS](SRS.md), los ADRs, la 
 | **Fuente** | `Source` | Fichero que se añade a una asignatura: un PDF (subido al servidor) o un CSV (importado en el dispositivo o subido). De ella se sacan los temas. |
 | **Tema** | `Topic` | Bloque temático de una asignatura (p. ej. "Virtualización"). En un PDF lo extrae la IA; en un CSV sale de las etiquetas, o hay un tema por fuente. El usuario lo puede editar. Sirve para etiquetar los nodos del mapa. |
 | **Concepto** | `Concept` | Idea evaluable dentro de un tema. Es la unidad con la que se mide la maestría y se programa la repetición espaciada. |
-| **Pregunta** (variante) | `Question` | Forma concreta de evaluar un concepto. Un concepto tiene de 1 a 3 variantes (el objetivo en PDFs es 2-3). Tipos del MVP: test de 4 opciones, verdadero/falso y **cloze de elegir** (frase con un hueco y 4 opciones). |
+| **Pregunta** (variante) | `Question` | Forma concreta de evaluar un concepto. Un concepto tiene de 1 a 3 variantes (el objetivo en PDFs es 2-3). Tipos del MVP: test de 4 opciones, verdadero/falso, **cloze de elegir** (frase con un hueco y 4 opciones) y **respuesta escrita**. |
+| **Respuesta escrita** | — | Tipo de pregunta que se responde tecleando una respuesta corta, como las tarjetas de Anki con respuesta tecleada. Se corrige sin LLM contra su lista de respuestas aceptadas, sin tener en cuenta mayúsculas, tildes ni puntuación y tolerando 1 errata. En un CSV, esa lista la da el jugador en la columna Respuestas (DP-18). |
 | **Cita** | `Citation` | Fragmento literal de la fuente, con su página (PDF) o fila (CSV), que fundamenta una pregunta. Cada pregunta tiene exactamente una. |
 | **Banco de preguntas** | `QuestionBank` | Conjunto de preguntas vigentes de una asignatura. |
 | **Ampliación** | `TopUp` | Nueva tanda de preguntas generadas para un tema que se ha agotado o que se falla mucho. |
@@ -46,7 +47,8 @@ Estos son los términos canónicos del proyecto. El [SRS](SRS.md), los ADRs, la 
 | **Estado** | `Status` | Efecto persistente sobre un combatiente: veneno, debilidad o vulnerabilidad en el MVP. |
 | **Crítico por rapidez** | `SpeedCrit` | Multiplica por 1,5 los valores numéricos de un efecto cuando se acierta antes de un umbral, que depende de la longitud de la pregunta. |
 | **Intención** | `Intent` | Acción que hará el enemigo en su siguiente fase. El jugador la ve de antemano. |
-| **Reliquia** | `Relic` | Objeto pasivo que solo modifica efectos disparados por un acierto. Se consigue en Eventos y Élites. |
+| **Reliquia** | `Relic` | Objeto pasivo que solo modifica efectos disparados por un acierto. Se consigue en Eventos y Élites. Dura toda la partida mientras se lleve y ocupa uno de los 5 huecos de reliquia (DP-16). |
+| **Comodín** | `Lifeline` | Objeto de un solo uso que quita 2 distractores de una pregunta de 4 opciones. Se consigue acertando. El acierto con comodín no tiene crítico y FSRS lo califica *Hard*. **No confundir con los comodines de Balatro, que aquí son las reliquias.** |
 | **Oro** | `Gold` | Moneda de la partida que se gasta en la Tienda. |
 | **Biblioteca** | `Library` | Nodo de descanso. Hay que elegir entre curarse (respondiendo preguntas) o estudiar: repasar las preguntas falladas con su cita, volver a responderlas y, si se aciertan, mejorar una carta. |
 | **Ascensión** | `Ascension` | Nivel de dificultad que se desbloquea entre partidas. Fuera del MVP. |
@@ -56,12 +58,12 @@ Estos son los términos canónicos del proyecto. El [SRS](SRS.md), los ADRs, la 
 | Término | Código | Definición |
 |---|---|---|
 | **FSRS** | — | Algoritmo de repetición espaciada (*Free Spaced Repetition Scheduler*). |
-| **Evento de respuesta** | `ReviewEvent` | Registro inmutable de una respuesta: pregunta, concepto, acierto o fallo, tiempo, momento, dispositivo y contexto de juego. |
+| **Evento de respuesta** | `ReviewEvent` | Registro inmutable de una respuesta: pregunta, concepto, acierto o fallo, tiempo, momento, dispositivo y contexto de juego (por ejemplo, si se usó un comodín). |
 | **Evento de cambio** | `ChangeEvent` | Registro inmutable de un cambio del usuario sobre su contenido (crear, importar, editar, renombrar, reportar). |
 | **Lápida** | `Tombstone` | Evento de cambio que marca algo como borrado o anulado. Gana a cualquier otro cambio del mismo objeto y no se deshace al sincronizar. |
 | **Registro de eventos** | `EventLog` | Secuencia *append-only* de eventos de respuesta y de cambio, ordenada por (momento, id). Es la fuente de verdad. |
 | **Estado FSRS** | `ConceptMemoryState` | Estado de memoria de un concepto: estabilidad, dificultad y próximo repaso. **Se recalcula siempre** a partir del registro de eventos; nunca se edita a mano. |
-| **Calificación objetiva** | — | Nota FSRS que se deduce del acierto y del tiempo: fallo = Again, acierto = Good, crítico = Easy. **Nunca la pone el usuario.** |
+| **Calificación objetiva** | — | Nota FSRS que se deduce del acierto, del tiempo y del uso de un comodín: fallo = Again, acierto con comodín = Hard (DP-17), acierto = Good, crítico = Easy. **Nunca la pone el usuario.** |
 | **Paso de aprendizaje** | — | Respuesta a un concepto que ya ha salido en la misma partida. FSRS la trata como repaso del mismo día, no como repaso consolidado. |
 | **Maestría** | `Mastery` | Grado de dominio de un tema o concepto, de 0 a 100%, calculado a partir del estado FSRS. |
 | **Mapa de maestría** | `MasteryMap` | Vista del temario de una asignatura coloreada según la maestría. Es la meta-progresión del MVP. |

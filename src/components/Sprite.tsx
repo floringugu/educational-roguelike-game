@@ -6,8 +6,8 @@ type SpriteProps = {
   // Description for screen readers. It comes from the text catalog, or is
   // empty when the sprite is only decoration and screen readers skip it.
   description: string;
-  // Size on screen in CSS pixels. Sprites are 16x16, so multiples of 16 keep
-  // every pixel the same size.
+  // Size on screen in CSS pixels. Sprites are 16x16, and enemies 96x96, so
+  // multiples of their side keep every pixel the same size.
   size?: number;
 };
 

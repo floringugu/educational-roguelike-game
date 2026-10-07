@@ -46,6 +46,23 @@
   --color-holo-band3: #f2c94c;
   --color-holo-band4: #d4584f;
 
+  /* The combat screen of the prototype and its question sheet. */
+  --color-health-track: #2e231b;
+  --color-health-trail: #cdb896;
+  --color-enemy-health: #d4584f;
+  --color-player-health: #5a9a5a;
+  --color-damage-tag: #9a3340;
+  --color-heal-tag: #2f5a3a;
+  --color-block-tag: #3b4577;
+  --color-exam: #faf4e2;
+  --color-exam-text: #1a1410;
+  --color-exam-rule: #98a6e0;
+  --color-exam-mark: #9a3340;
+  --color-exam-option: #ece0c6;
+  --color-exam-option-edge: #6f5a44;
+  --color-answer-correct: #a4d17a;
+  --color-answer-wrong: #9a3340;
+
   /* m6x11plus for titles and numbers; Pixelify Sans for reading (FR-VIS-005).
      The fallback fonts are only used while the files load. */
   --font-display: 'm6x11plus', 'Pixelify Sans', monospace;

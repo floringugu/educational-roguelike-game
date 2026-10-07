@@ -6,10 +6,10 @@
 
 | Campo | Valor |
 |---|---|
-| Versión | 1.2 (borrador para aprobación) |
-| Fecha | 2026-09-30 |
+| Versión | 1.3 (borrador para aprobación) |
+| Fecha | 2026-10-07 |
 | Dueño | Florin Gugu |
-| Estado | Decisiones de diseño resueltas salvo las de H2 (DP-14) y las del lanzamiento (§10.1). Pendiente de la aprobación final del dueño |
+| Estado | Decisiones de diseño resueltas salvo las de H2 (DP-14) y las del lanzamiento (§10.1). DP-15 a DP-18 resueltas el 2026-10-07. Pendiente de la aprobación final del dueño |
 | Fuente de las decisiones | Entrevista de diseño del 2026-09-29/30 (Q1–Q41), recogida en el [Apéndice A](#apéndice-a-registro-de-decisiones-y-trazabilidad) |
 
 ---
@@ -46,7 +46,7 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0011](adr/0011-arte-propio.md).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0012](adr/0012-calificacion-hard-con-comodin.md).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
 ### 1.5 Convenciones
@@ -222,15 +222,22 @@ Al terminar, informará de cuántas filas se importaron y cuántas se rechazaron
 - *Aceptación:* Dado `data/anki_decks/Tarjetas_Cloud.csv` (separado por `;` y con cabecera), cuando se importa, entonces ninguna tarjeta contiene el separador y la cabecera no se importa como tarjeta.
 - *Verificación:* UT, usando como casos de prueba los CSV de la v0.
 
-**FR-SUB-006** · M · H2 · Q3, Q11, DP-1
+**FR-SUB-006** · M · H2 · Q3, Q11, DP-1, DP-18
 El sistema deberá convertir cada fila válida de un CSV en un concepto con al menos una pregunta de un tipo del MVP. La cita de esa pregunta es la propia fila (número y texto).
 
 - **Temas:** salen de la columna de etiquetas. Si no hay etiquetas, se crea un tema por fuente.
+- **Columnas opcionales (DP-18):** el jugador puede añadir al CSV sus propias respuestas aceptadas y sus propios distractores, para que el juego no tenga que inventarlos.
+  - Se reconocen por el nombre en la cabecera, en cualquier orden y sin tener en cuenta mayúsculas ni tildes: **Respuestas** (o `answers`) y **Distractores** (o `distractors`). Sin cabecera, no se reconocen.
+  - Una celda puede tener varios valores separados por `|`. Se quitan los espacios de los extremos de cada valor y se ignoran los valores vacíos.
+  - Son opcionales fila a fila: una celda vacía o una columna que falta nunca hace que se rechace la fila; se aplica la regla sin columnas.
 - **Preguntas en H2, sin IA:**
-  - Test: los distractores son reversos de otras filas de la misma fuente.
-  - Verdadero/falso: el anverso se empareja con su propio reverso o con uno elegido al azar.
+  - Test: si la fila tiene 3 distractores válidos o más, en cada presentación se eligen 3 al azar entre ellos. Si tiene menos, se completan con reversos de otras filas de la misma fuente, que es también la regla sin columnas.
+  - Verdadero/falso: el anverso se empareja con su propio reverso o con un valor falso: uno de los distractores de la fila si tiene, o el reverso de otra fila elegido al azar si no.
+  - Respuesta escrita (DP-15): si la fila tiene la columna Respuestas rellena, esa es la lista de respuestas aceptadas. Si no, solo cuando el reverso es corto, de 3 palabras o menos (prov.), y entonces la respuesta aceptada es el propio reverso. En los dos casos, cada respuesta aceptada debe tener 3 palabras o menos (prov.).
+- **Validación de las columnas:** se descarta un distractor que, normalizado como en FR-ANS-007, coincide con el reverso o con una respuesta aceptada, y también una respuesta aceptada de más de 3 palabras. Lo descartado se cuenta en el informe de importación (FR-SUB-005), con la fila y el motivo, pero la fila se importa.
 - *Aceptación:* Dado un CSV con N ≥ 4 filas válidas, cuando se importa, entonces hay N conceptos, cada uno con al menos 1 pregunta y su cita, agrupados en temas según la regla anterior.
-- *Verificación:* UT.
+- *Aceptación:* Dada la fila `¿Puerto del servidor DHCP?;El puerto 67 UDP.;67;68|53|80|443` con la cabecera `Frente;Reverso;Respuestas;Distractores`, cuando se importa, entonces tiene una pregunta escrita que acepta "67" y un test cuyos 3 distractores salen siempre de 68, 53, 80 y 443.
+- *Verificación:* UT, usando también los CSV de la v0 (sin columnas opcionales).
 
 **FR-SUB-007** · M · H2 · Q22 a
 El sistema deberá permitir renombrar y eliminar temas.
@@ -268,7 +275,8 @@ El sistema deberá organizar lo generado en la jerarquía *tema → concepto →
 - Cada variante es de uno de los tipos del MVP:
   - test de 4 opciones;
   - verdadero/falso;
-  - cloze de elegir: una frase con un hueco y 4 opciones.
+  - cloze de elegir: una frase con un hueco y 4 opciones;
+  - respuesta escrita (DP-15): una pregunta o una frase con un hueco que se responde tecleando una respuesta corta, con su lista de respuestas aceptadas (FR-ANS-007).
 - Ninguna variante debe poder responderse con solo memorizar el enunciado de otra variante del mismo concepto.
 - *Aceptación:* En una muestra de 20 conceptos del conjunto de evaluación, el dueño juzga que se cumple en ≥ 90% de los casos (prov.).
 - *Verificación:* UT (estructura), EVAL.
@@ -282,11 +290,11 @@ Toda pregunta deberá llevar una cita literal de la fuente con su página.
 El sistema deberá descartar una pregunta si ocurre cualquiera de estas dos cosas:
 
 - su cita, una vez normalizada (espacios, mayúsculas, guiones), no aparece literalmente en el texto de la página indicada;
-- su clave de respuesta no es válida para su tipo.
+- su clave de respuesta no es válida para su tipo. En la respuesta escrita, la lista de respuestas aceptadas no puede estar vacía y cada una debe tener 3 palabras o menos (prov.).
 - *Verificación:* UT.
 
 **FR-GEN-006** · M · H4 · Q12
-El sistema deberá verificar cada pregunta que supere FR-GEN-005 con un modelo de una familia distinta a la del generador. La pregunta se descarta si la respuesta no se deduce de la cita o si algún distractor no es claramente falso.
+El sistema deberá verificar cada pregunta que supere FR-GEN-005 con un modelo de una familia distinta a la del generador. La pregunta se descarta si la respuesta no se deduce de la cita o si algún distractor no es claramente falso. En la respuesta escrita, también se descarta si admite respuestas correctas que no están en su lista de respuestas aceptadas.
 
 - *Aceptación:* Dadas unas preguntas defectuosas sembradas a propósito en el conjunto de evaluación, el verificador rechaza ≥ 90% de ellas (prov.).
 - *Verificación:* EVAL.
@@ -334,7 +342,7 @@ El sistema deberá registrar los tokens y el coste estimado de cada trabajo del 
 ### 3.4 Banco de preguntas y calidad (QST)
 
 **FR-QST-001** · M · H4 · Q3, Q12
-El sistema deberá permitir al dueño ver, editar (enunciado, opciones y respuesta) y descartar cualquier pregunta de sus asignaturas. Una pregunta editada conserva su cita.
+El sistema deberá permitir al dueño ver, editar (enunciado, opciones y respuesta, o respuestas aceptadas en la respuesta escrita) y descartar cualquier pregunta de sus asignaturas. Una pregunta editada conserva su cita.
 
 - *Verificación:* E2E.
 
@@ -451,6 +459,8 @@ El paquete de contenido base deberá incluir 8 enemigos normales, 2 élites y 1 
 El sistema no deberá limitar el tiempo de respuesta. A cambio, existe el **crítico por rapidez**:
 
 - Se activa cuando el acierto llega antes de un umbral calculado a partir de la longitud de la pregunta. La fórmula es un parámetro (prov.).
+- En la respuesta escrita, el umbral suma además un tiempo por cada carácter de la respuesta aceptada más corta (prov.), porque teclear es más lento que tocar una opción (DP-15).
+- Un acierto con comodín no lo activa (FR-ANS-008).
 - Multiplica por 1,5 los valores numéricos del efecto, redondeando hacia abajo.
 - Se combina de forma multiplicativa con otros multiplicadores: por ejemplo, Apuesta ×3 con crítico da ×4,5.
 - No afecta a los efectos que no tienen valor numérico.
@@ -516,7 +526,9 @@ Así, crear una Carta de Estudio nueva es solo cuestión de datos.
 **FR-NOD-004** · M · H2 · P1
 **Reliquias:** una reliquia solo puede modificar efectos que se disparan con un acierto (p. ej. "+2 de daño en los aciertos"). El MVP incluye al menos 5 reliquias como recompensa de Eventos y Élites (prov.).
 
-- *Verificación:* UT (validación del contenido).
+- **Huecos (DP-16):** el jugador puede llevar como máximo 5 reliquias a la vez (prov.). Si consigue una con todos los huecos ocupados, elige entre quedársela soltando una de las que lleva o renunciar a la nueva. Una reliquia soltada se pierde para el resto de la partida.
+- *Aceptación:* Dado un jugador con todos los huecos ocupados, cuando consigue una reliquia, entonces nunca lleva más reliquias que huecos y la que sale es la que él elige.
+- *Verificación:* UT (validación del contenido y regla de los huecos).
 
 ### 3.9 Respuesta y corrección (ANS)
 
@@ -557,6 +569,27 @@ Si no queda ninguna pregunta elegible, se relaja primero la regla 3 y después l
 
 - *Verificación:* UT y SIM: con el banco mínimo de FR-RUN-001 no se produce ningún bloqueo en 1.000 partidas.
 
+**FR-ANS-007** · M · H2 · Q11, P1, DP-15
+En la **respuesta escrita**, el sistema deberá corregir la respuesta tecleada comparándola con la lista de respuestas aceptadas de la pregunta, después de normalizar las dos:
+
+- **Normalización:** no cuentan las mayúsculas, las tildes, los signos de puntuación ni los espacios repetidos o en los extremos. La "ñ" no se convierte en "n".
+- **Erratas:** si la respuesta aceptada tiene 5 caracteres o más una vez normalizada, se admite 1 errata: una letra de más, de menos, cambiada o dos letras contiguas intercambiadas (prov.).
+- **Números:** si la respuesta aceptada contiene cifras, las cifras deben coincidir exactamente; las erratas solo se admiten en las letras.
+- **Corrección:** después de responder, se muestra la respuesta tecleada junto a la respuesta aceptada más parecida, con las diferencias marcadas. Si se acepta con una errata, se muestra igualmente para que el jugador vea la forma correcta.
+- No existe ningún botón de "la tenía bien" ni otra forma de autoevaluación (FR-ANS-001). Si la corrección es injusta, el camino es el reporte (FR-QST-002) o editar las respuestas aceptadas (FR-QST-001).
+- *Aceptación:* Dada la respuesta aceptada "Hipervisor", entonces "hipervisor", " Hipervisor. " e "hipervisro" son aciertos, e "hipervisión" es un fallo. Dada "1492", "1942" es un fallo.
+- *Verificación:* UT (tabla de casos).
+
+**FR-ANS-008** · M · H2 · P1, DP-17, ADR-0012
+Un **comodín** es un objeto de un solo uso que, antes de responder, quita 2 distractores de una pregunta de 4 opciones (test o cloze de elegir). No se puede usar en verdadero/falso ni en la respuesta escrita.
+
+- **Cómo se consigue:** solo como recompensa de opciones de Evento que exigen acertar (FR-NOD-002) y de Élites. El jugador puede llevar como máximo 2 a la vez (prov.).
+- **Acierto con comodín:** la carta aplica su efecto, pero sin crítico por rapidez (FR-CMB-007). Los demás multiplicadores se aplican con normalidad. Para todo lo demás de la partida cuenta como un acierto.
+- **Fallo con comodín:** igual que cualquier fallo (FR-CMB-001).
+- **Aprendizaje:** el acierto con comodín se califica *Hard* (FR-SRS-002) y el evento de respuesta guarda en su contexto de juego que se usó un comodín.
+- El comodín se gasta al usarlo, se acierte o se falle. Si la app se cierra con la pregunta en pantalla, al retomar siguen quitados los mismos distractores (FR-OFF-010).
+- *Verificación:* UT, y SIM dentro de NFR-QLT-002: el jugador que responde al azar usa todos los comodines que consigue.
+
 ### 3.10 Aprendizaje (SRS)
 
 **FR-SRS-001** · M · H2 · Q19 a, V0-D5
@@ -564,10 +597,11 @@ El sistema deberá programar los repasos con FSRS a nivel de **concepto**, usand
 
 - *Verificación:* UT.
 
-**FR-SRS-002** · M · H2 · Q19 a, P1, V0-D1, DP-5
-La calificación FSRS deberá derivarse solo del acierto y del tiempo de respuesta:
+**FR-SRS-002** · M · H2 · Q19 a, P1, V0-D1, DP-5, DP-17, ADR-0012
+La calificación FSRS deberá derivarse solo del acierto, del tiempo de respuesta y del uso de un comodín:
 
 - fallo = *Again*;
+- acierto con comodín = *Hard* (FR-ANS-008);
 - acierto = *Good*;
 - acierto con crítico por rapidez = *Easy*.
 - *Verificación:* UT.
@@ -880,7 +914,7 @@ Los marcados con ★ son criterios de aceptación del MVP (§8).
 ### 5.2 Formatos de entrada
 
 - **PDF:** hasta 100 páginas y 50 MB (prov.). Si tiene texto, se extrae; si está escaneado, va a visión (FR-GEN-002).
-- **CSV:** mínimo dos columnas (anverso y reverso) y, opcionalmente, una de etiquetas. Separador `,`, `;` o tabulador. También se admite el formato de texto plano de Anki (FR-SUB-005).
+- **CSV:** mínimo dos columnas (anverso y reverso) y, opcionalmente, una de etiquetas. También, opcionalmente, las columnas Respuestas y Distractores, reconocidas por la cabecera y con los valores separados por `|` (FR-SUB-006). Separador `,`, `;` o tabulador. También se admite el formato de texto plano de Anki (FR-SUB-005).
 - **Paquete de contenido:** JSON validado por esquema (FR-DAT-001).
 
 ### 5.3 Interfaces de software
@@ -936,7 +970,7 @@ Cada hito termina con su propia verificación. H4 depende de las cuentas de H3.
 - Ascensión (Q37 c), desbloqueos de variedad y más reliquias (Q20 a).
 - Cartas cuya dificultad de pregunta crece con su potencia (Q13 d).
 - Compartir asignaturas por enlace (Q14 b).
-- Respuesta libre corregida por LLM; preguntas de ordenar y emparejar (Q11 d/e).
+- Respuesta libre corregida por LLM (respuestas largas; la respuesta escrita corta del MVP se corrige sin LLM, FR-ANS-007); preguntas de ordenar y emparejar (Q11 d/e).
 - Envoltorio nativo con Capacitor para las tiendas (Q8 b).
 - Ampliación con búsqueda web, citando la URL (Q22).
 - Plan de pago (Q10 b).
@@ -986,7 +1020,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 
 ### 10.1 Decisiones pendientes (DP)
 
-- **Resuelta:** el dueño la decidió el 2026-09-30 y ya está escrita en los requisitos.
+- **Resuelta:** el dueño la decidió (el 2026-09-30, salvo DP-15 a DP-18, del 2026-10-07) y ya está escrita en los requisitos.
 - **Propuesta:** ya está escrita en los requisitos; solo falta la confirmación del dueño.
 - **Abierta:** falta decidirla, antes del hito indicado.
 
@@ -996,7 +1030,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | DP-2 | ¿Se conserva el progreso del invitado al registrarse? | Resuelta | No: la cuenta empieza de cero y el progreso de invitado queda solo en el dispositivo (FR-ACC-004) | H3 |
 | DP-3 | Qué pasa con una carta cuya pregunta se falla | Resuelta | Va al descarte y no se elimina del mazo (FR-CMB-001) | H2 |
 | DP-4 | Repaso: ¿repite la misma pregunta fallada o usa otra variante del concepto? | Resuelta | Otra variante; la misma solo si ya se cumple la distancia mínima (FR-STU-001). Repetirla justo después de ver la respuesta premia la memoria a corto plazo | H2 |
-| DP-5 | Qué nota FSRS corresponde a cada respuesta | Resuelta | Fallo = Again, acierto = Good, crítico = Easy; *Hard* no se usa (FR-SRS-002) | H2 |
+| DP-5 | Qué nota FSRS corresponde a cada respuesta | Resuelta | Fallo = Again, acierto = Good, crítico = Easy (FR-SRS-002). *Hard* solo se usa en los aciertos con comodín (DP-17, ADR-0012) | H2 |
 | DP-6 | Valores de la cuota y si las ampliaciones la consumen | Resuelta (criterio) | Fijarlos con el coste medido en H4. Los trabajos fallidos no consumen (FR-GEN-011) | H4 |
 | DP-7 | Dónde se aloja el worker de Node | Resuelta para desarrollo; abierta para el lanzamiento | Durante el desarrollo y H4, el worker se ejecuta en el ordenador del dueño, sin coste. Para el lanzamiento, en este orden (investigación del 2026-09-30): (1) Oracle Cloud Always Free A1 en Frankfurt, gratis pero con capacidad no garantizada y reclamación de instancias inactivas; (2) Hetzner, desde ~6 €/mes; (3) una beta pequeña desde el ordenador del dueño, sabiendo que los trabajos esperan en la cola mientras esté apagado | Lanzamiento |
 | DP-8 | Nombre del producto | Resuelta | **Empollatro**. Antes del lanzamiento hay que comprobar que el dominio, las tiendas y las marcas (EUIPO/OEPM) estén libres | Lanzamiento |
@@ -1006,6 +1040,10 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | DP-12 | ¿El invitado puede importar CSV en local? (en Q16 la cuenta solo se exigía para subir PDFs) | Resuelta | Sí: no tiene coste de IA y hace posible H2 sin cuentas | H2 |
 | DP-13 | Presupuesto de lanzamiento: Supabase Pro (R-7), alojamiento del worker (DP-7) y saldo de LLM para usuarios públicos | Abierta | Decidirlo justo antes del lanzamiento, con los costes medidos en H4 (FR-GEN-012, NFR-CST-001) | Lanzamiento |
 | DP-14 | Dónde se aloja la PWA, con HTTPS (lo exigen la instalación y el Service Worker de FR-OFF-004) | Resuelta para H1; abierta para H2 | En H1 se prueba con el servidor de desarrollo del PC del dueño, a través de la wifi de casa (sin coste y sin publicar nada). Antes de H2 hay que elegir un alojamiento estático gratuito con HTTPS (R-10) | H2 |
+| DP-15 | ¿Hay preguntas en las que se escribe la respuesta, como en las tarjetas de Anki con respuesta tecleada? | Resuelta | Sí, como cuarto tipo del MVP: la **respuesta escrita**, para respuestas cortas, corregida sin LLM con normalización y 1 errata tolerada (FR-ANS-007). La respuesta larga corregida por LLM sigue después del MVP (§7.2) | H2 |
+| DP-16 | ¿Hay un límite de reliquias? | Resuelta | Sí: 5 huecos (prov.); con todos ocupados, el jugador elige cuál soltar o renuncia a la nueva (FR-NOD-004). Las reliquias siguen modificando solo efectos de un acierto (P1) | H2 |
+| DP-17 | ¿Hay ayudas que quiten opciones? | Resuelta | Sí: el **comodín**, de un solo uso, quita 2 distractores y se consigue acertando. El acierto con comodín no tiene crítico y FSRS lo califica *Hard* (FR-ANS-008, FR-SRS-002, ADR-0012) | H2 |
+| DP-18 | ¿El jugador puede dar en su CSV las respuestas aceptadas y los distractores? | Resuelta | Sí, con las columnas opcionales Respuestas y Distractores, reconocidas por la cabecera y con los valores separados por `\|` (FR-SUB-006). Sin ellas, se aplica la regla de DP-1. En los mazos reales los reversos son frases largas, así que sin la columna Respuestas casi ninguna fila daría pregunta escrita | H2 |
 
 ### 10.2 Valores provisionales (se calibran jugando)
 
@@ -1022,6 +1060,10 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Distancia mínima tras un fallo | 8 preguntas | FR-ANS-004 | H2 |
 | Biblioteca | 3 preguntas; 10% de vida por acierto; mejora con ≥ 2 aciertos | FR-NOD-003 | H2 |
 | Eventos / reliquias | ≥ 5 / ≥ 5 | FR-NOD-002/004 | H2 |
+| Huecos de reliquia | 5 | FR-NOD-004 | H2 |
+| Comodines a la vez | 2 | FR-ANS-008 | H2 |
+| Respuesta escrita: longitud máxima / erratas toleradas | 3 palabras / 1 errata desde 5 caracteres | FR-SUB-006, FR-ANS-007 | H2 |
+| Tiempo extra del crítico por carácter tecleado | lo fija la fórmula del umbral | FR-CMB-007 | H2 |
 | Victoria jugando al azar / acertándolo todo | ≤ 1% / ≥ 90% | NFR-QLT-002 | H2 |
 | Límites de PDF | 100 páginas / 50 MB | FR-SUB-002 | H4 |
 | Umbral de página para visión | < 50 caracteres o > 50% de imagen | FR-GEN-002 | H4 |
@@ -1049,7 +1091,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Q9.1 | (a) Se prioriza el coste; procesamiento en EE. UU. con DPA | FR-PRV-004, ADR-0007 |
 | Q9.2 | Se decide con el stack: Vercel AI SDK | FR-GEN-010 |
 | Q10 | (a) Cuota gratuita, arquitectura preparada para (b) | FR-GEN-011, NFR-SEC-004 |
-| Q11 | (a)+(b)+(c) en el MVP; (d) y (e) después | FR-GEN-003, FR-ANS-001, §7.2 |
+| Q11 | (a)+(b)+(c) en el MVP; (d) y (e) después. El 2026-10-07 se añade al MVP la respuesta escrita corta (DP-15) | FR-GEN-003, FR-ANS-001/007, §7.2 |
 | Q12 | (a)+(b)+(d) Cita, verificación automática y reporte | P3, FR-GEN-004/005/006, FR-QST-* |
 | Q13 | (b) Las cartas exigen pregunta; evolución hacia (d) | FR-CMB-001, §7.2 |
 | Q14 | (a) Asignaturas privadas; (b) después; (c) nunca | P6, FR-SUB-004, FR-PRV-*, §7.3 |
@@ -1057,7 +1099,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Q16 | (b)+(c) Google, Apple y enlace mágico + invitado | FR-ACC-*, DP-12 |
 | Q17 | (a) 1 acto con nodos por tema; guardado tras cada acción | FR-RUN-002/003, FR-OFF-003/009/010 |
 | Q18 | (b) La partida trabaja sobre una asignatura | FR-RUN-001 |
-| Q19 | (a) FSRS; falladas y vencidas primero; nunca bloquea | FR-SRS-*, ADR-0008 |
+| Q19 | (a) FSRS; falladas y vencidas primero; nunca bloquea | FR-SRS-*, ADR-0008, ADR-0012 |
 | Q20 | (a)+(c) Meta-progresión de variedad + mapa de maestría | FR-PRG-*, §7.2 |
 | Q21 | (a) Offline-first, innegociable | P4, FR-OFF-*, ADR-0006 |
 | Q22 | (a) Asignatura → fuentes → temas → conceptos → preguntas | FR-SUB-*, FR-GEN-003, Glosario |

@@ -1,0 +1,169 @@
+/* The combat screen of the prototype (ticket 06): the title and the credits
+   at the top, the enemy in the middle and, at the bottom, where the thumb
+   reaches, the health and block of the player and the hand
+   (NFR-USA-002). */
+.combat-screen {
+  min-height: 100dvh;
+  /* A card dragged past the edge of the screen must not make the page
+     scroll sideways. */
+  overflow: clip;
+}
+
+.combat-screen__content {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  /* At the bottom, room for the arc of the fan and for the gesture bar of
+     the phone. */
+  padding: 0.5rem 1rem max(1.5rem, env(safe-area-inset-bottom));
+}
+
+.combat-screen__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.combat-screen__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 36px; /* twice the size m6x11plus is drawn for */
+  font-weight: normal;
+  line-height: 1;
+  color: var(--color-accent);
+}
+
+.combat-screen__credits {
+  /* At least 44x44 px to be easy to tap with a thumb. */
+  min-width: 44px;
+  min-height: 44px;
+  padding: 0.5rem 1rem;
+  font: inherit;
+  color: var(--color-text);
+  background-color: var(--color-surface);
+  border: 2px solid var(--color-text-muted);
+}
+
+.combat-screen__arena {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+}
+
+/* The health, the block and the discard pile of the player, in one row over
+   the hand. */
+.combat-screen__player {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.combat-screen__player-health {
+  flex: 1;
+  min-width: 0;
+}
+
+.combat-screen__counter {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0;
+  line-height: 1;
+}
+
+.combat-screen__counter-label {
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+
+.combat-screen__counter-value {
+  font-family: var(--font-display);
+  font-size: 18px; /* the size m6x11plus is drawn for */
+}
+
+/* The block is the shield of the player: its number has the color of
+   defense. */
+.combat-screen__counter--block .combat-screen__counter-value {
+  min-width: 2rem;
+  padding: 2px 4px;
+  text-align: center;
+  color: var(--color-text);
+  background-color: var(--color-block-tag);
+}
+
+/* What the last card did to the player, floating up from the row. */
+.combat-screen__player-tag {
+  position: absolute;
+  bottom: 100%;
+  left: 40%;
+  animation: tag-float 900ms ease-out forwards;
+}
+
+/* A tag with what a played card did: "-6" over the enemy, "+5" over the
+   player. It is only a picture of the change: the numbers of the bars and
+   counters already say it. */
+.effect-tag {
+  padding: 2px 6px;
+  font-family: var(--font-display);
+  font-size: 36px; /* twice the size m6x11plus is drawn for */
+  line-height: 1;
+  color: var(--color-text);
+  border: 2px solid var(--color-background);
+  box-shadow: 2px 2px 0 var(--color-background);
+  pointer-events: none;
+}
+
+.effect-tag--damage {
+  color: var(--color-text);
+  background-color: var(--color-damage-tag);
+}
+
+.effect-tag--heal {
+  color: var(--color-text);
+  background-color: var(--color-heal-tag);
+}
+
+.effect-tag--block {
+  color: var(--color-text);
+  background-color: var(--color-block-tag);
+}
+
+@keyframes tag-float {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.6);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.2);
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1);
+  }
+}
+
+/* The same tag without movement: it only appears and fades. */
+@keyframes tag-fade {
+  0%,
+  70% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .combat-screen__player-tag {
+    animation-name: tag-fade;
+  }
+}

@@ -2,7 +2,7 @@ import { hexToRgb } from '../theme/contrast';
 import { PALETTE, type PaletteColorName } from '../theme/palette';
 import fragmentShaderSource from './swirl.frag.glsl?raw';
 import vertexShaderSource from './swirl.vert.glsl?raw';
-import type { SwirlColors } from './swirlColors';
+import { DESK_DETAIL_COLORS, type SwirlColors } from './swirlColors';
 
 // Seconds the swirl takes to complete its loop. The shader is written so the
 // end of the loop joins its start (see swirl.frag.glsl).
@@ -60,6 +60,12 @@ export function createSwirlRenderer(canvas: HTMLCanvasElement, colors: SwirlColo
   gl.uniform3fv(gl.getUniformLocation(program, 'u_baseColor'), paletteColorForShader(colors.base));
   gl.uniform3fv(gl.getUniformLocation(program, 'u_primaryColor'), paletteColorForShader(colors.primary));
   gl.uniform3fv(gl.getUniformLocation(program, 'u_secondaryColor'), paletteColorForShader(colors.secondary));
+  gl.uniform3fv(gl.getUniformLocation(program, 'u_penColor'), paletteColorForShader(DESK_DETAIL_COLORS.pen));
+  gl.uniform3fv(gl.getUniformLocation(program, 'u_eraserColor'), paletteColorForShader(DESK_DETAIL_COLORS.eraser));
+  gl.uniform3fv(
+    gl.getUniformLocation(program, 'u_eraserSleeveColor'),
+    paletteColorForShader(DESK_DETAIL_COLORS.eraserSleeve),
+  );
 
   const resolutionLocation = gl.getUniformLocation(program, 'u_resolution');
   const phaseLocation = gl.getUniformLocation(program, 'u_phase');

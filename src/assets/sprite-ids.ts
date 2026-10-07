@@ -6,7 +6,9 @@ export const SPRITE_IDS = [
   'card-art-cheat-sheet',
   'card-art-coffee',
   'card-art-empty-desk',
-  'enemy-brute',
+  'enemy-math-teacher',
+  'enemy-midterm',
+  'intent-attack',
 ] as const;
 
 export type SpriteId = (typeof SPRITE_IDS)[number];

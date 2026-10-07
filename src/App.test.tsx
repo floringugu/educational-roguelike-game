@@ -27,13 +27,24 @@ describe('App', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows the screen with the texts from the catalog', () => {
+  it('opens on the combat screen of the prototype, with the texts from the catalog', () => {
     const html = renderToStaticMarkup(<App />);
 
     expect(html).toContain(es.app.name);
-    expect(html).toContain(es.home.tagline);
-    expect(html).toContain(es.home.status);
-    expect(html).toContain(es.home.creditsButton);
+    expect(html).toContain(es.combat.creditsButton);
+    expect(html).toContain(es.enemies.midterm.name);
+    expect(html).toContain(es.enemies.midterm.description);
+    expect(html).toContain(es.combat.blockLabel);
+    expect(html).toContain(es.combat.discardLabel);
+  });
+
+  it('shows the enemy with its health bar and its intent: the action and its value (FR-CMB-005)', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html).toContain(`aria-label="${es.combat.enemyHealthLabel}"`);
+    expect(html).toContain('aria-valuenow="40"');
+    expect(html).toContain(es.combat.intentAttack);
+    expect(html).toContain('<span class="enemy__intent-value">8</span>');
   });
 
   it('shows the hand of 5 test cards, with their texts from the catalog (FR-VIS-002)', () => {

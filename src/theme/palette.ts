@@ -85,6 +85,31 @@ export const colorRoles = {
   // edge.
   cardCoffee: 'sand',
   cardCoffeeEdge: 'tan',
+  // The combat screen of the prototype (ticket 06). The health bars: an
+  // empty track, the health that is left and, behind it, a trail that
+  // follows a moment later and shows how much was lost.
+  healthTrack: 'bark',
+  healthTrail: 'sand',
+  enemyHealth: 'vermilion',
+  playerHealth: 'leaf',
+  // The tags that show what a played card did: damage, healing and block.
+  // The block tag has the color of defense.
+  damageTag: 'crimson',
+  healTag: 'forest',
+  blockTag: 'indigo',
+  // The question sheet: a page of an exam, with ruled lines, a margin line in
+  // the color of the type of the card and the marks of the teacher in red
+  // pen. Its options are on parchment, and after answering, the right one
+  // turns green and a wrong one red. Like the card, it can be crumpled or
+  // stained with coffee, with the same textures.
+  exam: 'paper',
+  examText: 'ink',
+  examRule: 'lavender',
+  examMark: 'crimson',
+  examOption: 'parchment',
+  examOptionEdge: 'leather',
+  answerCorrect: 'lime',
+  answerWrong: 'crimson',
 } as const satisfies Record<string, PaletteColorName>;
 
 export type ColorRole = keyof typeof colorRoles;
@@ -117,6 +142,28 @@ export const textOnBackgroundPairs: ReadonlyArray<{ text: ColorRole; background:
   { text: 'cardText', background: 'cardCrease' },
   { text: 'cardText', background: 'cardCoffee' },
   { text: 'cardText', background: 'cardCoffeeEdge' },
+  // The combat screen: the tags of the effects, the numbers of the health
+  // bars over their track, and the question sheet.
+  { text: 'text', background: 'damageTag' },
+  { text: 'text', background: 'healTag' },
+  { text: 'text', background: 'blockTag' },
+  { text: 'text', background: 'healthTrack' },
+  { text: 'examText', background: 'exam' },
+  // The name of the card being played, at the top of the sheet, in the
+  // color of its type.
+  { text: 'cardAttack', background: 'exam' },
+  { text: 'cardDefense', background: 'exam' },
+  { text: 'cardSkill', background: 'exam' },
+  { text: 'examText', background: 'examRule' },
+  // The question sheet of a crumpled card, or of a stained one.
+  { text: 'examText', background: 'cardDiploma' },
+  { text: 'examText', background: 'cardCrease' },
+  { text: 'examText', background: 'cardCoffee' },
+  { text: 'examText', background: 'cardCoffeeEdge' },
+  { text: 'examMark', background: 'exam' },
+  { text: 'examText', background: 'examOption' },
+  { text: 'examText', background: 'answerCorrect' },
+  { text: 'text', background: 'answerWrong' },
   // The window behind the art of a card holds no text, but the test that
   // reads the CSS cannot know it: it counts any text color that is set
   // without a background as able to end up on it.
