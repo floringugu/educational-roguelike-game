@@ -1,4 +1,4 @@
-// The fixed palette of Empollatro: "Pergamino y tinta", 20 colors chosen by
+// The fixed palette of Empollatro: "Pergamino y tinta", 23 colors chosen by
 // the owner (FR-VIS-004). All the art and all the colors of the interface use
 // only these colors.
 //
@@ -25,6 +25,11 @@ export const PALETTE = {
   forest: '#2f5a3a',
   leaf: '#5a9a5a',
   lime: '#a4d17a',
+  // The faded greens of the formica of the desk in the background, from its
+  // shaded side to its lit side (ADR-0014).
+  olive: '#7d8556',
+  sage: '#afb989',
+  khaki: '#c8c48e',
 } as const;
 
 export type PaletteColorName = keyof typeof PALETTE;
@@ -38,6 +43,14 @@ export const colorRoles = {
   text: 'paper',
   textMuted: 'sand',
   accent: 'gold',
+  // The texts drawn right on the desk of the background (ADR-0014), which is
+  // light: the name of the enemy and the numbers of the health in ink, and
+  // the title of the combat in wine. They have no
+  // background of their own, so their contrast is checked against every
+  // color of the desk and the floor that can be under them
+  // (tests/background/swirl-colors.test.ts).
+  deskText: 'ink',
+  deskTitle: 'wine',
   // Cards (FR-VIS-002): a page of a notebook. Paper with ink text, ruled
   // lines, a leather frame with a hard shadow, and a dark window behind the
   // art, since the sprites have light details. The cost is circled in red
@@ -58,40 +71,20 @@ export const colorRoles = {
   cardDefenseLight: 'periwinkle',
   cardSkill: 'forest',
   cardSkillLight: 'leaf',
-  // The editions of a card. Foil is a diploma: crumpled parchment with a
-  // gold seal that shines. Holo is a certificate: crumpled paper with a thin
-  // tan edge, like the diploma, and the brown seal of the university, with a mortarboard on
-  // it, crossed by holographic stripes. The seal is not blue, the color
-  // of defense, since a certificate can be of any type. The crumpled sheets are textures
-  // (src/assets/textures/): their inside uses `card`, `cardDiploma` and
-  // `cardCrease` (the shaded side of the creases), their edge
-  // `cardSheetEdge`, and their shadow
-  // `cardShadow`. No text reaches the edge.
+  // The editions of a card. Foil is a diploma: crumpled parchment. Holo is a
+  // certificate: crumpled paper with a thin tan edge, like the diploma. The
+  // crumpled sheets are textures (src/assets/textures/): their inside uses
+  // `card`, `cardDiploma` and `cardCrease` (the shaded side of the creases),
+  // their edge `cardSheetEdge`, and their shadow `cardShadow`. No text
+  // reaches the edge.
   cardDiploma: 'parchment',
   cardCrease: 'sand',
   cardSheetEdge: 'tan',
-  cardSealEdge: 'umber',
-  foilSeal: 'gold',
-  foilSealRing: 'amber',
-  foilShine: 'paper',
-  holoSeal: 'umber',
-  holoSealRing: 'leather',
-  holoEmblem: 'paper',
-  holoBand1: 'lavender',
-  holoBand2: 'lime',
-  holoBand3: 'gold',
-  holoBand4: 'vermilion',
   // The coffee stains of a card (textures too): dried coffee, darker at its
   // edge.
   cardCoffee: 'sand',
   cardCoffeeEdge: 'tan',
-  // The combat screen of the prototype (ticket 06). The health bars: an
-  // empty track, the health that is left and, behind it, a trail that
-  // follows a moment later and shows how much was lost.
-  healthTrack: 'bark',
-  healthTrail: 'sand',
-  enemyHealth: 'vermilion',
-  playerHealth: 'leaf',
+  // The combat screen of the prototype (ticket 06).
   // The tags that show what a played card did: damage, healing and block.
   // The block tag has the color of defense.
   damageTag: 'crimson',
@@ -142,12 +135,10 @@ export const textOnBackgroundPairs: ReadonlyArray<{ text: ColorRole; background:
   { text: 'cardText', background: 'cardCrease' },
   { text: 'cardText', background: 'cardCoffee' },
   { text: 'cardText', background: 'cardCoffeeEdge' },
-  // The combat screen: the tags of the effects, the numbers of the health
-  // bars over their track, and the question sheet.
+  // The combat screen: the tags of the effects and the question sheet.
   { text: 'text', background: 'damageTag' },
   { text: 'text', background: 'healTag' },
   { text: 'text', background: 'blockTag' },
-  { text: 'text', background: 'healthTrack' },
   { text: 'examText', background: 'exam' },
   // The name of the card being played, at the top of the sheet, in the
   // color of its type.

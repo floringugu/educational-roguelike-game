@@ -27,6 +27,13 @@ export default defineConfig({
     // same. If the port is busy, Vite stops instead of picking another one.
     port: 5173,
     strictPort: true,
+    // Listen on the local network too, so the phone can open the game.
+    host: true,
+    // The computer announces itself on the local network as
+    // empollatro.local (mDNS). Vite answers only to localhost and IP
+    // addresses unless a name is allowed here, to stop other sites from
+    // reaching the dev server through a name they control.
+    allowedHosts: ['empollatro.local'],
   },
   test: {
     include: ['src/**/*.test.{ts,tsx}', 'tests/**/*.test.ts'],

@@ -44,7 +44,7 @@ const colorProperty =
 const wordsThatAreNotColors = new Set([
   'none', 'inherit', 'initial', 'unset', 'currentcolor', 'transparent',
   'solid', 'dashed', 'dotted', 'double', 'inset', 'thin', 'medium', 'thick', 'underline',
-  // Gradients, such as the editions of the cards.
+  // Gradients, such as the ruled lines of the cards.
   'linear', 'repeating', 'gradient', 'calc',
 ]);
 
@@ -180,9 +180,14 @@ describe('NFR-ACS-001: contrast of text and background', () => {
   //     without a background can end up on any of them, so every such
   //     combination is a pair.
   //   - A ::before or ::after with empty content is only a drawing (the
-  //     mortarboard of a seal): it holds no text, so its background is not
-  //     one of those.
+  //     tape that holds the art of a card): it holds no text, so its
+  //     background is not one of those.
+  //   - The texts drawn right on the desk of the background (deskText and
+  //     deskTitle) are never inside a container with a background: their
+  //     contrast is checked against the colors of the desk in
+  //     tests/background/swirl-colors.test.ts.
   it('lists every pair of text and background that the CSS uses', () => {
+    const rolesDrawnOnTheDesk = new Set<ColorRole>(['deskText', 'deskTitle']);
     const usedPairs = new Set<string>();
     const textColorsWithoutBackground = new Set<ColorRole>();
     const containerBackgrounds = new Set<ColorRole>();
@@ -199,7 +204,11 @@ describe('NFR-ACS-001: contrast of text and background', () => {
         if (text !== undefined && background !== undefined) {
           usedPairs.add(`${text} on ${background}`);
         }
-        if (text !== undefined && (background === undefined || rule.selector === 'body')) {
+        if (
+          text !== undefined &&
+          !rolesDrawnOnTheDesk.has(text) &&
+          (background === undefined || rule.selector === 'body')
+        ) {
           textColorsWithoutBackground.add(text);
         }
         const isEmptyPseudoElement =

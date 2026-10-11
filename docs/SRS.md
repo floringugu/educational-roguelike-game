@@ -46,7 +46,8 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0012](adr/0012-calificacion-hard-con-comodin.md).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0014](adr/0014-vista-tres-cuartos-alta-y-pupitre-verde.md).
+- [Guía de arte](GUIA-DE-ARTE.md) (ADR-0014).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
 ### 1.5 Convenciones
@@ -826,7 +827,7 @@ El fondo deberá ser un shader WebGL de remolino escrito desde cero (R-3). El sh
 - *Verificación:* MAN, INS.
 
 **FR-VIS-002** · M · H1 · Q24.1 a
-Las cartas deberán inclinarse en 3D al tocarlas o arrastrarlas, con animación de muelle. Los efectos de edición (foil y holo) se hacen con CSS propio.
+Las cartas deberán inclinarse en 3D al tocarlas o arrastrarlas, con animación de muelle. Las ediciones (foil y holo) se distinguen por la hoja de la carta, con texturas y CSS propios, sin sellos ni brillos.
 
 - *Verificación:* MAN.
 

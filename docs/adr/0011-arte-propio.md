@@ -11,7 +11,7 @@ ADR-0004 dice que el arte sale de packs CC0 (Kenney, 0x72) recoloreados a la pal
 ## Decisión
 
 - El catálogo de assets admite **sprites propios** del proyecto además de los de packs CC0.
-- Los sprites propios se dibujan píxel a píxel, a 16×16 y solo con colores de la paleta (FR-VIS-004). No se copian ni se calcan de otros juegos (R-3).
+- Los sprites propios se dibujan píxel a píxel, a 16×16 y solo con colores de la paleta (FR-VIS-004). No se copian ni se calcan de otros juegos (R-3). Ampliado por [ADR-0014](0014-vista-tres-cuartos-alta-y-pupitre-verde.md), que sustituye a ADR-0013: se ven en tres cuartos alta y siguen la guía de arte.
 - Se publican con licencia **CC0 1.0**, con el dueño como autor, y tienen su entrada en el registro de licencias (R-4).
 - El fichero de cada sprite es su PNG en `src/assets/sprites/`. Para cambiarlo, se edita ese PNG con cualquier editor de pixel art.
 - Las **texturas** propias (por ejemplo, las hojas arrugadas de las ediciones de las cartas y las manchas de café) siguen las mismas reglas, pero van en `src/assets/textures/`: no son sprites de 16×16, y el CSS las usa como fondo sin pasar por el catálogo de sprites.

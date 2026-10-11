@@ -2,6 +2,10 @@
   max-width: 40rem;
   margin: 0 auto;
   padding: 1.5rem;
+  /* A dark sheet of its own over the light desk of the background
+     (ADR-0014): the long texts of the credits would fall on the cuts and
+     the objects of the desk. */
+  background-color: var(--color-background);
 }
 
 .credits-screen__title {

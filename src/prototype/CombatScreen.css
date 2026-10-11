@@ -31,7 +31,8 @@
   font-size: 36px; /* twice the size m6x11plus is drawn for */
   font-weight: normal;
   line-height: 1;
-  color: var(--color-accent);
+  /* Drawn right on the light floor of the background (ADR-0014). */
+  color: var(--color-desk-title);
 }
 
 .combat-screen__credits {
@@ -69,31 +70,61 @@
 }
 
 .combat-screen__counter {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  position: relative;
   margin: 0;
   line-height: 1;
 }
 
-.combat-screen__counter-label {
-  font-size: 12px;
-  color: var(--color-text-muted);
+.combat-screen__counter .sprite {
+  display: block;
 }
 
+/* The names of the counters, for screen readers only. */
+.combat-screen__counter-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The number, inside the drawing: in the middle of the shield, and on the
+   front of the shredder, under its slot. */
 .combat-screen__counter-value {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 10px;
   font-family: var(--font-display);
   font-size: 18px; /* the size m6x11plus is drawn for */
-}
-
-/* The block is the shield of the player: its number has the color of
-   defense. */
-.combat-screen__counter--block .combat-screen__counter-value {
-  min-width: 2rem;
-  padding: 2px 4px;
   text-align: center;
   color: var(--color-text);
-  background-color: var(--color-block-tag);
+}
+
+.combat-screen__shredder {
+  position: relative;
+  display: block;
+}
+
+.combat-screen__shredder .combat-screen__counter-value {
+  top: 24px;
+}
+
+/* The strips come out of the bottom of the shredder (its last 2 sprite
+   pixels are the feet). They are cut at that edge, so before and after the
+   cut they cannot be seen. */
+.combat-screen__strips {
+  position: absolute;
+  top: 42px;
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.combat-screen__strips-paper {
+  display: block;
+  transform: translateY(-100%);
 }
 
 /* What the last card did to the player, floating up from the row. */

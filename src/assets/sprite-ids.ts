@@ -1,13 +1,21 @@
 // Identifiers of the sprites in the catalog. They are in their own file, with
 // no Vite code, so scripts and tests can use them (see catalog.ts).
 export const SPRITE_IDS = [
+  'block-shield-empty',
+  'block-shield-full',
   'card-art-books',
   'card-art-chalk',
   'card-art-cheat-sheet',
   'card-art-coffee',
   'card-art-empty-desk',
+  'discard-shredder',
+  'discard-shredder-strips',
   'enemy-math-teacher',
   'enemy-midterm',
+  'health-cross-empty',
+  'health-cross-full',
+  'health-neuron-empty',
+  'health-neuron-full',
   'intent-attack',
 ] as const;
 

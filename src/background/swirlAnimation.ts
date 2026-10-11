@@ -1,7 +1,8 @@
 import type { FallbackReason } from './backgroundMode';
+import { bumpLiftInPixels, onDeskBump } from './deskBumps';
 import { FRAME_RATE_WINDOW_MS, MINIMUM_FRAME_RATE, createFrameRateMeter } from './frameRateMeter';
 import type { SwirlColors } from './swirlColors';
-import { createSwirlRenderer, type SwirlRenderer } from './swirlRenderer';
+import { NO_DESK_BUMP, createSwirlRenderer, type DeskBump, type SwirlRenderer } from './swirlRenderer';
 
 export type SwirlAnimationOptions = {
   colors: SwirlColors;
@@ -43,6 +44,17 @@ function runSwirlAnimation(
   let animationTimeMs = 0;
   let previousFrameTime: number | null = null;
   let frameRequest: number | null = null;
+  // The last hit on the desk (see deskBumps.ts), measured in animation
+  // time, so a hit received just before hiding the tab finishes its jump
+  // when the tab comes back.
+  let lastBump: { atMs: number; liftInPixels: number } | null = null;
+
+  function currentBump(): DeskBump {
+    if (lastBump === null) {
+      return NO_DESK_BUMP;
+    }
+    return { secondsSince: (animationTimeMs - lastBump.atMs) / 1000, liftInPixels: lastBump.liftInPixels };
+  }
 
   // FR-VIS-001: the image is drawn below the native resolution and stretched
   // to the screen. Drawing 1/16 of the pixels (with the default scale of
@@ -53,7 +65,7 @@ function runSwirlAnimation(
     renderer.resize(width, height);
     // Changing the size erases the image: draw it again right away, so the
     // screen does not show an empty frame.
-    renderer.draw(animationTimeMs / 1000);
+    renderer.draw(animationTimeMs / 1000, currentBump());
   }
 
   function drawFrame(frameTime: number) {
@@ -61,7 +73,7 @@ function runSwirlAnimation(
       animationTimeMs += Math.min(frameTime - previousFrameTime, LONGEST_ANIMATION_STEP_MS);
     }
     previousFrameTime = frameTime;
-    renderer.draw(animationTimeMs / 1000);
+    renderer.draw(animationTimeMs / 1000, currentBump());
 
     frameRateMeter.recordFrame(frameTime);
     if (frameRateMeter.isSlowerThan(MINIMUM_FRAME_RATE)) {
@@ -83,7 +95,7 @@ function runSwirlAnimation(
     if (options.frozen) {
       // Nothing moves, but some phones drop the image of a page that was
       // in the background: draw the frame again when the tab comes back.
-      renderer.draw(animationTimeMs / 1000);
+      renderer.draw(animationTimeMs / 1000, currentBump());
       return;
     }
     // The time spent hidden is neither animation time nor slow frames.
@@ -113,8 +125,17 @@ function runSwirlAnimation(
 
   const resizeObserver = new ResizeObserver(resizeToCanvas);
 
+  // The objects on the desk jump with a hit. A frozen background ignores
+  // the hits: nothing moves with reduced motion (FR-VIS-007).
+  const stopListeningToBumps = options.frozen
+    ? () => undefined
+    : onDeskBump((strength) => {
+        lastBump = { atMs: animationTimeMs, liftInPixels: bumpLiftInPixels(strength) };
+      });
+
   function stop() {
     pause();
+    stopListeningToBumps();
     document.removeEventListener('visibilitychange', handleVisibilityChange);
     canvas.removeEventListener('webglcontextlost', handleContextLost);
     resizeObserver.disconnect();

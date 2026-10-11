@@ -105,7 +105,8 @@
    character, wraps to a second line instead of widening the enemy. */
 .enemy__name {
   margin: 0 0 -0.25rem;
-  color: var(--color-text);
+  /* Drawn right on the light desk of the background (ADR-0014). */
+  color: var(--color-desk-text);
   font-family: var(--font-display);
   font-size: 18px; /* the size m6x11plus is drawn for */
   line-height: 1;
@@ -113,6 +114,8 @@
 }
 
 .enemy__health {
+  display: flex;
+  justify-content: center;
   width: 100%;
 }
 

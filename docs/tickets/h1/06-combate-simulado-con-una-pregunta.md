@@ -14,7 +14,7 @@ Es una maqueta para juzgar el aspecto y la sensación de juego. El motor de regl
 **Estado:** listo
 
 - [x] Un enemigo con sprite del catálogo, barra de vida e intención visible (tipo de acción y valor).
-  - El enemigo es un sprite propio de 96×96 a 192 px, con su nombre y su barra de vida debajo (40/40). Encima lleva su intención: un boli rojo propio de 16×16 (`intent-attack`, en el registro de licencias) y el valor en m6x11plus a 36 px. Un lector de pantalla oye «Va a atacar con 8».
+  - El enemigo es un sprite propio de 96×96 a 192 px, con su nombre y su vida debajo: cinco tachones rojos y «40/40» (ver la nota «Vida»). Encima lleva su intención: un boli rojo propio de 16×16 (`intent-attack`, en el registro de licencias) y el valor en m6x11plus a 36 px. Un lector de pantalla oye «Va a atacar con 8».
   - La intención cambia con cada mano nueva (8, 12, 6), para que se vea cambiar. En la maqueta el enemigo nunca llega a atacar.
 - [x] Al tocar una carta aparece una pregunta de test de 4 opciones:
   - Se juega con un toque corto (menos de 300 ms y menos de 10 px de movimiento) o arrastrándola más de 120 px hacia arriba. Mantenerla pulsada solo la levanta para leerla. Con el teclado se juega con Intro o Espacio.
@@ -24,9 +24,9 @@ Es una maqueta para juzgar el aspecto y la sensación de juego. El motor de regl
   - [x] las opciones se barajan cada vez que se presenta.
     - `shuffledOptions` las baraja con Fisher-Yates cada vez que se juega una carta. Nunca sale dos veces seguidas la misma pregunta.
 - [x] Si se acierta, el enemigo pierde vida con animación, la pantalla tiembla y la carta va al descarte.
-  - La opción se pone verde con «¡Bien!» y, 0,7 s después, la hoja baja. El enemigo destella y retrocede, sale un «-6» flotando y la barra baja con una estela más clara que la sigue con retraso. La pantalla tiembla más cuanto más daño hace la carta.
+  - La opción se pone verde con «¡Bien!» y, 0,7 s después, la hoja baja. El enemigo destella y retrocede, sale un «-6» flotando y sus tachones se vacían deslizándose. La pantalla tiembla más cuanto más daño hace la carta.
   - Solo tiemblan los ataques. Las cartas de defensa suman bloqueo y Cafelito recupera vida, con un «+5» o un «+4» sobre la vida del jugador.
-  - Con movimiento reducido no hay temblor ni movimientos: las barras y las etiquetas cambian sin animación.
+  - Con movimiento reducido no hay temblor ni movimientos: los símbolos de vida y las etiquetas cambian sin animación.
 - [x] Si se falla:
   - [x] la carta no tiene efecto y va al descarte;
     - La nota en rojo dice «Fallo: la carta no hace nada y va al descarte.». El contador de descarte sube igual.
@@ -37,7 +37,7 @@ Es una maqueta para juzgar el aspecto y la sensación de juego. El motor de regl
 - [x] Las preguntas y las cartas son un JSON de prueba con al menos 5 preguntas en español, cada una con su cita.
   - Las preguntas están en `src/prototype/questions.json`: 8 preguntas de temas variados, con `id`, `prompt`, `answer`, 3 `distractors` y `citation` (`text` y `page`). `parseQuestions` las valida al cargar y dice cuál falla. Las cartas siguen en `src/prototype/cards.json`.
 - [x] La lógica de este ticket es de usar y tirar: está aislada en la carpeta del prototipo y no se reutiliza en H2 (ADR-0003).
-  - Todo está en `src/prototype/`: la pantalla, la hoja de examen, el enemigo, las barras, las preguntas y las reglas simuladas (`mockCombat.ts`). Fuera de esa carpeta solo cambian la carta (los gestos para jugarla) y la mano (las claves de cada carta).
+  - Todo está en `src/prototype/`: la pantalla, la hoja de examen, el enemigo, la vida, las preguntas y las reglas simuladas (`mockCombat.ts`). Fuera de esa carpeta solo cambian la carta (los gestos para jugarla) y la mano (las claves de cada carta).
 - [x] Todos los botones miden al menos 44×44 px.
   - Medido en el navegador a 320, 360 y 393 px: las opciones miden 48 px de alto, y los botones de la cita, de informar y de continuar, 44 px.
 
@@ -49,8 +49,22 @@ Es una maqueta para juzgar el aspecto y la sensación de juego. El motor de regl
     - Al principio era un monstruo en píxel art con volumen y sombra en el suelo, pero desentonaba con el pupitre y con Don Ramiro, que son papel y tinta. Queda para H2 cómo distinguir de un vistazo los enemigos normales de los Élites y el Jefe, ahora que todos son garabatos.
   - **Don Ramiro, el de Mates** (`enemy-math-teacher`), un garabato a boli coloreado: la caricatura de un profesor despeinado, con gafas enormes, bigote, la lengua fuera, bata manchada de tinta, un libro con «MATES» en la tapa y el dedo en alto. Está dibujado con trazo añil sobre un trozo de hoja cuadriculada con margen rojo, manchas de café y unas pocas fórmulas. Los Élites y el Jefe serán personajes así: caricaturas con nombre inventado.
   - Los dos son 96×96 y se ven a 192 px (×2), como las cartas (16×16 a 32 px), así que el píxel mide lo mismo en todo el combate. Solo usan colores de la paleta (FR-VIS-004) y son dibujo propio (ADR-0011), en el registro de licencias (R-4).
-  - El nombre va encima de la barra de vida, desde el catálogo de textos. Cabe en una línea a 320 px.
+  - El nombre va encima de su vida, desde el catálogo de textos. Cabe en una línea a 320 px.
   - El sprite de Kenney (Tiny Dungeon) que había antes se ha quitado, junto con su entrada en el registro de licencias y el script que lo recortaba.
+- **Vida (cambio posterior).** La barra de vida se ha cambiado por una fila de símbolos, porque la del jugador cruzaba toda la pantalla. Solo es una forma distinta de dibujar la vida: el criterio de la barra de vida se sigue cumpliendo.
+  - El jugador tiene neuronas (`health-neuron-*`) y el enemigo, tachones de boli rojo (`health-cross-*`), como los fallos que marca el profesor. Cada uno tiene un sprite propio de 16×16 lleno y otro vacío, en el registro de licencias (R-4). Se ven a 32 px, como las cartas.
+  - Cada símbolo vale 8 de vida y se vacía por cuartos de 2: con 40 de vida hay 5 símbolos, y con más vida máxima habrá más. Un cuarto se ve lleno mientras le quede algo de vida, así que la fila nunca parece vacía si queda vida (`healthSymbols.ts`).
+  - El número («26/40») va al lado, en m6x11plus, para saber la cifra exacta. A 320 px no cabe junto a Bloqueo y Descarte y baja debajo de los símbolos.
+  - Cuando la vida baja, la parte llena se recorta deslizándose (250 ms). Con movimiento reducido cambia de golpe.
+  - Un lector de pantalla sigue oyendo un medidor con su nombre y sus valores («Tu vida», 26 de 40).
+  - Se han quitado los colores de la barra en la paleta: la pista, la estela y los colores de la vida.
+- **Bloqueo y Descarte (cambio posterior).** Los dos contadores son ahora un dibujo con su número dentro, sin el nombre a la vista.
+  - El bloqueo es un escudo a boli (`block-shield-*`). Con bloqueo es añil; con 0 se ve apagado, en marrón.
+  - El descarte es una trituradora de papel (`discard-shredder`), con el número en el frente, bajo la ranura.
+  - Los dos son sprites propios de 16×16, en el registro de licencias (R-4), y se ven a 48 px (×3) para que el número quepa dentro. El número va en el color del texto, sobre un fondo de la paleta con el que pasa el contraste.
+  - Los nombres («Bloqueo», «Descarte») siguen en el catálogo de textos, solo para lectores de pantalla.
+  - Cuando una carta se juega, acierte o falle, una copia suya vuela a la trituradora, se encoge, se endereza y entra por la ranura. Entonces la trituradora tiembla y por debajo salen las tiras de papel (`discard-shredder-strips`), que caen un poco y se desvanecen. El contador sube cuando la carta entra, no antes (`src/prototype/discardFlight.ts`).
+  - Con movimiento reducido no hay vuelo ni tiras: la carta sale de la mano y el contador sube al momento (FR-VIS-007).
 - **Efectos de las cartas.** Están en `src/prototype/mockCombat.ts`: Tizazo hace 6 de daño, Chuleta 10, Faltar da 5 de bloqueo, Tocho 9 y Cafelito recupera 4 de vida. Un test comprueba que la descripción de cada carta dice el mismo número.
 - **La hoja se parece a la carta que pregunta.** Así se ve qué carta se está jugando:
   - La línea de margen tiene el color del tipo de la carta: granate para Ataque, añil para Defensa y verde para Habilidad. El nombre de la carta, en la cabecera, va en el mismo color.

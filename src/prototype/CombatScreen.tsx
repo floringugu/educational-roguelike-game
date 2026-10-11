@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { usePrefersReducedMotion } from '../background/usePrefersReducedMotion';
 import type { CardData } from '../cards/cardData';
 import { Hand } from '../cards/Hand';
+import { Sprite } from '../components/Sprite';
 import { es } from '../i18n/es';
+import { flyCardToShredder, runShredder } from './discardFlight';
 import { EnemyView } from './EnemyView';
-import { HealthBar } from './HealthBar';
+import { HealthMeter } from './HealthMeter';
 import {
   bringNextEnemy,
   dealNewHand,
@@ -22,6 +24,10 @@ import './CombatScreen.css';
 // How long the hand stays empty after its last card, so the result of that
 // card can be seen before the new hand comes in and the block is lost.
 const NEW_HAND_DELAY_MS = 1000;
+
+// The shield and the shredder are drawn at three times their 16 pixels, so the
+// number fits inside them.
+const COUNTER_SIZE = 48;
 
 type CombatScreenProps = {
   onOpenCredits: () => void;
@@ -60,13 +66,19 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
   // How many enemies have come in after the first one.
   const [enemyArrivals, setEnemyArrivals] = useState(0);
   const [playerTag, setPlayerTag] = useState<PlayerTag | null>(null);
+  // Played cards still flying to the shredder. The discard counter does not
+  // count them until they go in.
+  const [cardsInFlight, setCardsInFlight] = useState(0);
   const previousQuestionId = useRef<string | null>(null);
   const screenElement = useRef<HTMLElement>(null);
   const handElement = useRef<HTMLDivElement>(null);
+  const shredderElement = useRef<HTMLSpanElement>(null);
+  const stripsElement = useRef<HTMLSpanElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const enemyIsDefeated = isEnemyDefeated(combat);
   const handIsEmpty = isHandEmpty(combat);
+  const shownDiscardCount = Math.max(combat.discardPile.length - cardsInFlight, 0);
 
   function handlePlayCard(cardKey: string) {
     const handCard = combat.hand.find((candidate) => candidate.key === cardKey);
@@ -88,6 +100,9 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
       return;
     }
     const { combat: nextCombat, applied } = playCard(combat, openQuestion.cardKey, isCorrect);
+    // Before the card leaves the hand, a copy of it starts its flight to
+    // the shredder.
+    sendCardToShredder(openQuestion.cardKey);
     setCombat(nextCombat);
     setOpenQuestion(null);
 
@@ -100,6 +115,25 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
     }
 
     focusFirstCard();
+  }
+
+  // A played card, right or wrong, flies to the shredder of the discard
+  // pile, which cuts it into strips. With reduced motion it only goes to the
+  // discard pile, as the counter shows (FR-VIS-007).
+  function sendCardToShredder(cardKey: string) {
+    const index = combat.hand.findIndex((candidate) => candidate.key === cardKey);
+    const slot = handElement.current?.querySelectorAll('.hand__slot')[index];
+    const card = slot?.querySelector<HTMLElement>('.card');
+    const shredder = shredderElement.current;
+    const strips = stripsElement.current;
+    if (prefersReducedMotion || card === null || card === undefined || shredder === null || strips === null) {
+      return;
+    }
+    setCardsInFlight((count) => count + 1);
+    void flyCardToShredder(card, shredder).then(() => {
+      setCardsInFlight((count) => count - 1);
+      runShredder(shredder, strips);
+    });
   }
 
   // Gives the keyboard focus back to the hand, where the next card is. The
@@ -178,20 +212,38 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
 
         <section className="combat-screen__player">
           <div className="combat-screen__player-health">
-            <HealthBar
+            <HealthMeter
               health={combat.player.health}
               maxHealth={combat.player.maxHealth}
               label={es.combat.playerHealthLabel}
               kind="player"
             />
           </div>
+          {/* The block is a shield drawn with a pen, dimmed when there is
+              none. The discard pile is a paper shredder. Their names are
+              only for screen readers: the drawings say what they are. */}
           <p className="combat-screen__counter combat-screen__counter--block">
             <span className="combat-screen__counter-label">{es.combat.blockLabel}</span>
+            <Sprite
+              id={combat.player.block > 0 ? 'block-shield-full' : 'block-shield-empty'}
+              description=""
+              size={COUNTER_SIZE}
+            />
             <span className="combat-screen__counter-value">{combat.player.block}</span>
           </p>
-          <p className="combat-screen__counter">
+          <p className="combat-screen__counter combat-screen__counter--discard">
             <span className="combat-screen__counter-label">{es.combat.discardLabel}</span>
-            <span className="combat-screen__counter-value">{combat.discardPile.length}</span>
+            {/* The strips of paper, hidden under the shredder until it cuts a
+                card. */}
+            <span className="combat-screen__strips">
+              <span ref={stripsElement} className="combat-screen__strips-paper">
+                <Sprite id="discard-shredder-strips" description="" size={COUNTER_SIZE} />
+              </span>
+            </span>
+            <span ref={shredderElement} className="combat-screen__shredder">
+              <Sprite id="discard-shredder" description="" size={COUNTER_SIZE} />
+              <span className="combat-screen__counter-value">{shownDiscardCount}</span>
+            </span>
           </p>
           {playerTag !== null && (
             <span

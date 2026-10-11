@@ -1,27 +1,32 @@
 // Fragment shader of the background (FR-VIS-001), written from scratch for
-// Empollatro (R-3). It draws the wooden top of a school desk seen from above,
-// so the cards and the enemies lie on it. It works in three steps:
+// Empollatro (R-3). It draws a green school desk with its chair, on the
+// floor of a classroom, seen from a high three-quarter view (ADR-0014).
 //
-// 1. Grain. A value that grows from the bottom to the top of the screen. Its
-//    lines of equal value are the lines of the grain. A few slow sine waves
-//    bend them and change the space between them, like in real wood.
-// 2. Knots. Around a few points the value rises like a small hill, so the
-//    grain bends around them and closes into rings. The knots drift a little
-//    and the grain flows around them.
-// 3. Bands. The fraction of the value picks one of the three colors, without
-//    blending them, so every pixel is exactly a palette color (FR-VIS-004).
-// 4. Details. On top of the wood, things a student leaves on a desk: a heart
-//    with two initials and other doodles drawn with a black pen, and an
-//    eraser. They do not move. They are built from lines and simple shapes,
-//    measured in pixels of the image (each one is 4x4 CSS pixels): the
-//    doodles in the corners and the eraser against the left edge, where the
-//    interface leaves the desk free. The
-//    eraser is light, so no text may go on it (see swirlColors.ts).
+// The still part of the scene (the floor, the desk, the chair, the cuts in
+// the formica and the things lying on it) is painted once in deskScene.ts
+// and arrives here as a texture. Each of its pixels holds the position of
+// its color in the palette, and the palette texture turns it into the
+// color, so every pixel is exactly a palette color (FR-VIS-004). This shader
+// puts the scene on the screen and adds what moves, all of it small and
+// slow, so it does not distract from the combat:
+//
+// 1. A fly that comes in, lands on the desk, walks a little and leaves.
+// 2. A paper plane that crosses the screen over the desk, with its shadow.
+// 3. When the enemy hits the player, the things on the desk jump a pixel or
+//    two while their shadows stay (see deskBumps.ts).
+// 4. A ball of paper that someone throws: it falls on the desk, bounces,
+//    rolls slowly off its right edge, falls to the floor and rolls out of
+//    the screen before the loop starts again.
+// 5. An ant that crosses the desk with a crumb, stops and looks back.
 //
 // The animation is a loop. Everything that moves depends on u_phase, an angle
-// that goes from 0 to 2*pi once per loop, multiplied only by whole numbers, so
-// the last frame of the loop joins the first one. The numbers also stay small,
-// which matters on phones whose GPU uses low precision floats.
+// that goes from 0 to 2*pi once per loop, so the last frame of the loop joins
+// the first one. The numbers also stay small, which matters on phones whose
+// GPU uses low precision floats. The first frame of the loop, the one shown
+// when the background is frozen, has nothing moving on the desk.
+//
+// All positions are whole pixels of the image (each one is 4x4 CSS pixels),
+// counted from the top left corner of the screen, with y going down.
 
 #ifdef GL_FRAGMENT_PRECISION_HIGH
 precision highp float;
@@ -31,297 +36,339 @@ precision mediump float;
 
 uniform vec2 u_resolution; // size of the canvas, in pixels
 uniform float u_phase; // from 0 to 2*pi, once per loop
-uniform vec3 u_baseColor;
-uniform vec3 u_primaryColor;
-uniform vec3 u_secondaryColor;
-uniform vec3 u_penColor;
-uniform vec3 u_eraserColor;
-uniform vec3 u_eraserSleeveColor;
+// The still scene: the ground in red, the objects in green.
+uniform sampler2D u_scene;
+// The sprites of the animation, side by side, and the size of that image in
+// pixels.
+uniform sampler2D u_sprites;
+uniform vec2 u_spritesSize;
+// The palette: the colors and their shaded versions, in two rows, and how
+// many colors it has.
+uniform sampler2D u_palette;
+uniform float u_paletteSize;
+// The top of the desk: its left column, top row, right column and front row.
+uniform vec4 u_desk;
+// The last hit on the desk: seconds since it happened and how many pixels
+// the objects jump. The jump is 0 when there has been no hit.
+uniform float u_bumpSeconds;
+uniform float u_bumpLift;
 
-// How many grain lines cross the shorter side of the screen.
-const float GRAIN_DENSITY = 9.0;
+const float TWO_PI = 6.2831853;
 
-// How many rings a knot adds: the height of its hill in grain lines.
-const float KNOT_RINGS = 3.0;
-// Knots are longer than tall, because they stretch along the grain.
-const float KNOT_STRETCH = 0.55;
+// Stored where there is no color (NOTHING in deskScene.ts).
+const float NOTHING = 255.0;
 
-// Limits inside each grain line, which goes from 0 to 1: below the first
-// one, the base color; between both, the primary; above, the secondary.
-const float PRIMARY_FROM = 0.55;
-const float SECONDARY_FROM = 0.85;
+// The rows of the palette texture.
+const float NORMAL_ROW = 0.0;
+const float SHADED_ROW = 1.0;
+const float PALETTE_ROWS = 2.0;
 
-// Adds the hill of one knot. center is where it is, size how big it is and
-// turns how many small circles it drifts around center in each loop.
-float knot(vec2 position, vec2 center, float size, float turns) {
-  vec2 drift = vec2(0.04 * cos(turns * u_phase), 0.03 * sin(turns * u_phase));
-  vec2 offset = position - center - drift;
-  offset.x *= KNOT_STRETCH;
-  float distanceSquared = dot(offset, offset) / (size * size);
-  return KNOT_RINGS * exp(-distanceSquared);
+// The sprites of the animation, in the order of ANIMATION_SPRITES in
+// deskScene.ts. Each one fills a square cell of SPRITE_CELL pixels.
+const float FLY_WINGS_UP_SPRITE = 0.0;
+const float FLY_WINGS_DOWN_SPRITE = 1.0;
+const float FLY_STANDING_SPRITE = 2.0;
+const float PAPER_PLANE_SPRITE = 3.0;
+const float PAPER_BALL_SPRITE = 4.0;
+const float PAPER_BALL_TURNED_SPRITE = 5.0;
+const float ANT_STEP_A_SPRITE = 6.0;
+const float ANT_STEP_B_SPRITE = 7.0;
+const float ANT_LOOKING_BACK_SPRITE = 8.0;
+const float SPRITE_CELL = 8.0;
+
+// ---- Reading the textures ----
+
+// A texture channel holds a number from 0 to 255 as a value from 0 to 1.
+float storedNumber(float channel) {
+  return floor(channel * 255.0 + 0.5);
 }
 
-// ---- Details (step 4) ----
-// Every shape gets `pixel`: the pixel being drawn, in whole pixels of the
-// image, counted from the top left corner of the shape. Its center is at
-// +0.5, like the centers of the lines below, so straight lines and 45 degree
-// lines come out one pixel thick, as if drawn by hand in pixel art.
-
-// True if the pixel is on the line from a to b, both given in whole pixels.
-bool onLine(vec2 pixel, vec2 a, vec2 b) {
-  vec2 center = pixel + 0.5;
-  vec2 start = a + 0.5;
-  vec2 direction = b - a;
-  // How far along the line the closest point is, from 0 (a) to 1 (b).
-  float along = clamp(dot(center - start, direction) / max(dot(direction, direction), 0.0001), 0.0, 1.0);
-  return length(center - (start + along * direction)) < 0.55;
+// The color position of the ground and of the objects at a pixel. The
+// pixel is read at its center (+0.5), so it never falls between two.
+float groundAt(vec2 pixel) {
+  return storedNumber(texture2D(u_scene, (pixel + 0.5) / u_resolution).r);
 }
 
-// True inside the classic heart curve (x^2 + y^2 - 1)^3 - x^2 y^3 <= 0, with
-// y going up. It is about 2.3 wide and 2.2 tall around (0, 0).
-bool insideHeart(vec2 point) {
-  float a = dot(point, point) - 1.0;
-  return a * a * a - point.x * point.x * point.y * point.y * point.y <= 0.0;
+float objectAt(vec2 pixel) {
+  return storedNumber(texture2D(u_scene, (pixel + 0.5) / u_resolution).g);
 }
 
-// The outline of a heart, HEART_SIZE pixels from its center to the side,
-// with its center at (11, 11).
-const float HEART_SIZE = 9.0;
-vec2 heartPoint(vec2 pixel) {
-  // From pixels, y going down, to the curve, y going up.
-  return (pixel + 0.5 - vec2(11.0, 11.0)) / HEART_SIZE * vec2(1.0, -1.0);
+vec3 paletteColor(float position, float row) {
+  return texture2D(u_palette, vec2((position + 0.5) / u_paletteSize, (row + 0.5) / PALETTE_ROWS)).rgb;
 }
 
-bool onHeart(vec2 pixel) {
-  vec2 point = heartPoint(pixel);
-  // One pixel, measured on the curve.
-  float onePixel = 1.0 / HEART_SIZE;
-  // On the outline: inside, but with a neighbour outside.
-  return insideHeart(point) && !(
-    insideHeart(point + vec2(onePixel, 0.0)) && insideHeart(point - vec2(onePixel, 0.0)) &&
-    insideHeart(point + vec2(0.0, onePixel)) && insideHeart(point - vec2(0.0, onePixel))
-  );
+// The color position of a sprite at a pixel counted from its top left
+// corner, or NOTHING outside it.
+float spriteAt(float sprite, vec2 pixel) {
+  if (pixel.x < 0.0 || pixel.y < 0.0 || pixel.x >= SPRITE_CELL || pixel.y >= SPRITE_CELL) {
+    return NOTHING;
+  }
+  vec2 inImage = vec2(sprite * SPRITE_CELL, 0.0) + pixel + 0.5;
+  return storedNumber(texture2D(u_sprites, inImage / u_spritesSize).r);
 }
 
-// The letters F, + and D, 3 pixels wide and 5 tall, side by side with one
-// pixel between them: "F+D", 11 pixels wide.
-bool onInitials(vec2 pixel) {
-  bool letterF = onLine(pixel, vec2(0.0, 0.0), vec2(0.0, 4.0)) ||
-    onLine(pixel, vec2(0.0, 0.0), vec2(2.0, 0.0)) ||
-    onLine(pixel, vec2(0.0, 2.0), vec2(1.0, 2.0));
-  bool plus = onLine(pixel, vec2(5.0, 1.0), vec2(5.0, 3.0)) ||
-    onLine(pixel, vec2(4.0, 2.0), vec2(6.0, 2.0));
-  // The D has cut corners, so it does not look like an O.
-  bool letterD = onLine(pixel, vec2(8.0, 0.0), vec2(8.0, 4.0)) ||
-    onLine(pixel, vec2(8.0, 0.0), vec2(9.0, 0.0)) ||
-    onLine(pixel, vec2(8.0, 4.0), vec2(9.0, 4.0)) ||
-    onLine(pixel, vec2(10.0, 1.0), vec2(10.0, 3.0));
-  return letterF || plus || letterD;
+// ---- 1 and 2. The fly and the paper plane ----
+
+// Something that moves over the desk: the top left corner of its sprite,
+// which sprite it shows (NOTHING when it is out of sight) and how high it
+// flies, which is how far its shadow falls.
+struct Flyer {
+  vec2 position;
+  float sprite;
+  float height;
+};
+
+const Flyer AWAY = Flyer(vec2(0.0), NOTHING, 0.0);
+
+// The fly, at a point of the loop. It comes in from the left between 0.08
+// and 0.13, stands on the desk to the left of the enemy until 0.30, taking
+// two steps, and leaves to the top left. It beats its wings 12 times a
+// second.
+Flyer fly(float loop) {
+  vec2 landing = vec2(u_desk.x + 8.0, u_desk.y + 52.0);
+  float wings = mod(floor(loop * 720.0), 2.0) == 0.0 ? FLY_WINGS_UP_SPRITE : FLY_WINGS_DOWN_SPRITE;
+  if (loop >= 0.08 && loop < 0.13) {
+    float progress = (loop - 0.08) / 0.05;
+    vec2 from = vec2(-4.0, u_desk.y + 30.0);
+    // It wobbles up and down, less and less as it lands.
+    vec2 position = mix(from, landing, progress) + vec2(0.0, 3.0 * sin(progress * 12.566) * (1.0 - progress));
+    return Flyer(floor(position + 0.5), wings, floor(4.0 * (1.0 - progress) + 0.5));
+  }
+  if (loop >= 0.13 && loop < 0.30) {
+    float steps = (loop > 0.19 ? 1.0 : 0.0) + (loop > 0.24 ? 1.0 : 0.0);
+    return Flyer(landing + vec2(steps, 0.0), FLY_STANDING_SPRITE, 0.0);
+  }
+  if (loop >= 0.30 && loop < 0.35) {
+    float progress = (loop - 0.30) / 0.05;
+    vec2 from = landing + vec2(2.0, 0.0);
+    vec2 to = vec2(u_desk.x - 12.0, -4.0);
+    vec2 position = mix(from, to, progress) + vec2(3.0 * sin(progress * 9.425), 0.0);
+    return Flyer(floor(position + 0.5), wings, floor(4.0 * progress + 0.5));
+  }
+  return AWAY;
 }
 
-// An arrow through the heart, from the bottom left to the top right. It
-// goes behind the heart: it is not drawn inside it.
-bool onArrow(vec2 pixel) {
-  if (insideHeart(heartPoint(pixel))) {
+// The paper plane, at a point of the loop. It crosses the whole screen from
+// left to right between 0.58 and 0.66 (about 5 seconds), over the free far
+// part of the desk, between the tally of the days and the enemy, so no text
+// covers it. It comes down slowly and rocks a pixel up and down.
+Flyer paperPlane(float loop) {
+  if (loop < 0.58 || loop >= 0.66) {
+    return AWAY;
+  }
+  float progress = (loop - 0.58) / 0.08;
+  float x = mix(-10.0, u_resolution.x + 2.0, progress);
+  float y = u_desk.y + 12.0 + 4.0 * progress + sin(progress * 18.85);
+  return Flyer(floor(vec2(x, y) + 0.5), PAPER_PLANE_SPRITE, floor(7.0 - 2.0 * progress + 0.5));
+}
+
+// The color position of a flyer at a pixel, or NOTHING.
+float flyerAt(Flyer flyer, vec2 pixel) {
+  if (flyer.sprite == NOTHING) {
+    return NOTHING;
+  }
+  return spriteAt(flyer.sprite, pixel - flyer.position);
+}
+
+// True if the shadow of a flyer falls on the pixel. With the light from the
+// top left, the shadow falls down and to the right, farther the higher it
+// flies. A fly standing on the desk has no shadow.
+bool inShadowOf(Flyer flyer, vec2 pixel) {
+  if (flyer.sprite == NOTHING || flyer.height <= 0.0) {
     return false;
   }
-  // At 45 degrees, through the middle of the heart, the line is clean.
-  bool shaft = onLine(pixel, vec2(-3.0, 25.0), vec2(25.0, -3.0));
-  bool head = onLine(pixel, vec2(25.0, -3.0), vec2(21.0, -3.0)) || onLine(pixel, vec2(25.0, -3.0), vec2(25.0, 1.0));
-  // Two feathers at the tail, shaped like the head.
-  bool feathers = false;
-  for (int feather = 0; feather < 2; feather++) {
-    vec2 base = vec2(-3.0, 25.0) + float(feather) * vec2(2.0, -2.0);
-    feathers = feathers || onLine(pixel, base, base - vec2(2.0, 0.0)) || onLine(pixel, base, base + vec2(0.0, 2.0));
-  }
-  return shaft || head || feathers;
+  vec2 shadowPosition = flyer.position + vec2(floor(flyer.height * 0.5), flyer.height);
+  return spriteAt(flyer.sprite, pixel - shadowPosition) != NOTHING;
 }
 
-// A skull over two crossed bones, 13x15 pixels.
-bool onSkull(vec2 pixel) {
-  // The top of the head: half a ring.
-  vec2 fromCenter = pixel + 0.5 - vec2(6.5, 5.5);
-  bool head = pixel.y <= 6.0 && abs(length(fromCenter) - 4.6) < 0.55;
-  // The jaw, narrower than the head, with three teeth.
-  bool jaw = onLine(pixel, vec2(2.0, 7.0), vec2(4.0, 9.0)) ||
-    onLine(pixel, vec2(10.0, 7.0), vec2(8.0, 9.0)) ||
-    onLine(pixel, vec2(4.0, 9.0), vec2(8.0, 9.0)) ||
-    onLine(pixel, vec2(5.0, 8.0), vec2(5.0, 9.0)) ||
-    onLine(pixel, vec2(7.0, 8.0), vec2(7.0, 9.0));
-  // Two square eyes of 2x2 and a nose of one pixel.
-  vec2 leftEye = pixel - vec2(3.0, 4.0);
-  vec2 rightEye = pixel - vec2(8.0, 4.0);
-  bool eyes = (leftEye.x >= 0.0 && leftEye.x <= 1.0 && leftEye.y >= 0.0 && leftEye.y <= 1.0) ||
-    (rightEye.x >= 0.0 && rightEye.x <= 1.0 && rightEye.y >= 0.0 && rightEye.y <= 1.0);
-  bool nose = pixel == vec2(6.0, 6.0);
-  // The bones cross under the jaw, with a knob at each end.
-  bool bones = onLine(pixel, vec2(1.0, 11.0), vec2(11.0, 14.0)) || onLine(pixel, vec2(1.0, 14.0), vec2(11.0, 11.0));
-  bool knobs = pixel == vec2(0.0, 10.0) || pixel == vec2(0.0, 15.0) ||
-    pixel == vec2(12.0, 10.0) || pixel == vec2(12.0, 15.0);
-  return head || jaw || eyes || nose || bones || knobs;
-}
+// ---- 3. The jump of the objects ----
 
-// A star drawn in one stroke, without lifting the pen: five lines that join
-// every second point of a pentagon. It is 11x11 pixels.
-bool onStar(vec2 pixel) {
-  // The five points, starting at the top and going round. Their angles are
-  // whole fifths of a turn.
-  const float FIFTH_OF_A_TURN = 1.2566371;
-  bool star = false;
-  for (int point = 0; point < 5; point++) {
-    float from = float(point) * 2.0 * FIFTH_OF_A_TURN;
-    float to = from + 2.0 * FIFTH_OF_A_TURN;
-    vec2 start = floor(vec2(5.0, 5.5) + 5.0 * vec2(sin(from), -cos(from)) + 0.5);
-    vec2 end = floor(vec2(5.0, 5.5) + 5.0 * vec2(sin(to), -cos(to)) + 0.5);
-    star = star || onLine(pixel, start, end);
-  }
-  return star;
-}
+// How long a jump lasts, in seconds.
+const float BUMP_SECONDS = 0.25;
 
-// Days counted with marks: a group of five, crossed, and two more.
-bool onTallyMarks(vec2 pixel) {
-  bool marks = false;
-  for (int mark = 0; mark < 6; mark++) {
-    // The first four, then a gap where the fifth would be, then two more.
-    float x = float(mark) * 2.0 + (mark >= 4 ? 4.0 : 0.0);
-    marks = marks || onLine(pixel, vec2(x, 0.0), vec2(x, 4.0));
-  }
-  return marks || onLine(pixel, vec2(0.0, 4.0), vec2(6.0, 0.0));
-}
-
-// The eraser: a block of rubber with a paper sleeve around one end, tilted
-// and cut by the left edge of the screen. Returns 0 outside, 1 on its dark
-// outline, 2 on the rubber and 3 on the sleeve.
-const float ERASER_TILT = -0.3; // radians
-float eraserPart(vec2 pixel) {
-  // Turn the pixel the opposite way, so the eraser can be measured as a
-  // straight box around its center.
-  vec2 center = pixel + 0.5;
-  float cosine = cos(ERASER_TILT);
-  float sine = sin(ERASER_TILT);
-  vec2 box = vec2(cosine * center.x + sine * center.y, -sine * center.x + cosine * center.y);
-  vec2 halfSize = vec2(10.0, 5.0);
-  vec2 inside = halfSize - abs(box);
-  // The free end is worn round: its corners are cut.
-  if (box.x > 7.0 && abs(box.y) > 2.0 + (halfSize.x - box.x)) {
+// How many pixels up the objects are. They all jump together, so each one
+// moves in one piece.
+float objectLift() {
+  if (u_bumpLift <= 0.0 || u_bumpSeconds > BUMP_SECONDS) {
     return 0.0;
   }
-  if (inside.x < 0.0 || inside.y < 0.0) {
-    return 0.0;
-  }
-  if (inside.x < 1.0 || inside.y < 1.0) {
-    return 1.0;
-  }
-  // The sleeve covers the end that is out of the screen, and a bit more.
-  if (box.x < 1.0) {
-    // A line where the sleeve ends, so it reads as a separate piece.
-    return box.x > 0.0 ? 1.0 : 3.0;
-  }
-  return 2.0;
+  // Up and down again, like a ball thrown up: a parabola.
+  float progress = u_bumpSeconds / BUMP_SECONDS;
+  return floor(u_bumpLift * 4.0 * progress * (1.0 - progress) + 0.5);
 }
 
-// True if the pixel, counted from the top left corner of the image, is part
-// of a pen doodle. Each doodle is only looked at inside its box, so the
-// shader does little work for the rest.
-bool insideBox(vec2 pixel, vec2 size) {
-  return pixel.x >= 0.0 && pixel.y >= 0.0 && pixel.x < size.x && pixel.y < size.y;
+// ---- 4. The ball of paper ----
+
+// How far the ball falls when it rolls off the side of the desk: the height
+// of the desk, from its top to the feet of its front legs (deskScene.ts).
+const float DESK_HEIGHT = 36.0;
+
+// The ball of paper, at a point of the loop. Someone at the back of the
+// class throws it at 0.70: it falls from above the screen to the right of
+// the enemy, below the carved heart, and bounces twice. Then it keeps
+// rolling slowly to the right, at 2 pixels per second, until it goes over
+// the right edge of the desk at 0.847. It falls to the floor, bounces once
+// and rolls out of the screen, faster after the fall, so it is gone before
+// the loop starts again. It spins in the air and turns a quarter for each
+// pixel it rolls.
+//
+// `ground` is the point under the ball (on the desk or on the floor) and
+// `height` how high above it the ball is. The ball shows that many pixels
+// higher, and its shadow stays on the ground (see inShadowOf). The ball is
+// always one pixel higher than its height, so that, lying on the ground, it
+// has a line of shadow under it like the other things.
+Flyer paperBall(float loop) {
+  if (loop < 0.70) {
+    return AWAY;
+  }
+  vec2 landing = vec2(u_desk.z - 18.0, u_desk.y + 40.0);
+  // Where it goes over the edge: 2 pixels of it, of 5, still on the desk.
+  vec2 edge = landing + vec2(16.0, 1.0);
+  vec2 onTheFloor = edge + vec2(3.0, DESK_HEIGHT);
+  float spinning = mod(floor(loop * 250.0), 2.0) == 0.0 ? PAPER_BALL_SPRITE : PAPER_BALL_TURNED_SPRITE;
+  vec2 ground;
+  float height;
+  float sprite;
+  bool onTheDesk = true;
+  if (loop < 0.73) {
+    // Falling from farther back, faster and faster.
+    float progress = (loop - 0.70) / 0.03;
+    ground = mix(landing + vec2(-8.0, -24.0), landing, progress);
+    height = (landing.y + 16.0) * (1.0 - progress * progress);
+    sprite = spinning;
+  } else if (loop < 0.745) {
+    // The first bounce, 4 pixels high: up and down again, a parabola.
+    float progress = (loop - 0.73) / 0.015;
+    ground = landing + vec2(3.0 * progress, progress);
+    height = 4.0 * 4.0 * progress * (1.0 - progress);
+    sprite = spinning;
+  } else if (loop < 0.755) {
+    // The second bounce, 1 pixel high.
+    float progress = (loop - 0.745) / 0.01;
+    ground = landing + vec2(3.0 + 2.0 * progress, 1.0);
+    height = 4.0 * progress * (1.0 - progress);
+    sprite = spinning;
+  } else if (loop < 0.847) {
+    // Rolling the 11 pixels to the edge. 2 pixels per second are 120 per
+    // loop, so it takes 11 / 120 = 0.092 of the loop.
+    float rolled = min(floor(120.0 * (loop - 0.755) + 0.5), 11.0);
+    ground = landing + vec2(5.0 + rolled, 1.0);
+    height = 0.0;
+    sprite = mod(rolled, 2.0) == 0.0 ? PAPER_BALL_SPRITE : PAPER_BALL_TURNED_SPRITE;
+  } else if (loop < 0.857) {
+    // Falling down the side of the desk, faster and faster. From now on the
+    // ground under it is the floor, a desk height lower on the screen, so it
+    // shows at the same place at the start of the fall.
+    float progress = (loop - 0.847) / 0.01;
+    ground = mix(edge + vec2(0.0, DESK_HEIGHT), onTheFloor, progress);
+    height = DESK_HEIGHT * (1.0 - progress * progress);
+    sprite = spinning;
+    onTheDesk = false;
+  } else if (loop < 0.865) {
+    // One bounce on the floor, 2 pixels high.
+    float progress = (loop - 0.857) / 0.008;
+    ground = onTheFloor + vec2(2.0 * progress, 0.0);
+    height = 4.0 * 2.0 * progress * (1.0 - progress);
+    sprite = spinning;
+    onTheDesk = false;
+  } else {
+    // Rolling on the floor at 16 pixels per second (960 per loop) until it
+    // leaves the screen: the widest floor, beside a wide desk, is about 100
+    // pixels, so it is out after some 6 seconds, before the loop ends.
+    float rolled = floor(960.0 * (loop - 0.865) + 0.5);
+    ground = onTheFloor + vec2(2.0 + rolled, 0.0);
+    height = 0.0;
+    sprite = mod(rolled, 2.0) == 0.0 ? PAPER_BALL_SPRITE : PAPER_BALL_TURNED_SPRITE;
+    onTheDesk = false;
+  }
+  // Lying on the desk, it jumps with the other things when the enemy hits.
+  float lift = onTheDesk ? objectLift() : 0.0;
+  float shownHeight = floor(height + 0.5) + 1.0 + lift;
+  return Flyer(floor(ground + 0.5) - vec2(0.0, shownHeight), sprite, shownHeight);
 }
 
-bool onPenDoodle(vec2 topLeft) {
-  // One doodle in each corner. The top ones go below the title and the
-  // credits button; the bottom ones can be partly hidden by the hand.
-  // Skull, top left.
-  vec2 skull = topLeft - vec2(4.0, 16.0);
-  if (insideBox(skull, vec2(13.0, 16.0)) && onSkull(skull)) {
-    return true;
+// ---- 5. The ant ----
+
+// The ant, at a point of the loop. It comes up the left edge of the desk at
+// 0.38 and walks to the right, carrying a crumb, along the free row between
+// the carved heart and the intent of the enemy. At 0.47 it stops, looks
+// back for a moment and goes on, until it goes down the right edge at 0.66.
+// It moves its legs at each pixel it walks, and it takes the same time on
+// any desk, so it walks a bit faster on a wide one.
+Flyer ant(float loop) {
+  if (loop < 0.38 || loop >= 0.66) {
+    return AWAY;
   }
-  // Tally marks, top right.
-  vec2 tally = topLeft - vec2(u_resolution.x - 18.0, 17.0);
-  if (insideBox(tally + vec2(1.0, 0.0), vec2(16.0, 5.0)) && onTallyMarks(tally)) {
-    return true;
+  // From just out of the left edge to just out of the right one.
+  float start = u_desk.x - 7.0;
+  float end = u_desk.z + 1.0;
+  float stop = floor(mix(start, end, 0.4) + 0.5);
+  float x;
+  float sprite;
+  if (loop < 0.47) {
+    x = floor(mix(start, stop, (loop - 0.38) / 0.09) + 0.5);
+    sprite = mod(x, 2.0) == 0.0 ? ANT_STEP_A_SPRITE : ANT_STEP_B_SPRITE;
+  } else if (loop < 0.53) {
+    x = stop;
+    sprite = loop >= 0.49 && loop < 0.51 ? ANT_LOOKING_BACK_SPRITE : ANT_STEP_A_SPRITE;
+  } else {
+    x = floor(mix(stop, end, (loop - 0.53) / 0.13) + 0.5);
+    sprite = mod(x, 2.0) == 0.0 ? ANT_STEP_A_SPRITE : ANT_STEP_B_SPRITE;
   }
-  // Heart with an arrow, bottom left. The arrow sticks out of the heart, so
-  // the box starts before it.
-  vec2 heart = topLeft - vec2(6.0, u_resolution.y - 32.0);
-  if (insideBox(heart + vec2(6.0, 4.0), vec2(32.0, 32.0)) &&
-      (onHeart(heart) || onInitials(heart - vec2(6.0, 7.0)) || onArrow(heart))) {
-    return true;
-  }
-  // Star, bottom right.
-  vec2 star = topLeft - vec2(u_resolution.x - 15.0, u_resolution.y - 16.0);
-  if (insideBox(star, vec2(11.0, 11.0)) && onStar(star)) {
-    return true;
-  }
-  return false;
+  return Flyer(vec2(x, u_desk.y + 18.0), sprite, 0.0);
 }
 
-// The color of the detail on this pixel, or the wood color if there is none.
-vec3 addDetails(vec3 woodColor, vec2 topLeft, vec2 bottomLeft) {
-  // The pen is black, like the darkest lines of the grain. To keep it from
-  // getting lost among them, the wood right next to each stroke is light,
-  // as if the stroke were scratched into the desk.
-  if (onPenDoodle(topLeft)) {
-    return u_penColor;
+// The color position of the ant at a pixel, or NOTHING. Only the part of it
+// on the top of the desk shows, inside its outline: the rest is still
+// climbing the edge.
+float antAt(Flyer theAnt, vec2 pixel) {
+  if (pixel.x <= u_desk.x || pixel.x >= u_desk.z) {
+    return NOTHING;
   }
-  if (onPenDoodle(topLeft + vec2(1.0, 0.0)) || onPenDoodle(topLeft - vec2(1.0, 0.0)) ||
-      onPenDoodle(topLeft + vec2(0.0, 1.0)) || onPenDoodle(topLeft - vec2(0.0, 1.0))) {
-    return u_primaryColor;
-  }
-  // Eraser, on the left between the enemy and the player, with three crumbs
-  // of rubber.
-  float eraser = eraserPart(bottomLeft - vec2(8.0, 64.0));
-  if (eraser == 1.0) {
-    return u_secondaryColor;
-  }
-  if (eraser == 2.0) {
-    return u_eraserColor;
-  }
-  if (eraser == 3.0) {
-    return u_eraserSleeveColor;
-  }
-  vec2 crumbs = bottomLeft - vec2(21.0, 56.0);
-  if (crumbs == vec2(0.0, 0.0) || crumbs == vec2(3.0, 2.0) || crumbs == vec2(2.0, -2.0)) {
-    return u_eraserColor;
-  }
-  return woodColor;
+  return flyerAt(theAnt, pixel);
 }
 
 void main() {
-  // Position of the pixel relative to the center of the screen. Dividing by
-  // the shorter side keeps the knots round on any screen shape.
-  vec2 position = (gl_FragCoord.xy - 0.5 * u_resolution) / min(u_resolution.x, u_resolution.y);
+  vec2 bottomLeft = floor(gl_FragCoord.xy);
+  vec2 pixel = vec2(bottomLeft.x, u_resolution.y - 1.0 - bottomLeft.y);
+  // Where we are in the loop, from 0 to 1.
+  float loop = u_phase / TWO_PI;
 
-  // 1. Grain. The two waves that only depend on y make the lines closer or
-  //    farther apart. The other three bend them; each one moves at its own
-  //    whole number of turns per loop. The last, small and fast in space,
-  //    roughens the edges of the lines.
-  float grain = position.y * GRAIN_DENSITY;
-  grain += 1.2 * sin(2.3 * position.y + 0.4) + 0.6 * sin(5.1 * position.y + 1.0);
-  grain += 0.35 * sin(1.3 * position.x + 0.8 * position.y + u_phase);
-  grain += 0.18 * sin(3.1 * position.x - 1.7 * position.y - 2.0 * u_phase);
-  grain += 0.08 * sin(7.0 * position.x + 2.0 * position.y + 3.0 * u_phase);
-  grain += 0.06 * sin(23.0 * position.x + 5.0 * position.y);
-
-  // 2. Knots: one at the top, between the doodles, and two low, under the
-  //    health of the player and under the hand.
-  grain += knot(position, vec2(0.05, 0.75), 0.09, 1.0);
-  grain += knot(position, vec2(0.25, -0.62), 0.07, -1.0);
-  grain += knot(position, vec2(-0.1, -0.95), 0.06, 2.0);
-
-  // 3. Bands.
-  float line = fract(grain);
-  vec3 pixelColor = u_baseColor;
-  if (line > SECONDARY_FROM) {
-    pixelColor = u_secondaryColor;
-  } else if (line > PRIMARY_FROM) {
-    pixelColor = u_primaryColor;
+  // The scene: the ground, and over it the objects, which are read a few
+  // pixels lower while they jump, so they show higher up.
+  float color = groundAt(pixel);
+  float object = objectAt(pixel + vec2(0.0, objectLift()));
+  if (object != NOTHING) {
+    color = object;
   }
 
-  // 4. Details. Whole pixels, counted from the top left and the bottom left
-  //    corners of the image.
-  vec2 bottomLeft = floor(gl_FragCoord.xy);
-  vec2 topLeft = vec2(bottomLeft.x, u_resolution.y - 1.0 - bottomLeft.y);
-  pixelColor = addDetails(pixelColor, topLeft, bottomLeft);
+  // The ant walks on the desk, so the shadows fall on it too.
+  float antColor = antAt(ant(loop), pixel);
+  if (antColor != NOTHING) {
+    color = antColor;
+  }
+
+  // The shadows of what flies.
+  Flyer theFly = fly(loop);
+  Flyer thePlane = paperPlane(loop);
+  Flyer theBall = paperBall(loop);
+  bool shaded = inShadowOf(theFly, pixel) || inShadowOf(thePlane, pixel) || inShadowOf(theBall, pixel);
+  vec3 pixelColor = paletteColor(color, shaded ? SHADED_ROW : NORMAL_ROW);
+
+  // What flies, on top of everything: the ball, the fly over it and the
+  // plane over both.
+  float ballColor = flyerAt(theBall, pixel);
+  if (ballColor != NOTHING) {
+    pixelColor = paletteColor(ballColor, NORMAL_ROW);
+  }
+  float flyColor = flyerAt(theFly, pixel);
+  if (flyColor != NOTHING) {
+    pixelColor = paletteColor(flyColor, NORMAL_ROW);
+  }
+  float planeColor = flyerAt(thePlane, pixel);
+  if (planeColor != NOTHING) {
+    pixelColor = paletteColor(planeColor, NORMAL_ROW);
+  }
 
   gl_FragColor = vec4(pixelColor, 1.0);
 }

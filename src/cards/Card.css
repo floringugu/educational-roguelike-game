@@ -9,17 +9,13 @@
    pixels: the ruled lines must match the height of the lines of text, and
    the pixel fonts are only sharp at whole pixels. */
 .card {
-  /* How much the card turns in 3D, in degrees, set by Card.tsx. The shine
-     of the seal of the editions moves 2% of the seal for each degree. */
-  --edition-shift: 0;
-  --band-shift: calc(var(--edition-shift) * 2%);
   /* The coffee stains: none, unless a .card--stain-… class below sets them. */
   --stain-images: none;
   --stain-positions: 0 0;
   --stain-sizes: auto;
   /* --type-color and --type-light-color, the colors of its type, are set by
-     .card--attack and the others below. They only paint lines, the tape and
-     the ribbons of the seal, never text. */
+     .card--attack and the others below. They only paint lines and the tape,
+     never text. */
 
   position: relative;
   display: flex;
@@ -211,8 +207,8 @@
 /*
  * Editions (FR-VIS-002). A special card is not a page of the notebook but an
  * academic document: foil is a diploma and holo is a certificate. Both are
- * crumpled, as if they had spent the course at the bottom of a backpack, and
- * both carry a seal whose shine moves as the card turns.
+ * crumpled, as if they had spent the course at the bottom of a backpack. The
+ * sheet is the only mark of the edition: there is no seal and no shine.
  *
  * A crumpled sheet is not a rectangle, so it cannot be the background and the
  * border of the card. It is a texture of our own (src/assets/textures/) with
@@ -258,8 +254,7 @@
   background-image: url('../assets/textures/crumpled-parchment.png');
 }
 
-/* Holo: a certificate on crumpled paper with the same tan edge. Its seal
-   is not blue: blue is the color of defense cards. */
+/* Holo: a certificate on crumpled paper with the same tan edge. */
 .card--holo::before {
   background-image: url('../assets/textures/crumpled-paper.png');
 }
@@ -298,88 +293,4 @@
   --stain-images: url('../assets/textures/coffee-corner.png'), url('../assets/textures/coffee-ring.png');
   --stain-positions: -2px calc(100% + 2px), 42px calc(100% + 4px);
   --stain-sizes: 56px 40px, 44px 44px;
-}
-
-/* The seal, stamped on the bottom left corner of the photo: the left side of
-   a card is the part that its neighbor in the hand does not cover. It is only
-   a holder: its ::before draws the ribbons and its ::after the disc, so the
-   disc is painted over the ribbons. */
-.card__seal {
-  position: absolute;
-  top: 30px;
-  left: 4px;
-  width: 22px;
-  height: 22px;
-}
-
-/* The disc. Its shine is a band of light that crosses it as the card turns. */
-.card__seal::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  box-shadow: 0 0 0 1px var(--color-card-seal-edge);
-}
-
-.card--foil .card__seal::after {
-  background-image: linear-gradient(
-    115deg,
-    var(--color-foil-seal) calc(20% + var(--band-shift)),
-    var(--color-foil-shine) 0 calc(42% + var(--band-shift)),
-    var(--color-foil-seal) 0
-  );
-  border: 2px solid var(--color-foil-seal-ring);
-  /* The dashed ring of a wax seal, inside the disc. */
-  outline: 1px dashed var(--color-foil-seal-ring);
-  outline-offset: -6px;
-}
-
-/* Two ribbons in the color of the type hang from the gold seal. The
-   clip-path cuts the notch at the end of each one. */
-.card--foil .card__seal::before {
-  content: '';
-  position: absolute;
-  top: 16px;
-  left: 4px;
-  width: 14px;
-  height: 14px;
-  background-image: linear-gradient(90deg, var(--type-color) 0 6px, transparent 0 8px, var(--type-color) 0);
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 86% 80%, 58% 100%, 58% 0, 42% 0, 42% 100%, 14% 80%, 0 100%);
-}
-
-/* Holo: the seal of the university, dark brown with a mortarboard. A band of
-   holographic stripes crosses it as the card turns, like the light on the
-   gold seal. */
-.card--holo .card__seal::after {
-  background-image: linear-gradient(
-    115deg,
-    var(--color-holo-seal) calc(20% + var(--band-shift)),
-    var(--color-holo-band1) 0 calc(26% + var(--band-shift)),
-    var(--color-holo-band2) 0 calc(32% + var(--band-shift)),
-    var(--color-holo-band3) 0 calc(38% + var(--band-shift)),
-    var(--color-holo-band4) 0 calc(44% + var(--band-shift)),
-    var(--color-holo-seal) 0
-  );
-  border: 2px solid var(--color-holo-seal-ring);
-}
-
-/* The mortarboard, cut by clip-path out of an 18x11 box: the board seen
-   from above as a wide flat diamond, the narrower cap under it, and the
-   tassel hanging on the right with its knot. It goes over the disc
-   (z-index), in the middle of it. */
-.card--holo .card__seal::before {
-  content: '';
-  position: absolute;
-  z-index: 1;
-  top: 5px;
-  left: 2px;
-  width: 18px;
-  height: 11px;
-  background-color: var(--color-holo-emblem);
-  clip-path: polygon(
-    9px 0, 18px 3.5px,
-    16px 4.28px, 16px 9px, 17px 9px, 17px 11px, 14px 11px, 14px 9px, 15px 9px, 15px 4.67px,
-    13px 5.44px, 13px 10.5px, 5px 10.5px, 5px 5.44px,
-    0 3.5px
-  );
 }
