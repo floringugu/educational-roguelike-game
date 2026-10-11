@@ -6,8 +6,8 @@
 
 | Campo | Valor |
 |---|---|
-| Versión | 1.3 (borrador para aprobación) |
-| Fecha | 2026-10-07 |
+| Versión | 1.4 (borrador para aprobación) |
+| Fecha | 2026-10-11 |
 | Dueño | Florin Gugu |
 | Estado | Decisiones de diseño resueltas salvo las de H2 (DP-14) y las del lanzamiento (§10.1). DP-15 a DP-18 resueltas el 2026-10-07. Pendiente de la aprobación final del dueño |
 | Fuente de las decisiones | Entrevista de diseño del 2026-09-29/30 (Q1–Q41), recogida en el [Apéndice A](#apéndice-a-registro-de-decisiones-y-trazabilidad) |
@@ -46,8 +46,8 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0014](adr/0014-vista-tres-cuartos-alta-y-pupitre-verde.md).
-- [Guía de arte](GUIA-DE-ARTE.md) (ADR-0014).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0013](adr/0013-aula-en-vista-baja-y-pupitre-verde.md).
+- [Guía de arte](GUIA-DE-ARTE.md) (ADR-0013).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
 ### 1.5 Convenciones
@@ -108,7 +108,7 @@ Los principios prevalecen sobre cualquier requisito. Si un requisito entra en co
 ```mermaid
 flowchart LR
   subgraph DEV[Dispositivo del usuario]
-    UI[PWA React + fondo WebGL] --> ENG[Motor de juego TS puro]
+    UI[PWA React + aula en pixel art] --> ENG[Motor de juego TS puro]
     UI --> IDB[(IndexedDB: banco de preguntas, registro de eventos, partida en curso)]
   end
   UI <-->|sincronización| SB[Supabase UE: Auth, Postgres + RLS, Storage, Queues]
@@ -818,12 +818,12 @@ Antes de abrir el producto al público deberá estar publicada una política de 
 
 ### 3.17 Presentación visual (VIS)
 
-**FR-VIS-001** · M · H1 · Q24.1 a
-El fondo deberá ser un shader WebGL de remolino escrito desde cero (R-3). El shader:
+**FR-VIS-001** · M · H1 · Q24.1 a, ADR-0013
+El fondo de la pantalla de combate deberá ser el **aula**: un PNG dibujado píxel a píxel, con la capa de luz encima y animaciones de sprites en el DOM hechas con CSS, sin WebGL. Las animaciones del aula:
 
-- se renderiza por debajo de la resolución nativa;
-- se pausa cuando la pestaña está oculta;
-- se sustituye por un fondo estático si no hay WebGL o si la media baja de 30 fps durante 5 s.
+- solo mueven `transform` y `opacity`, o cambian de fotograma con CSS;
+- se pausan cuando la pestaña está oculta;
+- se paran si la media baja de 30 fps durante 5 s, y el aula queda quieta.
 - *Verificación:* MAN, INS.
 
 **FR-VIS-002** · M · H1 · Q24.1 a
@@ -836,8 +836,8 @@ Deberá haber una superposición CRT (scanlines y viñeta) que se pueda desactiv
 
 - *Verificación:* E2E.
 
-**FR-VIS-004** · M · H1 · Q28.1
-Todo el arte deberá usar una única paleta fija de 16 a 24 colores y cargarse desde un catálogo de assets.
+**FR-VIS-004** · M · H1 · Q28.1, ADR-0013
+Todo el arte deberá usar una única paleta fija de hasta 32 colores y cargarse desde un catálogo de assets.
 
 - *Verificación:* INS.
 
@@ -858,6 +858,20 @@ Con `prefers-reduced-motion` activo, el fondo animado se detendrá y las animaci
 
 - *Verificación:* E2E.
 
+**FR-VIS-008** · M · H1 · ADR-0013
+Todo el pixel art (el aula, los sprites, los iconos y las cartas) deberá pintarse con una única **escala entera**, la misma para todo: la mayor con la que la zona segura del aula cabe entera en la pantalla, desde ×2. Lo normal es ×2 en el móvil y ×3 o ×4 en tableta y PC. El juego deberá ir en una columna vertical centrada. En pantallas más anchas, el aula sigue a los lados de la columna, sin franjas vacías, y la zona segura se ve siempre entera.
+
+- *Verificación:* UT (la elección de la escala), MAN (móvil, tableta y PC).
+
+**FR-VIS-009** · M · H1 · ADR-0013
+El aula deberá mostrar textos pintados encima del dibujo, nunca dibujados en él:
+
+- la pizarra lleva, a la izquierda, el nombre del tema del combate y, a la derecha, una frase al azar del catálogo de textos, distinta en cada combate;
+- el pósit, los avisos de la megafonía y los bocadillos llevan frases del catálogo de textos (NFR-I18N-001);
+- ningún texto se sale de su zona a ninguna escala, y todos cumplen el contraste de NFR-ACS-001;
+- las frases siguen el tono gamberro e irónico y los límites de la guía de arte, y el dueño las revisa antes de que entren en el catálogo.
+- *Verificación:* UT, INS.
+
 ---
 
 ## 4. Requisitos no funcionales
@@ -868,7 +882,7 @@ Los marcados con ★ son criterios de aceptación del MVP (§8).
 |---|---|---|---|---|---|---|
 | NFR-PRF-001 ★ | Tiempo hasta poder jugar | Con un PDF de 40 páginas subido desde el móvil, el primer tema es jugable en **≤ 2 min** (p90 sobre el conjunto de evaluación) | M | H4 | E2E, EVAL | Q40 |
 | NFR-PRF-002 | Respuesta de la interfaz | Desde tocar una carta hasta ver la pregunta: ≤ 100 ms en el dispositivo de referencia (prov.) | M | H2 | MAN | S-4 |
-| NFR-PRF-003 | Fluidez visual | ≥ 30 fps sostenidos en combate con el fondo activo, en el dispositivo de referencia (prov.) | M | H1 | MAN | Q24.1 |
+| NFR-PRF-003 | Fluidez visual | ≥ 30 fps sostenidos en combate con el aula animada, en el dispositivo de referencia (prov.) | M | H1 | MAN | Q24.1 |
 | NFR-PRF-004 | Arranque | Carga en frío ≤ 3 s en 4G simulado; arranque desde caché ≤ 1,5 s (prov.) | S | H2 | E2E | Q8 |
 | NFR-REL-001 ★ | Ningún progreso perdido | Forzando el cierre de la app en ≥ 50 puntos aleatorios de una partida, con cortes de red, en todos los casos se retoma el estado exacto | M | H2 | E2E | Q40, Q17 |
 | NFR-REL-002 | Sincronización correcta | Con registros aleatorios en 2 o 3 dispositivos y cualquier orden de sincronización, no se pierde ni se duplica ningún evento y nada borrado reaparece | M | H3 | UT (propiedades) | Q26 |
@@ -922,7 +936,7 @@ Los marcados con ★ son criterios de aceptación del MVP (§8).
 
 - **Supabase:** Auth, Postgres con RLS, Storage (PDFs temporales) y Queues (ADR-0005).
 - **Proveedores de LLM:** solo desde el worker, a través de la interfaz interna sobre el Vercel AI SDK (FR-GEN-010).
-- **Navegador:** IndexedDB, almacenamiento persistente, Service Worker, WebGL (con alternativa si no está) e instalación como PWA.
+- **Navegador:** IndexedDB, almacenamiento persistente, Service Worker e instalación como PWA.
 
 ---
 
@@ -961,7 +975,7 @@ Cada hito termina con su propia verificación. H4 depende de las cuentas de H3.
 
 | Hito | Entrega | Criterio de salida |
 |---|---|---|
-| **H1** Prototipo visual | Pantalla de combate simulada: 5 cartas, fondo shader, CRT, una pregunta, tipografías y créditos | El dueño confirma en su móvil que el estilo le convence **y** se cumple NFR-PRF-003. Si no, se activa el plan B de ADR-0004 antes de seguir |
+| **H1** Prototipo visual | Pantalla de combate simulada: 5 cartas, el aula animada, CRT, una pregunta, tipografías y créditos | El dueño confirma en su móvil que el estilo le convence **y** se cumple NFR-PRF-003. Si no, se activa el plan B de ADR-0004 antes de seguir |
 | **H2** Juego offline con CSV | Motor, contenido base, mapa, combate, Cartas de Estudio, nodos, FSRS local, maestría, PWA offline, invitado, asignatura de demostración y tutorial | Se cumplen NFR-QLT-002, NFR-REL-001, NFR-USA-001 y NFR-MNT-002/003/005 |
 | **H3** Cuentas y sincronización | Login, sincronización, analítica y RGPD | Se cumplen FR-ACC-*, FR-OFF-001/005/006, FR-PRV-001/002/003 y NFR-REL-002 |
 | **H4** Pipeline de PDFs | Worker, cola, extracción, generación, verificación, cuota, edición, conjunto de evaluación y política de privacidad | Se cumplen NFR-PRF-001, NFR-QLT-001 y NFR-CST-001 |
@@ -1009,7 +1023,8 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 |---|---|---|
 | Preguntas incorrectas que enseñan errores | Alto | P3, FR-GEN-005/006, FR-QST-002, NFR-QLT-001 |
 | Cambios constantes de modelos y precios de LLM | Medio | FR-GEN-009/010, NFR-CST-001 |
-| No se consigue el look Balatro con DOM + WebGL | Medio | H1 lo valida antes de construir; plan B con PixiJS (ADR-0004) |
+| No se consigue un aula en pixel art viva y fluida con DOM y CSS | Medio | H1 lo valida antes de construir: la paleta y el boceto del aula se aprueban antes de dibujar a tamaño final, y los fps se miden en el móvil; plan B con PixiJS (ADR-0004) |
+| Los textos gamberros del aula ofenden o envejecen mal | Bajo | Límites del tono en la guía de arte; el dueño revisa cada frase; salen del catálogo y se cambian sin tocar el código (FR-VIS-009) |
 | Alcance grande para "unas semanas" (offline, sincronización, IA) | Alto | Hitos con verificación propia; H2 ya es un producto jugable |
 | Abuso de costes (p. ej. PDFs escaneados enormes) | Medio | FR-SUB-002, FR-GEN-008/011, NFR-SEC-004 |
 | RGPD y ePrivacy: procesamiento en EE. UU. e identificador de analítica | Medio | FR-PRV-004, NFR-PRV-001, FR-ANL-001/002 (opt-in) |
@@ -1072,6 +1087,8 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Verificador | rechaza ≥ 90% de las preguntas defectuosas sembradas | FR-GEN-006 | H4 |
 | Coste máximo por PDF | 0,05 $ | NFR-CST-001 | H4 |
 | Rendimiento | 100 ms / 30 fps / 3 s | NFR-PRF-002/003/004 | H1-H2 |
+| Zona segura del aula | 160×280 píxeles del arte | FR-VIS-008 | H1 |
+| Guiños del aula | uno cada 20 a 40 s, nunca dos a la vez | FR-VIS-001 | H1 |
 | JavaScript inicial del build | ≤ 150 kB con gzip | NFR-PRF-004 | H2 |
 
 ---
@@ -1105,11 +1122,11 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Q21 | (a) Offline-first, innegociable | P4, FR-OFF-*, ADR-0006 |
 | Q22 | (a) Asignatura → fuentes → temas → conceptos → preguntas | FR-SUB-*, FR-GEN-003, Glosario |
 | Q23 | TypeScript en todo | R-1, ADR-0002 |
-| Q24 / Q24.1 | (a) Estética Balatro con DOM + WebGL, validada con un prototipo | FR-VIS-*, ADR-0004 |
+| Q24 / Q24.1 | (a) Estética Balatro con DOM + WebGL, validada con un prototipo. El 2026-10-11 el fondo pasa a ser un aula en PNG con animaciones del DOM, sin WebGL | FR-VIS-*, ADR-0004, ADR-0013 |
 | Q25 | (a) Supabase UE + worker Node | R-2, ADR-0005 |
 | Q26 | Registro append-only; (a) la partida en curso solo es local | FR-OFF-002/006/008, ADR-0006 |
 | Q27 | (a) Rehacer en el mismo repo (etiqueta `v0-flask`) | ADR-0001 |
-| Q28 / Q28.1 | (a) Packs CC0 con paleta fija; m6x11 + Pixelify Sans | FR-VIS-004/005/006, R-4 |
+| Q28 / Q28.1 | (a) Packs CC0 con paleta fija; m6x11 + Pixelify Sans. El 2026-10-11 la paleta pasa a tener hasta 32 colores | FR-VIS-004/005/006, R-4, ADR-0013 |
 | Q29 | 30-40 preguntas por partida; iterar con datos | FR-RUN-005 |
 | Q30 | (c) Sin límite de tiempo; crítico por rapidez según la longitud | FR-CMB-007, FR-OFF-010 |
 | Q31 | Mazo inicial de 10 y pool de ~20; las Cartas de Estudio son la clave | P7, FR-CMB-003/004, FR-STU-*, FR-DAT-006 |

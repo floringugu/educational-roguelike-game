@@ -39,7 +39,7 @@
   font-family: var(--font-display);
   font-size: 18px; /* the size m6x11plus is drawn for */
   line-height: 1;
-  /* Drawn right on the light desk of the background (ADR-0014). */
+  /* Drawn right on the light desk of the background (ticket 04). */
   color: var(--color-desk-text);
 }
 

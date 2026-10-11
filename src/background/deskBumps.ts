@@ -1,4 +1,4 @@
-// The hits on the desk (ADR-0014): when the enemy hits the player, the things
+// The hits on the desk (ticket 04): when the enemy hits the player, the things
 // lying on the desk of the background jump a little. The combat only calls
 // bumpDesk(); the background listens with onDeskBump(). It is a plain module
 // and not React state, so a hit never draws the screen again with React:

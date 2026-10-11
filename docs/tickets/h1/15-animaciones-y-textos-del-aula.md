@@ -10,7 +10,7 @@
 
 **Bloqueado por:** 11, 12.
 
-**Requisitos:** FR-VIS-001, FR-VIS-007, NFR-PRF-003, NFR-I18N-001, el requisito nuevo de textos del aula (ticket 09), ADR-0013, guía de arte.
+**Requisitos:** FR-VIS-001, FR-VIS-007, NFR-PRF-003, NFR-I18N-001, FR-VIS-009, ADR-0013, guía de arte.
 
 **Estado:** listo
 

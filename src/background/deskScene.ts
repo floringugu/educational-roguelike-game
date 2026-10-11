@@ -1,7 +1,7 @@
 import { PALETTE, type PaletteColorName } from '../theme/palette';
 import type { SwirlColors } from './swirlColors';
 
-// The still part of the background (FR-VIS-001, ADR-0014): the floor, the
+// The still part of the background (FR-VIS-001, ticket 04): the floor, the
 // desk, its legs, the chair, the cuts in the formica and the things lying on
 // the desk. It is painted once here, pixel by pixel, every time the screen
 // changes size, and the shader (swirl.frag.glsl) only puts it on the screen
@@ -403,7 +403,7 @@ const INITIALS_ROWS = [
 ];
 
 // ---- The things on the desk ----
-// Seen from the high three-quarter view of ADR-0014: the top of each thing
+// Seen from the high three-quarter view of ticket 04: the top of each thing
 // and a bit of its front. The light comes from the top left. In every one,
 // `o` is its shadow on the desk.
 

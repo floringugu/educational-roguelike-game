@@ -2,7 +2,7 @@ import { PALETTE, type PaletteColorName } from '../theme/palette';
 
 // The colors of the background (FR-VIS-001): a green school desk with its
 // chair, on the terrazzo floor of a classroom, seen from a high three-quarter
-// view (ADR-0014). They are parameters taken from the fixed palette
+// view (ticket 04). They are parameters taken from the fixed palette
 // (FR-VIS-004), never free colors. The things lying on the desk (pencil,
 // eraser...) are small sprites with their own colors, in deskScene.ts.
 export type SwirlColors = {

@@ -31,7 +31,7 @@
   font-size: 36px; /* twice the size m6x11plus is drawn for */
   font-weight: normal;
   line-height: 1;
-  /* Drawn right on the light floor of the background (ADR-0014). */
+  /* Drawn right on the light floor of the background (ticket 04). */
   color: var(--color-desk-title);
 }
 

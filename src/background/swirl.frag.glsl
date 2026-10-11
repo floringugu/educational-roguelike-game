@@ -1,6 +1,6 @@
 // Fragment shader of the background (FR-VIS-001), written from scratch for
 // Empollatro (R-3). It draws a green school desk with its chair, on the
-// floor of a classroom, seen from a high three-quarter view (ADR-0014).
+// floor of a classroom, seen from a high three-quarter view (ticket 04).
 //
 // The still part of the scene (the floor, the desk, the chair, the cuts in
 // the formica and the things lying on it) is painted once in deskScene.ts
