@@ -1,0 +1,50 @@
+/* The health of the combat screen as a row of symbols (ticket 06). When
+   there is not room for the numbers beside the symbols, they go under them. */
+.health-meter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  column-gap: 0.5rem;
+}
+
+.health-meter__symbols {
+  display: flex;
+}
+
+/* The drawing of a symbol is 12 of the 16 pixels of its sprite, centered.
+   The negative margins take back part of the empty pixels around it, so the
+   symbols sit 26 px apart instead of 32 and the row is 24 px tall. */
+.health-meter__symbol {
+  position: relative;
+  margin: -4px -3px;
+}
+
+.health-meter__symbol .sprite {
+  display: block;
+}
+
+/* The full symbol, over the empty one, cut on the right so only the
+   quarters that are left show. The drawing starts 4 px in (2 sprite pixels at
+   x2) and each quarter is 6 px wide (3 sprite pixels), so with q quarters
+   full, 32 - (4 + 6q) px are cut. The cut slides, so a hit can be seen
+   draining the symbol. */
+.health-meter__full {
+  position: absolute;
+  inset: 0;
+  clip-path: inset(0 calc(28px - 6px * var(--filled-quarters)) 0 0);
+  transition: clip-path 250ms ease-out;
+}
+
+.health-meter__numbers {
+  font-family: var(--font-display);
+  font-size: 18px; /* the size m6x11plus is drawn for */
+  line-height: 1;
+  /* Drawn right on the light desk of the background (ADR-0014). */
+  color: var(--color-desk-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .health-meter__full {
+    transition: none;
+  }
+}

@@ -20,8 +20,8 @@ export const es = {
     lossSign: '-',
     gainSign: '+',
   },
-  // The enemies of the prototype (ticket 06): the name shown over the health
-  // bar and the description of the sprite for screen readers.
+  // The enemies of the prototype (ticket 06): the name shown over its health
+  // and the description of the sprite for screen readers.
   enemies: {
     midterm: {
       name: 'El Parcial',

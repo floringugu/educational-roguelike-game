@@ -2,7 +2,7 @@ import type { AnimationEvent } from 'react';
 import type { SpriteId } from '../assets/catalog';
 import { Sprite } from '../components/Sprite';
 import { es } from '../i18n/es';
-import { HealthBar } from './HealthBar';
+import { HealthMeter } from './HealthMeter';
 import type { MockCombat, MockEnemyId } from './mockCombat';
 import './EnemyView.css';
 
@@ -74,7 +74,7 @@ export function EnemyView({ enemy, hits, lastDamage, arrivals, onDefeatShown }: 
       <p className="enemy__name">{texts.name}</p>
 
       <div className="enemy__health">
-        <HealthBar
+        <HealthMeter
           health={enemy.health}
           maxHealth={enemy.maxHealth}
           label={es.combat.enemyHealthLabel}

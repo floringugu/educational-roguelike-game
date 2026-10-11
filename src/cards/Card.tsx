@@ -1,4 +1,4 @@
-import { m, useMotionValueEvent, useSpring, useTransform, useVelocity } from 'motion/react';
+import { m, useSpring, useTransform, useVelocity } from 'motion/react';
 import { useEffect, useRef, type MouseEvent, type PointerEvent } from 'react';
 import { Sprite } from '../components/Sprite';
 import { es } from '../i18n/es';
@@ -62,7 +62,6 @@ type CardProps = {
 // rendering the component again with React.
 export function Card({ card, restPose, onPlay }: CardProps) {
   const texts = es.cards[card.id];
-  const cardElement = useRef<HTMLButtonElement>(null);
   // Where and when the finger first pressed, while the card is held.
   const pressStart = useRef<{ x: number; y: number; time: number } | null>(null);
 
@@ -105,13 +104,6 @@ export function Card({ card, restPose, onPlay }: CardProps) {
       rotate.set(restPose.rotateDegrees);
     }
   }, [restPose.dropPixels, restPose.rotateDegrees, y, rotate]);
-
-  // The shine of the seal of the foil and holo editions moves as the card
-  // turns (Card.css). Motion cannot type a CSS variable in `style`, so it is set
-  // on the element directly.
-  useMotionValueEvent(rotateY, 'change', (degrees) => {
-    cardElement.current?.style.setProperty('--edition-shift', String(degrees));
-  });
 
   function handlePointerDown(event: PointerEvent<HTMLButtonElement>) {
     // Keep receiving the moves of this finger even when it leaves the card.
@@ -181,7 +173,6 @@ export function Card({ card, restPose, onPlay }: CardProps) {
   // readers.
   return (
     <m.button
-      ref={cardElement}
       type="button"
       className={cardClassName(card)}
       data-type={card.type}
@@ -206,9 +197,6 @@ export function Card({ card, restPose, onPlay }: CardProps) {
       </span>
       <span className="card__type">{es.cardTypes[card.type]}</span>
       <span className="card__description">{highlightNumbers(texts.description)}</span>
-      {/* The seal of a diploma or a certificate, drawn by Card.css. It is
-          decoration, so it has no text for screen readers. */}
-      {card.edition !== 'base' && <span className="card__seal" />}
     </m.button>
   );
 }

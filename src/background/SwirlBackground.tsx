@@ -15,11 +15,12 @@ type SwirlBackgroundProps = {
   colors?: SwirlColors;
 };
 
-// The animated background behind every screen (FR-VIS-001): the wood of a
-// school desk whose grain flows slowly around its knots. It stops moving and
-// shows a single frame when the frame rate is too low or when the system asks
-// for reduced motion (FR-VIS-007). Without WebGL there is no frame to show,
-// so it is replaced by the static CSS stripes.
+// The animated background behind every screen (FR-VIS-001): a green school
+// desk seen from a high three-quarter view, with a fly, a paper plane, a ball
+// of paper and an ant (ADR-0014). It stops moving and shows a single frame when
+// the frame rate is too low or when the system asks for reduced motion
+// (FR-VIS-007). Without WebGL there is no frame to show, so it is replaced by
+// a plain desk drawn with CSS.
 export function SwirlBackground({
   resolutionScale = DEFAULT_RESOLUTION_SCALE,
   colors = SWIRL_COLORS,

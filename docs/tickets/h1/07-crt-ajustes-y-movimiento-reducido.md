@@ -8,7 +8,7 @@
 
 Este ticket también pone en marcha los primeros tests de extremo a extremo.
 
-**Bloqueado por:** 04, 06.
+**Bloqueado por:** 06, 11, 12.
 
 **Requisitos:** FR-VIS-003, FR-VIS-007, §5.1 (pantallas de Ajustes y Créditos).
 

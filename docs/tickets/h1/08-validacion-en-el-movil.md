@@ -2,7 +2,7 @@
 
 **Qué construir:** nada nuevo. Este ticket decide si la arquitectura visual de ADR-0004 se mantiene o si se pasa al plan B (PixiJS) antes de empezar H2.
 
-**Bloqueado por:** 01, 02, 03, 04, 05, 06, 07.
+**Bloqueado por:** 01, 02, 03, 04, 05, 06, 07, 09, 10, 11, 12, 13, 14, 15.
 
 **Requisitos:** §7.1 (criterio de salida de H1), NFR-PRF-003, S-4, ADR-0004.
 

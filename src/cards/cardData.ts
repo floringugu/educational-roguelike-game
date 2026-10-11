@@ -3,8 +3,8 @@ import { es } from '../i18n/es';
 
 // The editions a card can have (FR-VIS-002). An edition only changes how
 // the card looks: "base" is the plain page of the notebook, "foil" is a
-// diploma and "holo" a certificate, both crumpled and with a seal whose shine
-// moves (see Card.css).
+// diploma on crumpled parchment and "holo" a certificate on crumpled paper
+// (see Card.css).
 export const CARD_EDITIONS = ['base', 'foil', 'holo'] as const;
 export type CardEdition = (typeof CARD_EDITIONS)[number];
 
