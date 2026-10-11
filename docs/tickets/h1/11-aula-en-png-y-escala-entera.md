@@ -10,7 +10,7 @@ Sustituye al fondo actual.
 
 **Bloqueado por:** 10.
 
-**Requisitos:** FR-VIS-001, FR-VIS-004, FR-VIS-007, el requisito nuevo de escala entera (ticket 09), NFR-PRF-003, R-4, ADR-0013.
+**Requisitos:** FR-VIS-001, FR-VIS-004, FR-VIS-007, FR-VIS-008, NFR-PRF-003, R-4, ADR-0013.
 
 **Estado:** listo
 

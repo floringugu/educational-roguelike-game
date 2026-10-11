@@ -26,7 +26,7 @@ export const PALETTE = {
   leaf: '#5a9a5a',
   lime: '#a4d17a',
   // The faded greens of the formica of the desk in the background, from its
-  // shaded side to its lit side (ADR-0014).
+  // shaded side to its lit side. ADR-0013 keeps them for the classroom.
   olive: '#7d8556',
   sage: '#afb989',
   khaki: '#c8c48e',
@@ -43,7 +43,7 @@ export const colorRoles = {
   text: 'paper',
   textMuted: 'sand',
   accent: 'gold',
-  // The texts drawn right on the desk of the background (ADR-0014), which is
+  // The texts drawn right on the desk of the background (ticket 04), which is
   // light: the name of the enemy and the numbers of the health in ink, and
   // the title of the combat in wine. They have no
   // background of their own, so their contrast is checked against every
