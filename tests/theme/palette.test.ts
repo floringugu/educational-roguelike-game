@@ -84,9 +84,9 @@ function roleOfValue(value: string): ColorRole | undefined {
 }
 
 describe('FR-VIS-004: the palette', () => {
-  it('has between 16 and 24 different colors', () => {
+  it('has up to 32 different colors', () => {
     expect(paletteHexColors.length).toBeGreaterThanOrEqual(16);
-    expect(paletteHexColors.length).toBeLessThanOrEqual(24);
+    expect(paletteHexColors.length).toBeLessThanOrEqual(32);
     expect(new Set(paletteHexColors).size).toBe(paletteHexColors.length);
   });
 

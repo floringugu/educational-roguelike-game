@@ -5,51 +5,58 @@
  * each text/background pair has a contrast of at least 4.5:1 (NFR-ACS-001).
  */
 :root {
-  --color-background: #1a1410;
-  --color-surface: #2e231b;
-  --color-text: #faf4e2;
-  --color-text-muted: #cdb896;
-  --color-accent: #f2c94c;
+  --color-background: #1c1426;
+  --color-surface: #30203a;
+  --color-text: #fff7de;
+  --color-text-muted: #cfc0a0;
+  --color-accent: #ffd04e;
   /* The texts drawn right on the light desk of the background. */
-  --color-desk-text: #1a1410;
-  --color-desk-title: #5c1f2a;
+  --color-desk-text: #1c1426;
+  --color-desk-title: #5c1a3e;
 
   /* Cards and their editions. */
-  --color-card: #faf4e2;
-  --color-card-text: #1a1410;
-  --color-card-rule: #98a6e0;
-  --color-card-frame: #6f5a44;
-  --color-card-shadow: #1a1410;
-  --color-card-art: #2e231b;
-  --color-card-photo-edge: #cdb896;
-  --color-card-cost: #9a3340;
-  --color-card-attack: #9a3340;
-  --color-card-attack-light: #d4584f;
-  --color-card-defense: #3b4577;
-  --color-card-defense-light: #5d6bb0;
-  --color-card-skill: #2f5a3a;
-  --color-card-skill-light: #5a9a5a;
+  --color-card: #fff7de;
+  --color-card-text: #1c1426;
+  --color-card-rule: #a2c8f2;
+  --color-card-frame: #745848;
+  --color-card-shadow: #1c1426;
+  --color-card-art: #30203a;
+  --color-card-photo-edge: #cfc0a0;
+  --color-card-cost: #a62a48;
+  --color-card-attack: #a62a48;
+  --color-card-attack-light: #e2584a;
+  --color-card-defense: #384c98;
+  --color-card-defense-light: #5e86d2;
+  --color-card-skill: #1f4a4c;
+  --color-card-skill-light: #3f8a52;
   /* The colors of the textures of the cards (src/assets/textures/). The CSS
      does not paint with them: they are here, like every role, so the tests
      check the textures and the contrast of the text on them. */
-  --color-card-diploma: #ece0c6;
-  --color-card-crease: #cdb896;
-  --color-card-sheet-edge: #9c8266;
-  --color-card-coffee: #cdb896;
-  --color-card-coffee-edge: #9c8266;
+  --color-card-diploma: #e8dcc0;
+  --color-card-crease: #cfc0a0;
+  --color-card-sheet-edge: #a38a6c;
+  --color-card-coffee: #cfc0a0;
+  --color-card-coffee-edge: #a38a6c;
 
   /* The combat screen of the prototype and its question sheet. */
-  --color-damage-tag: #9a3340;
-  --color-heal-tag: #2f5a3a;
-  --color-block-tag: #3b4577;
-  --color-exam: #faf4e2;
-  --color-exam-text: #1a1410;
-  --color-exam-rule: #98a6e0;
-  --color-exam-mark: #9a3340;
-  --color-exam-option: #ece0c6;
-  --color-exam-option-edge: #6f5a44;
-  --color-answer-correct: #a4d17a;
-  --color-answer-wrong: #9a3340;
+  --color-damage-tag: #a62a48;
+  --color-heal-tag: #1f4a4c;
+  --color-block-tag: #384c98;
+  --color-exam: #fff7de;
+  --color-exam-text: #1c1426;
+  --color-exam-rule: #a2c8f2;
+  --color-exam-mark: #a62a48;
+  --color-exam-option: #e8dcc0;
+  --color-exam-option-edge: #745848;
+  --color-answer-correct: #a0d45c;
+  --color-answer-wrong: #a62a48;
+
+  /* The panels of the combat interface: the enemy panel and the bottom bar. */
+  --color-panel: #383a60;
+  --color-panel-edge: #6873a2;
+  --color-panel-text: #fff7de;
+  --color-health-bar: #e2584a;
+  --color-health-bar-track: #1c1426;
 
   /* m6x11plus for titles and numbers; Pixelify Sans for reading (FR-VIS-005).
      The fallback fonts are only used while the files load. */

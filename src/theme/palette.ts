@@ -1,35 +1,58 @@
-// The fixed palette of Empollatro: "Pergamino y tinta", 23 colors chosen by
+// The fixed palette of Empollatro: "Pergamino y tinta", 32 colors chosen by
 // the owner (FR-VIS-004). All the art and all the colors of the interface use
 // only these colors.
 //
 // The names describe the color, not its use, so a color can change role
 // without being renamed. Roles ("background", "text"...) are in `colorRoles`.
+//
+// The colors are grouped in ramps, from dark to light. The art guide
+// (docs/GUIA-DE-ARTE.md, section 6) lists them, and docs/arte/paleta.png
+// shows them.
 export const PALETTE = {
-  ink: '#1a1410',
-  bark: '#2e231b',
-  umber: '#4a3a2c',
-  leather: '#6f5a44',
-  tan: '#9c8266',
-  sand: '#cdb896',
-  parchment: '#ece0c6',
-  paper: '#faf4e2',
-  night: '#22263f',
-  indigo: '#3b4577',
-  periwinkle: '#5d6bb0',
-  lavender: '#98a6e0',
-  wine: '#5c1f2a',
-  crimson: '#9a3340',
-  vermilion: '#d4584f',
-  amber: '#e8933e',
-  gold: '#f2c94c',
-  forest: '#2f5a3a',
-  leaf: '#5a9a5a',
-  lime: '#a4d17a',
+  ink: '#1c1426',
+  bark: '#30203a',
+  umber: '#523046',
+  leather: '#745848',
+  tan: '#a38a6c',
+  sand: '#cfc0a0',
+  parchment: '#e8dcc0',
+  paper: '#fff7de',
+  night: '#21285a',
+  indigo: '#384c98',
+  periwinkle: '#5e86d2',
+  lavender: '#a2c8f2',
+  wine: '#5c1a3e',
+  crimson: '#a62a48',
+  vermilion: '#e2584a',
+  amber: '#f2953a',
+  gold: '#ffd04e',
+  // The warm light that comes in through the blinds of the classroom
+  // (ADR-0013): the light ramp is amber, gold and sunbeam.
+  sunbeam: '#fff5b8',
+  forest: '#1f4a4c',
+  leaf: '#3f8a52',
+  lime: '#a0d45c',
   // The faded greens of the formica of the desk in the background, from its
   // shaded side to its lit side. ADR-0013 keeps them for the classroom.
-  olive: '#7d8556',
-  sage: '#afb989',
-  khaki: '#c8c48e',
+  olive: '#66704a',
+  sage: '#9aa36a',
+  khaki: '#cfcb95',
+  // The classroom of ADR-0013, sampled from its reference images and adjusted
+  // so that no two colors of the palette look alike.
+  // The sage formica of the desk and the green lower half of the wall:
+  // spruce in the deepest shade, celadon where the light hits.
+  spruce: '#22313a',
+  moss: '#485f55',
+  fern: '#6c876c',
+  celadon: '#a2b690',
+  // The chalkboard is spruce; teal is the chalk rubbed out on it.
+  teal: '#2b5459',
+  // The upper half of the wall, a grey beige between umber and sand.
+  taupe: '#958d80',
+  // The dark panels of the combat interface, their metal edges, and the
+  // metal of the classroom (the clock, the legs of the desks).
+  slate: '#383a60',
+  steel: '#6873a2',
 } as const;
 
 export type PaletteColorName = keyof typeof PALETTE;
@@ -103,6 +126,14 @@ export const colorRoles = {
   examOptionEdge: 'leather',
   answerCorrect: 'lime',
   answerWrong: 'crimson',
+  // The panels of the combat interface (ADR-0013): the enemy panel at the top
+  // and the bottom bar. Dark slate with a steel edge and paper text. The
+  // health bar is red on an ink track, like the one in the reference.
+  panel: 'slate',
+  panelEdge: 'steel',
+  panelText: 'paper',
+  healthBar: 'vermilion',
+  healthBarTrack: 'ink',
 } as const satisfies Record<string, PaletteColorName>;
 
 export type ColorRole = keyof typeof colorRoles;
@@ -161,4 +192,7 @@ export const textOnBackgroundPairs: ReadonlyArray<{ text: ColorRole; background:
   { text: 'text', background: 'cardArt' },
   { text: 'textMuted', background: 'cardArt' },
   { text: 'accent', background: 'cardArt' },
+  // The texts of the panels of the combat interface: the name of the enemy,
+  // the numbers of the health and the button "Terminar turno".
+  { text: 'panelText', background: 'panel' },
 ];

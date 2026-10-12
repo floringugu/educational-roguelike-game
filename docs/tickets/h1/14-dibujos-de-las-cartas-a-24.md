@@ -4,7 +4,7 @@
 
 **Bloqueado por:** 10.
 
-**Requisitos:** FR-VIS-002, FR-VIS-004, NFR-ACS-001, R-3, R-4, ADR-0011, ADR-0013, guía de arte.
+**Requisitos:** FR-VIS-002, FR-VIS-004, NFR-ACS-001, R-3, R-4, ADR-0011, ADR-0013, ADR-0014, guía de arte.
 
 **Estado:** listo
 
@@ -15,7 +15,7 @@
   - la chuleta;
   - los libros.
 - [ ] Cumplen la lista de comprobación de la guía: paleta, máximo de colores, luz desde la izquierda y sin texto legible.
-- [ ] La ventana de la foto de la carta crece hasta que cabe el dibujo de 24×24 a la escala entera. La carta conserva el resto de su diseño.
+- [ ] La ventana de la foto de la carta crece hasta que cabe el dibujo de 24×24 a la escala entera. La carta mide unos 38×54 píxeles del arte (ADR-0014) y conserva el resto de su diseño.
 - [ ] Los textos de la carta siguen cabiendo, con la carta en la mano y levantada, también en el título y el certificado.
 - [ ] Los sellos de las ediciones y las manchas de café no tapan el dibujo ni los textos.
 - [ ] Las cartas, sus texturas y sus sombras se pintan con la escala entera del ticket 11, en cuanto esté terminado.
