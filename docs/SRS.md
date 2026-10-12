@@ -858,8 +858,8 @@ Con `prefers-reduced-motion` activo, el fondo animado se detendrá y las animaci
 
 - *Verificación:* E2E.
 
-**FR-VIS-008** · M · H1 · ADR-0013
-Todo el pixel art (el aula, los sprites, los iconos y las cartas) deberá pintarse con una única **escala entera**, la misma para todo: la mayor con la que la zona segura del aula cabe entera en la pantalla, desde ×2. Lo normal es ×2 en el móvil y ×3 o ×4 en tableta y PC. El juego deberá ir en una columna vertical centrada. En pantallas más anchas, el aula sigue a los lados de la columna, sin franjas vacías, y la zona segura se ve siempre entera.
+**FR-VIS-008** · M · H1 · ADR-0013, ADR-0014
+El juego deberá pintarse en un **marco fijo de 9:16**, centrado en la pantalla, con el aula de 180×320 píxeles del arte entera dentro. Fuera del marco quedan franjas lisas del color de fondo. Todo el pixel art (el aula, los sprites, los iconos y las cartas) deberá pintarse con una única **escala entera**, la misma para todo: la mayor con la que el marco cabe entero, contada en píxeles físicos de la pantalla. Un móvil de 1080 píxeles físicos de ancho pinta cada píxel del arte a 6×6; uno de 720, a 4×4. Los textos se pintan a media escala: cada píxel de la fuente mide la mitad que un píxel del arte.
 
 - *Verificación:* UT (la elección de la escala), MAN (móvil, tableta y PC).
 
@@ -1087,7 +1087,6 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Verificador | rechaza ≥ 90% de las preguntas defectuosas sembradas | FR-GEN-006 | H4 |
 | Coste máximo por PDF | 0,05 $ | NFR-CST-001 | H4 |
 | Rendimiento | 100 ms / 30 fps / 3 s | NFR-PRF-002/003/004 | H1-H2 |
-| Zona segura del aula | 160×280 píxeles del arte | FR-VIS-008 | H1 |
 | Guiños del aula | uno cada 20 a 40 s, nunca dos a la vez | FR-VIS-001 | H1 |
 | JavaScript inicial del build | ≤ 150 kB con gzip | NFR-PRF-004 | H2 |
 

@@ -32,7 +32,7 @@
   - [ ] el **reloj de la última hora**: si el combate dura más de unos minutos (prov.), el minutero va hacia atrás un momento;
   - [ ] la **persiana rota**: se le cae una lama torcida y entra un rayo de luz más;
   - [ ] los **móviles requisados**: un móvil vibra en su caja;
-  - [ ] el **radiador**: el bocadillo en papel de aluminio brilla cuando le da la luz;
+  - [ ] el **radiador**: el bocadillo en papel de aluminio da un destello de vez en cuando (los rayos de la ventana no llegan hasta él);
   - [ ] la **pelota de la clase**: desde un pupitre del fondo sube una mano con un bocadillo («Profe, ¿hoy no hay deberes?», de un conjunto de al menos 5). Le tiran una bola de papel y la mano baja.
 - [ ] **Reacciones al combate:**
   - [ ] el estuche, el cuaderno y el boli saltan cuando el enemigo golpea al jugador;

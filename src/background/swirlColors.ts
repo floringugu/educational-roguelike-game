@@ -44,18 +44,20 @@ export const SWIRL_COLORS: SwirlColors = {
   floorShadow: 'sand',
   desk: 'sage',
   deskLight: 'khaki',
-  deskShade: 'olive',
+  // Fern, not olive: ink on olive is below 4.5:1 since the palette was
+  // retouched, and the texts in ink can land on this shade (NFR-ACS-001).
+  deskShade: 'fern',
   deskOutline: 'ink',
   deskEdge: 'sand',
   deskEdgeSide: 'tan',
   deskEdgeGrain: 'leather',
   metal: 'khaki',
-  metalShade: 'olive',
+  metalShade: 'fern',
   feet: 'ink',
   cutGroove: 'umber',
   cutWall: 'tan',
   cutChip: 'khaki',
-  objectShadow: 'olive',
+  objectShadow: 'fern',
 };
 
 // NFR-ACS-001. The desk is light, so the texts drawn right on it are dark
@@ -117,6 +119,15 @@ export const SHADED_COLOR: Record<PaletteColorName, PaletteColorName> = {
   olive: 'umber',
   sage: 'olive',
   khaki: 'sage',
+  spruce: 'ink',
+  moss: 'spruce',
+  fern: 'moss',
+  celadon: 'fern',
+  teal: 'spruce',
+  taupe: 'umber',
+  sunbeam: 'gold',
+  slate: 'ink',
+  steel: 'slate',
 };
 
 // The static background that replaces the shader when there is no WebGL to
