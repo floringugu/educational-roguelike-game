@@ -56,7 +56,9 @@ export const LICENSES: LicenseEntry[] = [
   },
   {
     // The project's own pixel art (ADR-0011): drawn for Empollatro, with
-    // palette colors only. The PNG files are the source.
+    // palette colors only. The PNG files are the source, except for the
+    // classroom, which is drawn in art/classroom.aseprite and exported to the
+    // PNG files of backgrounds/ and of the sprites classroom-*.
     name: 'Empollatro sprites',
     author: 'Florin Gugu',
     license: 'Creative Commons Zero (CC0 1.0)',
@@ -64,6 +66,8 @@ export const LICENSES: LicenseEntry[] = [
     sourceUrl: 'https://github.com/floringugu/educational-roguelike-game',
     attribution: 'Empollatro sprites by Florin Gugu',
     files: [
+      'backgrounds/classroom-light.png',
+      'backgrounds/classroom.png',
       'sprites/block-shield-empty.png',
       'sprites/block-shield-full.png',
       'sprites/card-art-books.png',
@@ -71,6 +75,19 @@ export const LICENSES: LicenseEntry[] = [
       'sprites/card-art-cheat-sheet.png',
       'sprites/card-art-coffee.png',
       'sprites/card-art-empty-desk.png',
+      'sprites/classroom-blind-slat.png',
+      'sprites/classroom-clock-hour-hand.png',
+      'sprites/classroom-clock-minute-hand.png',
+      'sprites/classroom-clock-second-hand.png',
+      'sprites/classroom-cloud.png',
+      'sprites/classroom-notebook.png',
+      'sprites/classroom-pen.png',
+      'sprites/classroom-pencil-case.png',
+      'sprites/classroom-phone-box.png',
+      'sprites/classroom-radiator.png',
+      'sprites/classroom-speaker-left.png',
+      'sprites/classroom-speaker-right.png',
+      'sprites/classroom-tree.png',
       'sprites/discard-shredder.png',
       'sprites/discard-shredder-strips.png',
       'sprites/enemy-math-teacher.png',
@@ -94,5 +111,19 @@ export const LICENSES: LicenseEntry[] = [
       'textures/crumpled-sheet-top-cut.png',
       'textures/crumpled-sheet-top.png',
     ],
+  },
+  {
+    // The city seen through the window of the classroom (ADR-0004: a CC0
+    // pack, recolored to the palette). It is a layer of its own, under the
+    // classroom, so that this entry covers exactly the third-party pixels.
+    name: 'City Mega Pack',
+    author: 'GrafxKid',
+    license: 'Creative Commons Zero (CC0 1.0)',
+    licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/',
+    sourceUrl: 'https://opengameart.org/content/city-mega-pack',
+    attribution: 'City Mega Pack by GrafxKid (opengameart.org/content/city-mega-pack)',
+    modification:
+      'A slice of the city skyline of the pack, cropped, mapped to the palette of the game and with its towers recolored.',
+    files: ['backgrounds/classroom-city.png'],
   },
 ];

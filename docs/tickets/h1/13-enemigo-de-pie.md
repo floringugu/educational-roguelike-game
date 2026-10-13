@@ -11,6 +11,7 @@
 - [ ] El Examen es un sprite propio de 88×96 que sigue la lista de comprobación de la guía.
   - Conserva su diseño: la hoja con cara, la regla, el lápiz y las zapatillas rojas.
   - El encabezado «EXAMEN» y la nota pasan a ser garabatos y un círculo rojo, sin texto legible.
+- [ ] La pantalla de combate coloca al enemigo en la posición que exporta el ticket 11 (`ENEMY_RECT`): centrado en x 46-134 y con los pies en y 188, dentro del pupitre y no en su borde. Hoy el prototipo del ticket 06 lo deja en su maqueta antigua, con los pies en y 166.
 - [ ] Su sombra cae sobre el pupitre hacia la derecha y está justo donde pisa el enemigo, según la posición que exporta el ticket 11.
 - [ ] Tiene una animación de reposo de 2 a 4 fotogramas: respira y mueve la regla y el lápiz.
 - [ ] Al recibir daño, parpadea y retrocede, y después vuelve al reposo.

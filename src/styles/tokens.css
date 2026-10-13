@@ -10,7 +10,7 @@
   --color-text: #fff7de;
   --color-text-muted: #cfc0a0;
   --color-accent: #ffd04e;
-  /* The texts drawn right on the light desk of the background. */
+  /* The texts drawn right on the background, with no background of their own. */
   --color-desk-text: #1c1426;
   --color-desk-title: #5c1a3e;
 

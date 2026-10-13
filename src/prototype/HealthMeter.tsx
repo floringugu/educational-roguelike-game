@@ -43,9 +43,9 @@ export function HealthMeter({ health, maxHealth, label, kind }: HealthMeterProps
           return (
             // The symbols never change order, so their position is their key.
             <span key={index} className="health-meter__symbol" style={style}>
-              <Sprite id={sprites.empty} description="" size={32} />
+              <Sprite id={sprites.empty} description="" />
               <span className="health-meter__full">
-                <Sprite id={sprites.full} description="" size={32} />
+                <Sprite id={sprites.full} description="" />
               </span>
             </span>
           );

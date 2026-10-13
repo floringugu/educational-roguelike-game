@@ -9,9 +9,9 @@ import './FpsCounter.css';
 const DISPLAY_UPDATE_INTERVAL_MS = 500;
 
 // Debug counter of frames per second, to measure NFR-PRF-003 on the phone.
-// It shows the average of the last 5 seconds, the same window the swirl uses
-// to decide whether it is too slow (FR-VIS-001). It measures the whole page,
-// so it keeps working when the background is static.
+// It shows the average of the last 5 seconds, the same window the animations
+// of the classroom use to decide whether they are too slow (FR-VIS-001). It
+// measures the whole page, so it keeps working when the classroom is still.
 export function FpsCounter() {
   const [averageFrameRate, setAverageFrameRate] = useState<number | null>(null);
 

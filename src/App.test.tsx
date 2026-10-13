@@ -77,8 +77,12 @@ describe('App', () => {
     expect(renderToStaticMarkup(<App />)).toContain(es.credits.title);
   });
 
-  it('draws the swirl background behind the screen (FR-VIS-001)', () => {
-    expect(renderToStaticMarkup(<App />)).toContain('data-background="animated"');
+  it('draws the screen inside the game frame, over the classroom (FR-VIS-001, ADR-0014)', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html).toContain('class="game-frame"');
+    expect(html).toContain('--art-scale');
+    expect(html.indexOf('class="classroom"')).toBeLessThan(html.indexOf('class="combat-screen"'));
   });
 
   it('shows the frame rate counter only in debug mode', () => {

@@ -56,12 +56,12 @@ export function EnemyView({ enemy, hits, lastDamage, arrivals, onDefeatShown }: 
     <section className="enemy">
       <p className="enemy__intent">
         <span className="enemy__hidden-text">{es.combat.intentAttack} </span>
-        <Sprite id="intent-attack" description="" size={32} />
+        <Sprite id="intent-attack" description="" />
         <span className="enemy__intent-value">{enemy.intent.amount}</span>
       </p>
 
       <div key={`${arrivals}-${hits}`} className={bodyClassName} onAnimationEnd={handleAnimationEnd}>
-        <Sprite id={ENEMY_SPRITES[enemy.id]} description={texts.description} size={192} />
+        <Sprite id={ENEMY_SPRITES[enemy.id]} description={texts.description} size={96} />
       </div>
 
       {hits > 0 && (

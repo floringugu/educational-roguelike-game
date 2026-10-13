@@ -3,8 +3,8 @@
 // second that is. It does not use the browser, so it can be tested with
 // made-up times.
 
-// FR-VIS-001: the swirl stops moving and freezes on one frame when the average
-// of the last 5 seconds drops below 30 fps (NFR-PRF-003, prov.).
+// FR-VIS-001: the animations of the classroom (ticket 15) stop when the
+// average of the last 5 seconds drops below 30 fps (NFR-PRF-003, prov.).
 export const MINIMUM_FRAME_RATE = 30;
 export const FRAME_RATE_WINDOW_MS = 5000;
 
