@@ -24,6 +24,26 @@ export function getSpriteUrl(id: SpriteId): string {
   return url;
 }
 
+// The images of the classroom that cover the whole game frame (ADR-0015):
+// the city seen through the window, which is third-party art with an entry
+// of its own in the license register; the classroom itself, with a hole in
+// the glass of the window; and the layer of light drawn over everything else.
+export type BackgroundId = 'classroom-city' | 'classroom' | 'classroom-light';
+
+const backgroundUrls = import.meta.glob<string>('./backgrounds/*.png', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+});
+
+export function getBackgroundUrl(id: BackgroundId): string {
+  const url = backgroundUrls[`./backgrounds/${id}.png`];
+  if (url === undefined) {
+    throw new Error(`The background "${id}" is in the catalog but its file is missing`);
+  }
+  return url;
+}
+
 // License texts that travel with their work, such as the OFL of a font
 // (R-4). Asking Vite for their URL is what copies them into the build; a
 // file that nothing imports would be left out.

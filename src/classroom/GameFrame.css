@@ -1,0 +1,27 @@
+.game-frame {
+  --art-pixel: calc(var(--art-scale) * 1px);
+
+  position: fixed;
+  /* Nothing is drawn over the ink bands. The browser cuts at the edge of
+     the frame rounded to its own precision, and with a devicePixelRatio
+     such as 2.625 it cut the last physical pixel of the last row and column
+     of the classroom: the margin of one CSS pixel keeps them whole. A
+     browser without overflow: clip uses hidden, with no margin. */
+  overflow: hidden;
+  overflow: clip;
+  overflow-clip-margin: 1px;
+  /* The screens inside measure the frame, not the window, with the units
+     cqw and cqh. */
+  container-type: size;
+  /* The frame is the box of the layers with position: fixed inside it,
+     such as the question sheet, so they cover the frame and not the bands. */
+  contain: layout;
+}
+
+/* A screen taller than the frame, such as the credits, scrolls inside it. */
+.game-frame__screen {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}

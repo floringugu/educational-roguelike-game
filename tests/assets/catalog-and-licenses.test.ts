@@ -3,6 +3,20 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
 import { decodePng, pixelAt } from '../../scripts/png.ts';
 import { SPRITE_IDS } from '../../src/assets/sprite-ids.ts';
+import {
+  CLASSROOM_HEIGHT,
+  CLASSROOM_MARGIN_X,
+  CLASSROOM_MARGIN_Y,
+  CLASSROOM_WIDTH,
+  SAFE_AREA_HEIGHT,
+  SAFE_AREA_WIDTH,
+} from '../../src/classroom/integerScale.ts';
+import {
+  CLASSROOM_SPRITES,
+  ENEMY_RECT,
+  TEXT_ZONES,
+  type ArtRect,
+} from '../../src/classroom/classroomLayout.ts';
 import { LICENSES } from '../../src/data/licenses.ts';
 import { PALETTE, colorRoles } from '../../src/theme/palette.ts';
 
@@ -31,13 +45,17 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
     expect([...spriteFiles].sort()).toEqual([...catalogFiles].sort());
   });
 
-  // The art of a card is 16x16 drawn at 32 px, and an enemy is 96x96 drawn
-  // at 192 px: both at 2 px per pixel, so they look like the same game.
-  it('draws the enemies at 96x96 and every other sprite at 16x16', () => {
+  // The enemies are 96x96 and the other sprites 16x16, until tickets 12 to
+  // 14 redraw them at the sizes of the art guide (§2). The sprites of the
+  // classroom have the size of their place in the drawing.
+  it('draws the enemies at 96x96, the classroom at its places and every other sprite at 16x16', () => {
+    const classroomSizes = new Map(CLASSROOM_SPRITES.map(({ id, rect }) => [id as string, rect]));
     for (const id of SPRITE_IDS) {
       const image = decodePng(readFileSync(`${assetsDirectory}sprites/${id}.png`));
+      const place = classroomSizes.get(id);
       const side = id.startsWith('enemy-') ? 96 : 16;
-      expect([image.width, image.height], id).toEqual([side, side]);
+      const expected = place === undefined ? [side, side] : [place.width, place.height];
+      expect([image.width, image.height], id).toEqual(expected);
     }
   });
 
@@ -60,6 +78,106 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
       }
       expect(opaquePixels, id).toBeGreaterThan(0);
     }
+  });
+});
+
+describe('FR-VIS-001: the classroom (ticket 11)', () => {
+  const paletteColors = new Set<string>(Object.values(PALETTE));
+
+  function hexAt(image: ReturnType<typeof decodePng>, x: number, y: number): string {
+    const { red, green, blue } = pixelAt(image, x, y);
+    return `#${[red, green, blue].map((value) => value.toString(16).padStart(2, '0')).join('')}`;
+  }
+
+  // The classroom covers the whole frame (ADR-0015) together with the city
+  // under it: the classroom leaves a hole in the glass of the window, and
+  // the city, a separate image because it is third-party art (R-4), fills
+  // it. Each pixel is either opaque or fully transparent, in colors of the
+  // palette, and no pixel of the frame is left uncovered.
+  it('is a 216x432 drawing that, with the city under it, covers the frame in colors of the palette', () => {
+    const classroom = decodePng(readFileSync(`${assetsDirectory}backgrounds/classroom.png`));
+    const city = decodePng(readFileSync(`${assetsDirectory}backgrounds/classroom-city.png`));
+    expect([classroom.width, classroom.height]).toEqual([CLASSROOM_WIDTH, CLASSROOM_HEIGHT]);
+    expect([city.width, city.height]).toEqual([CLASSROOM_WIDTH, CLASSROOM_HEIGHT]);
+    let cityPixelsSeen = 0;
+    for (let y = 0; y < CLASSROOM_HEIGHT; y += 1) {
+      for (let x = 0; x < CLASSROOM_WIDTH; x += 1) {
+        for (const [name, image] of [['classroom', classroom], ['city', city]] as const) {
+          const { alpha } = pixelAt(image, x, y);
+          expect([0, 255], `${name} at ${x},${y}`).toContain(alpha);
+          if (alpha === 255) {
+            expect(paletteColors.has(hexAt(image, x, y)), `${name} uses ${hexAt(image, x, y)}`).toBe(true);
+          }
+        }
+        if (pixelAt(classroom, x, y).alpha === 0) {
+          expect(pixelAt(city, x, y).alpha, `uncovered at ${x},${y}`).toBe(255);
+          cityPixelsSeen += 1;
+        }
+      }
+    }
+    expect(cityPixelsSeen).toBeGreaterThan(0);
+  });
+
+  // The layer of light is the only exception to the rule of opaque pixels
+  // (art guide §4): gold and sunbeam, with three levels of transparency.
+  it('has a layer of light of the same size, in light colors and three levels of transparency', () => {
+    const image = decodePng(readFileSync(`${assetsDirectory}backgrounds/classroom-light.png`));
+    expect([image.width, image.height]).toEqual([CLASSROOM_WIDTH, CLASSROOM_HEIGHT]);
+    const lightColors = [PALETTE.gold, PALETTE.sunbeam];
+    let litPixels = 0;
+    for (let y = 0; y < image.height; y += 1) {
+      for (let x = 0; x < image.width; x += 1) {
+        const { alpha } = pixelAt(image, x, y);
+        expect([0, 64, 128, 192], `light at ${x},${y}`).toContain(alpha);
+        if (alpha > 0) {
+          litPixels += 1;
+          expect(lightColors, `light at ${x},${y}`).toContain(hexAt(image, x, y));
+        }
+      }
+    }
+    expect(litPixels).toBeGreaterThan(0);
+  });
+
+  // The places are counted from the safe area. A sprite may stand in the
+  // margin of the drawing, but the enemy and the texts must be seen on every
+  // screen, so they stay inside the safe area.
+  function expectInside(name: string, rect: ArtRect, left: number, top: number, right: number, bottom: number) {
+    expect(rect.width, name).toBeGreaterThan(0);
+    expect(rect.height, name).toBeGreaterThan(0);
+    expect(rect.x, name).toBeGreaterThanOrEqual(left);
+    expect(rect.y, name).toBeGreaterThanOrEqual(top);
+    expect(rect.x + rect.width, name).toBeLessThanOrEqual(right);
+    expect(rect.y + rect.height, name).toBeLessThanOrEqual(bottom);
+  }
+
+  it('places every sprite inside the drawing', () => {
+    for (const { id, rect } of CLASSROOM_SPRITES) {
+      expectInside(
+        id,
+        rect,
+        -CLASSROOM_MARGIN_X,
+        -CLASSROOM_MARGIN_Y,
+        SAFE_AREA_WIDTH + CLASSROOM_MARGIN_X,
+        SAFE_AREA_HEIGHT + CLASSROOM_MARGIN_Y,
+      );
+    }
+  });
+
+  it('places the enemy and the text zones inside the safe area', () => {
+    const places: Array<[string, ArtRect]> = [['enemy', ENEMY_RECT], ...Object.entries(TEXT_ZONES)];
+    for (const [name, rect] of places) {
+      expectInside(name, rect, 0, 0, SAFE_AREA_WIDTH, SAFE_AREA_HEIGHT);
+    }
+  });
+
+  // The enemies of the art guide (§2) are 88x96 and fill their place.
+  it('leaves an 88x96 place for the enemy', () => {
+    expect([ENEMY_RECT.width, ENEMY_RECT.height]).toEqual([88, 96]);
+  });
+
+  it('places every sprite of the classroom once', () => {
+    const classroomIds = SPRITE_IDS.filter((id) => id.startsWith('classroom-'));
+    expect(CLASSROOM_SPRITES.map(({ id }) => id).sort()).toEqual([...classroomIds].sort());
   });
 });
 

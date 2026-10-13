@@ -3,7 +3,7 @@
    reaches, the health and block of the player and the hand
    (NFR-USA-002). */
 .combat-screen {
-  min-height: 100dvh;
+  min-height: 100cqh;
   /* A card dragged past the edge of the screen must not make the page
      scroll sideways. */
   overflow: clip;
@@ -12,7 +12,7 @@
 .combat-screen__content {
   display: flex;
   flex-direction: column;
-  min-height: 100dvh;
+  min-height: 100cqh;
   /* At the bottom, room for the arc of the fan and for the gesture bar of
      the phone. */
   padding: 0.5rem 1rem max(1.5rem, env(safe-area-inset-bottom));

@@ -1,0 +1,37 @@
+/* The classroom covers the whole game frame (ADR-0015). It is laid out at
+   its size in pixels of the art, 216x432 CSS pixels, and a transform moves
+   it to the corner that GameFrame works out and enlarges it to the integer
+   scale of the frame. The browser rounds the lengths of the layout to 1/64
+   of a CSS pixel, but not the transforms: placed and sized with the layout,
+   the classroom would be a little off the physical pixels with a
+   devicePixelRatio such as 2.625, and the edges of its pixels would blur. */
+.classroom {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 216px;
+  height: 432px;
+  transform-origin: 0 0;
+  transform: translate(var(--classroom-left), var(--classroom-top)) scale(var(--art-scale));
+  /* The browser draws the classroom on a layer of its own. Drawn with the
+     rest of the frame, the parts that the frame leaves out made it redraw
+     the classroom off the physical pixels with a ratio such as 2.625, and
+     it blurred. */
+  will-change: transform;
+  /* Under the screen, which can be touched through it. */
+  pointer-events: none;
+}
+
+.classroom__image,
+.classroom__sprite {
+  position: absolute;
+  display: block;
+  /* Keep the pixels sharp at any scale. */
+  image-rendering: pixelated;
+}
+
+.classroom__image {
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}

@@ -6,20 +6,24 @@ type SpriteProps = {
   // Description for screen readers. It comes from the text catalog, or is
   // empty when the sprite is only decoration and screen readers skip it.
   description: string;
-  // Size on screen in CSS pixels. Sprites are 16x16, and enemies 96x96, so
-  // multiples of their side keep every pixel the same size.
+  // Side of the sprite in pixels of the art (ADR-0014). Each one is drawn
+  // as `--art-pixel` CSS pixels, the integer scale of the game frame, so
+  // every pixel of every sprite has the same size on screen.
   size?: number;
+  // A fixed side in CSS pixels, outside the integer scale. Only the cards use
+  // it, until ticket 14 redraws their art at 24x24.
+  cssSize?: number;
 };
 
 // Draws a sprite of the asset catalog by its identifier.
-export function Sprite({ id, description, size = 64 }: SpriteProps) {
+export function Sprite({ id, description, size = 16, cssSize }: SpriteProps) {
+  const side = cssSize === undefined ? `calc(${size} * var(--art-pixel))` : `${cssSize}px`;
   return (
     <img
       className="sprite"
       src={getSpriteUrl(id)}
       alt={description}
-      width={size}
-      height={size}
+      style={{ width: side, height: side }}
     />
   );
 }

@@ -37,7 +37,7 @@
   width: min(100%, 30rem);
   /* The enemy stays in sight above the page. A long question, or a long
      citation, scrolls inside the page. */
-  max-height: 85dvh;
+  max-height: 85cqh;
   overflow-y: auto;
   overscroll-behavior: contain;
   /* The wide padding on the left leaves room for the margin line; at the

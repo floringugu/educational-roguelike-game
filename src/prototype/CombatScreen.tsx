@@ -25,9 +25,6 @@ import './CombatScreen.css';
 // card can be seen before the new hand comes in and the block is lost.
 const NEW_HAND_DELAY_MS = 1000;
 
-// The shield and the shredder are drawn at three times their 16 pixels, so the
-// number fits inside them.
-const COUNTER_SIZE = 48;
 
 type CombatScreenProps = {
   onOpenCredits: () => void;
@@ -227,7 +224,6 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
             <Sprite
               id={combat.player.block > 0 ? 'block-shield-full' : 'block-shield-empty'}
               description=""
-              size={COUNTER_SIZE}
             />
             <span className="combat-screen__counter-value">{combat.player.block}</span>
           </p>
@@ -237,11 +233,11 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
                 card. */}
             <span className="combat-screen__strips">
               <span ref={stripsElement} className="combat-screen__strips-paper">
-                <Sprite id="discard-shredder-strips" description="" size={COUNTER_SIZE} />
+                <Sprite id="discard-shredder-strips" description="" />
               </span>
             </span>
             <span ref={shredderElement} className="combat-screen__shredder">
-              <Sprite id="discard-shredder" description="" size={COUNTER_SIZE} />
+              <Sprite id="discard-shredder" description="" />
               <span className="combat-screen__counter-value">{shownDiscardCount}</span>
             </span>
           </p>

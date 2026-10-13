@@ -27,6 +27,6 @@
 .hand__slot + .hand__slot {
   margin-inline-start: min(
     calc(var(--card-width) * -0.15),
-    calc((100vw - 3rem - 5 * var(--card-width)) / 4)
+    calc((100cqw - 3rem - 5 * var(--card-width)) / 4)
   );
 }

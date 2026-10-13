@@ -1,6 +1,6 @@
 # ADR-0014: Pantalla fija de 9:16
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada. El tamaño del aula, el marco y las franjas los modifica [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md).
 - **Fecha:** 2026-10-12
 - **Origen:** FR-VIS-008, NFR-USA-002, ticket 10 de H1. Modifica ADR-0013.
 
@@ -15,10 +15,10 @@ Al bocetarla (ticket 10) salieron dos problemas:
 
 ## Decisión
 
-- **El juego se pinta en un marco fijo de 9:16.** Dentro, el aula y la interfaz siguen la disposición de la imagen de referencia, sin cambios según la pantalla.
-- **El aula es un PNG de 180×320 píxeles**, que es todo el marco. No hay zona segura: todo el aula se ve siempre.
+- **El juego se pinta en un marco fijo de 9:16.** Dentro, el aula y la interfaz siguen la disposición de la imagen de referencia, sin cambios según la pantalla. Modificado por [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md): el marco es la parte de la pantalla que cubre el aula.
+- **El aula es un PNG de 180×320 píxeles**, que es todo el marco. No hay zona segura: todo el aula se ve siempre. Modificado por [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md): el aula mide 216×432, con una zona segura de 180×320 en el centro.
 - **La escala entera se calcula en píxeles físicos** de la pantalla, no en píxeles CSS: es la mayor con la que el marco cabe entero. Un móvil de 1080 píxeles físicos de ancho pinta cada píxel del arte a 6×6 y llena el ancho; uno de 720 lo pinta a 4×4 y uno de 1440 a 8×8.
-- **Fuera del marco, franjas lisas de `ink`**, con el marco centrado. En un móvil más alargado que 9:16 quedan arriba y abajo; en tableta y PC, a los lados.
+- **Fuera del marco, franjas lisas de `ink`**, con el marco centrado. En un móvil más alargado que 9:16 quedan arriba y abajo; en tableta y PC, a los lados. Modificado por [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md): en el móvil no quedan franjas.
 - **Tamaños de los sprites**, que fija la guía de arte: enemigos de 88×96, retrato del enemigo de 16×16, iconos de 12×12 y dibujos de las cartas de 24×24.
 - **Los textos se pintan a media escala:** cada píxel de la fuente mide la mitad que un píxel del arte, como en la referencia.
 

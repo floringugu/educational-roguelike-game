@@ -46,7 +46,7 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0013](adr/0013-aula-en-vista-baja-y-pupitre-verde.md).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0015](adr/0015-aula-con-margen-sin-franjas-en-el-movil.md).
 - [Guía de arte](GUIA-DE-ARTE.md) (ADR-0013).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
@@ -858,8 +858,8 @@ Con `prefers-reduced-motion` activo, el fondo animado se detendrá y las animaci
 
 - *Verificación:* E2E.
 
-**FR-VIS-008** · M · H1 · ADR-0013, ADR-0014
-El juego deberá pintarse en un **marco fijo de 9:16**, centrado en la pantalla, con el aula de 180×320 píxeles del arte entera dentro. Fuera del marco quedan franjas lisas del color de fondo. Todo el pixel art (el aula, los sprites, los iconos y las cartas) deberá pintarse con una única **escala entera**, la misma para todo: la mayor con la que el marco cabe entero, contada en píxeles físicos de la pantalla. Un móvil de 1080 píxeles físicos de ancho pinta cada píxel del arte a 6×6; uno de 720, a 4×4. Los textos se pintan a media escala: cada píxel de la fuente mide la mitad que un píxel del arte.
+**FR-VIS-008** · M · H1 · ADR-0013, ADR-0014, ADR-0015
+El aula mide 216×432 píxeles del arte, con una **zona segura** de 180×320 en el centro que todas las pantallas enseñan entera. Todo el pixel art (el aula, los sprites, los iconos y las cartas) deberá pintarse con una única **escala entera**, la misma para todo: la mayor con la que la zona segura cabe entera, contada en píxeles físicos de la pantalla. El juego se pinta en un **marco** centrado en la pantalla: la parte que cubre el aula a esa escala, con el aula centrada dentro. En el móvil, el marco llena la pantalla, sin franjas; en tableta y PC quedan franjas lisas del color de fondo a los lados. Un móvil de 1080 píxeles físicos de ancho pinta cada píxel del arte a 6×6; uno de 720, a 4×4. Los textos se pintan a media escala: cada píxel de la fuente mide la mitad que un píxel del arte.
 
 - *Verificación:* UT (la elección de la escala), MAN (móvil, tableta y PC).
 

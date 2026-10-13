@@ -66,12 +66,11 @@ export const colorRoles = {
   text: 'paper',
   textMuted: 'sand',
   accent: 'gold',
-  // The texts drawn right on the desk of the background (ticket 04), which is
-  // light: the name of the enemy and the numbers of the health in ink, and
-  // the title of the combat in wine. They have no
-  // background of their own, so their contrast is checked against every
-  // color of the desk and the floor that can be under them
-  // (tests/background/swirl-colors.test.ts).
+  // The texts drawn right on the background, with no background of their
+  // own: the name of the enemy and the numbers of the health in ink, and the
+  // title of the combat in wine. They were made for the light desk of the old
+  // background; over the classroom their contrast is not checked yet, because
+  // ticket 12 moves them onto the panels of the interface.
   deskText: 'ink',
   deskTitle: 'wine',
   // Cards (FR-VIS-002): a page of a notebook. Paper with ink text, ruled

@@ -193,7 +193,7 @@ export function Card({ card, restPose, onPlay }: CardProps) {
       <span className="card__name">{texts.name}</span>
       <span className="card__art">
         {/* The name already says what the card is: the art is decoration. */}
-        <Sprite id={card.art} description="" size={32} />
+        <Sprite id={card.art} description="" cssSize={32} />
       </span>
       <span className="card__type">{es.cardTypes[card.type]}</span>
       <span className="card__description">{highlightNumbers(texts.description)}</span>

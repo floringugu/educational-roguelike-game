@@ -1,6 +1,6 @@
 # Guía de arte
 
-Reglas para que todo el arte de Empollatro parezca del mismo juego. Desarrolla [ADR-0013](adr/0013-aula-en-vista-baja-y-pupitre-verde.md) y [ADR-0014](adr/0014-pantalla-fija-de-9-16.md), y se aplica a los sprites (`src/assets/sprites/`), a las texturas (`src/assets/textures/`) y a los fondos (`src/assets/backgrounds/`), todos de arte propio ([ADR-0011](adr/0011-arte-propio.md)).
+Reglas para que todo el arte de Empollatro parezca del mismo juego. Desarrolla [ADR-0013](adr/0013-aula-en-vista-baja-y-pupitre-verde.md), [ADR-0014](adr/0014-pantalla-fija-de-9-16.md) y [ADR-0015](adr/0015-aula-con-margen-sin-franjas-en-el-movil.md), y se aplica a los sprites (`src/assets/sprites/`), a las texturas (`src/assets/textures/`) y a los fondos (`src/assets/backgrounds/`), todos de arte propio ([ADR-0011](adr/0011-arte-propio.md)). La única excepción es la ciudad que se ve por la ventana, un trozo del paquete CC0 *City Mega Pack* de GrafxKid pasado a la paleta ([ADR-0004](adr/0004-arquitectura-visual-hibrida.md)): es una capa aparte, `classroom-city.png`, debajo del aula, con su propia entrada en el registro de licencias (R-4).
 
 Cada regla dice cómo se comprueba:
 
@@ -14,7 +14,7 @@ Todo se ve como lo vería un alumno sentado en su silla: los ojos quedan poco po
 - **El aula** tiene una perspectiva suave de un punto, con el punto de fuga en el centro de la pizarra. La pared del fondo se ve de frente, con la pizarra en el centro y el reloj y el corcho a la derecha. La pared de la izquierda se ve de lado, en perspectiva, con la ventana con persiana y el radiador debajo (§2): sus líneas horizontales van hacia el punto de fuga y las verticales siguen verticales.
 - **El pupitre del primer plano** es lo que más cerca está: se ve casi toda su cara de arriba, la formica verde, y debajo una franja de su canto.
 - **Los objetos sueltos** se ven de frente, con algo de su cara de arriba. Cuanto más por debajo de los ojos quedan, más se ve esa cara: de 1 a 3 píxeles en un objeto pequeño.
-  - Los objetos que están sobre el pupitre del primer plano, como el estuche, el cuaderno y el boli, están solo un poco girados hacia el punto de fuga. No siguen del todo la perspectiva de la pared de la ventana: sus lados largos se inclinan bastante menos. Se ve su cara de arriba y el lado que mira al centro. El estuche y el cuaderno no se ven enteros: solo asoma su punta por una esquina del pupitre, cortada por el borde del marco. El estuche lleva la cremallera a lo largo de la cara de arriba.
+  - Los objetos que están sobre el pupitre del primer plano, como el estuche, el cuaderno y el boli, están solo un poco girados hacia el punto de fuga. No siguen del todo la perspectiva de la pared de la ventana: sus lados largos se inclinan bastante menos. Se ve su cara de arriba y el lado que mira al centro. El estuche y el cuaderno están en los bordes del aula entera, cortados por ellos. En un móvil que solo enseña la zona segura (§2) asoma su punta por una esquina del pupitre; en una pantalla más ancha se ve un poco más. El estuche lleva la cremallera a lo largo de la cara de arriba.
   - Una pila de libros muestra los lomos de frente y una franja de la tapa del libro de arriba.
   - Una taza es un cilindro de frente, con la boca como un óvalo estrecho arriba.
 - **Las cosas planas que están de pie** (la pizarra, los carteles, el horario, el reloj) se ven de frente, sin perspectiva.
@@ -29,39 +29,44 @@ Todo se ve como lo vería un alumno sentado en su silla: los ojos quedan poco po
 | Dibujo de las cartas | 24×24 | 144×144 | test (ticket 14) |
 | Enemigos | 88×96 | 528×576 | test (ticket 13) |
 | Retrato del enemigo, en el panel del enemigo | 16×16 | 96×96 | test (ticket 13) |
-| Aula | 180×320, el marco entero | 1080×1920 | test (ticket 11) |
+| Aula | 216×432, con la zona segura de 180×320 en el centro | 1296×2592 | test (ticket 11) |
 | Capa de luz | la misma que el aula | la misma que el aula | test (ticket 11) |
 | Texturas | el tamaño con que las pinta el CSS, dividido entre la escala | según el CSS | test |
 
-- **El marco** es de 9:16 y el aula lo ocupa entero, así que todo lo que se dibuja se ve siempre, en cualquier pantalla (ADR-0014). Fuera del marco solo hay franjas lisas (§3).
-- **La composición** es la de la imagen de referencia. De arriba abajo, en píxeles del arte (x e y desde la esquina de arriba a la izquierda):
+- **La zona segura** son los 180×320 del centro del aula, y todas las pantallas la enseñan entera (ADR-0015). El enemigo, los textos y la interfaz van dentro de ella. *Test (ticket 11).*
+- **El margen** rodea la zona segura: 18 píxeles del arte a cada lado y 56 arriba y abajo. Continúa el aula (el techo con otro fluorescente, la ventana con su marco, el corcho con una foto de clase, los pupitres del fondo, el suelo y el pupitre verde) y se ve más o menos según la pantalla (§3). No lleva nada que haga falta para jugar. *Revisión.*
+- **La composición** de la zona segura es la de la imagen de referencia. De arriba abajo, en píxeles del arte (x e y desde la esquina de arriba a la izquierda de la zona segura; en el margen son menores que 0 o mayores que 180 y 320):
   - el techo con un fluorescente, y el botón del menú arriba a la izquierda, de 22×22;
-  - la pared de la izquierda, vista de lado hasta la esquina con la pared del fondo (x 34), con la ventana con persiana (x 0-33, y 0-113 con el alféizar) y la luz que entra por ella (§4), y debajo el radiador de hierro con el bocadillo en papel de aluminio encima (x 2-26, desde y 112 hasta el pupitre verde);
+  - la pared de la izquierda, vista de lado hasta la esquina con la pared del fondo (x 34), con la ventana con persiana (x 0-33, y 0-113 con el alféizar) y la luz que entra por ella (§4). Por la ventana se ven la ciudad, con torres grises y marrones, y delante unos árboles de copa redonda, y debajo el radiador de hierro con el bocadillo en papel de aluminio encima (x 2-26, desde y 112 hasta el pupitre verde);
   - el panel del enemigo arriba, en el centro (x 47-133, y 18-36), entre los dos altavoces, que están a la misma altura (y 22-32), y el reloj arriba a la derecha;
   - la pizarra (x 46-150, y 41-108), con sus dos zonas de texto, y a su derecha el horario de corcho con el pósit (x 152-180, y 42-100);
   - la pared de dos tonos, que cambia de color en y 86, los pupitres del fondo con mochilas a los lados y el suelo, hasta y 157;
   - el pupitre verde del primer plano, desde y 157, con la punta del estuche asomando por la esquina de la izquierda y la del cuaderno de espiral, con el boli, por la de la derecha, en diagonal hacia el punto de fuga, y garabatos escritos en la formica a los dos lados (x 14-46 y x 136-154, y 184-216), que están por definir;
+  - repartidas por todo el pupitre, hasta su borde de delante, cosas de estudiante pintadas en el aula, que no se mueven: una botella de agua (x 21-30, y 160-182), una chuleta doblada medio escondida bajo el cuaderno (x 158-174, y 186-197), un chicle (x 102-111, y 226-230), un taco de pósits (x 13-22, y 233-241), una calculadora (x 146-157, y 234-250) y una regla de madera (x 42-83, y 254-268). La mano de cartas tapa en parte las de abajo;
   - el enemigo de pie en el centro del pupitre, no en su borde (x 46-134, y 92-188), con los pies en y 188;
   - la mano de cartas (y 217-281);
   - la barra inferior (y 285-320), con botones de al menos 22 píxeles del arte de alto (§3).
-- El boceto [`docs/arte/boceto-aula.png`](arte/boceto-aula.png) es el aula a tamaño final, ampliada ×3, con las zonas de la interfaz, del enemigo y de los textos. Al lado enseña cómo queda el marco en un móvil de 412×915 y en un PC de 1920×1080.
+- El boceto [`docs/arte/boceto-aula.png`](arte/boceto-aula.png) es la zona segura a tamaño final, ampliada ×3, con las zonas de la interfaz, del enemigo y de los textos. Al lado enseña cómo quedaba el marco fijo de 9:16 de ADR-0014 en un móvil de 412×915 y en un PC de 1920×1080, antes de añadir el margen. El aula final está en `art/classroom.aseprite`.
 
 ## 3. Escala entera
 
 Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, los iconos, las cartas y sus texturas.
 
 - **Una sola escala** para todo el pixel art, a través de un único valor compartido. Un píxel del arte mide siempre N×N píxeles físicos de la pantalla, con N entero. *Revisión*, con el tamaño que se pasa a `Sprite` (`src/components/Sprite.tsx`) y el del CSS.
-- **Cómo se elige N:** la mayor escala entera con la que el marco de 180×320 cabe entero en la pantalla, contada en píxeles físicos (los píxeles CSS por la densidad de la pantalla, `devicePixelRatio`). *Test (ticket 11).* Por ejemplo:
+- **Cómo se elige N:** la mayor escala entera con la que la zona segura de 180×320 cabe entera en la pantalla, contada en píxeles físicos (los píxeles CSS por la densidad de la pantalla, `devicePixelRatio`). *Test (ticket 11).*
+- **El marco** es la parte de la pantalla que cubre el aula a esa escala: tanto como quepa, hasta los 216×432. El aula va centrada en el marco, y lo que no cabe del margen se queda fuera, a partes iguales a cada lado. *Test (ticket 11).* Por ejemplo:
 
-  | Pantalla | Píxeles físicos | Escala | El marco mide, en px CSS |
-  | --- | --- | --- | --- |
-  | Móvil de 360×800 a densidad 3 | 1080×2400 | ×6 | 360×640 |
-  | Móvil de 412×915 a densidad 2,625 | 1081×2402 | ×6 | 411×731 |
-  | Móvil de 360×640 a densidad 2 | 720×1280 | ×4 | 360×640 |
-  | Tableta de 820×1180 a densidad 2 | 1640×2360 | ×7 | 630×1120 |
-  | PC de 1920×1080 a densidad 1 | 1920×1080 | ×3 | 540×960 |
+  | Pantalla | Píxeles físicos | Escala | El marco mide, en px CSS | Se ve del aula, en píxeles del arte |
+  | --- | --- | --- | --- | --- |
+  | Móvil de 360×800 a densidad 3 | 1080×2400 | ×6 | 360×800 | 180×400 |
+  | Móvil de 412×915 a densidad 2,625 | 1081×2401 | ×6 | 412×915 | 180×400 |
+  | iPhone 15, de 393×852 a densidad 3 | 1179×2556 | ×6 | 393×852 | 196×426 |
+  | Móvil de 320×568 a densidad 2 | 640×1136 | ×3 | 320×568 | 213×379 |
+  | Móvil de 360×640 a densidad 2 | 720×1280 | ×4 | 360×640 | 180×320 |
+  | Tableta de 820×1180 a densidad 2 | 1640×2360 | ×7 | 756×1180 | 216×337 |
+  | PC de 1920×1080 a densidad 1 | 1920×1080 | ×3 | 648×1080 | 216×360 |
 
-- **El marco va centrado** en la pantalla. Lo que sobra son **franjas lisas de `ink`**: arriba y abajo en los móviles más alargados que 9:16, y a los lados en tableta y PC. *Revisión.*
+- **En el móvil, el marco llena la pantalla**, sin franjas. En tableta y PC, que son más anchos que el aula, el marco va centrado y lo que sobra son **franjas lisas de `ink`** a los lados. Solo un móvil más alargado que el aula entero, de 2:1, deja franjas finas arriba y abajo. *Revisión.*
 - **Botones táctiles:** miden al menos 44×44 px CSS (NFR-USA-002). En un móvil de 1080 píxeles físicos, un píxel del arte mide unos 2 px CSS, así que un botón mide al menos 22×22 píxeles del arte. *Revisión.*
 - **Los textos van a media escala:** cada píxel de la fuente mide la mitad que un píxel del arte, como en la referencia. Con una escala impar, se redondea hacia arriba al píxel físico entero: a ×3, cada píxel de la fuente mide 2 píxeles físicos. *Revisión.*
 - Siempre con `image-rendering: pixelated`, para que el navegador no difumine los píxeles. *Revisión.*
@@ -71,7 +76,7 @@ Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, l
 - **La luz entra por la izquierda.** Las caras que miran a la izquierda y hacia arriba llevan el tono claro, y las de la derecha y de abajo el oscuro. *Revisión.*
 - **El aula tiene dos ventanas**, las dos en la pared de la izquierda:
   - **la ventana del fondo**, con persiana, que se ve en la pared lateral (§1, §2) y da el sol del fondo;
-  - **una ventana delantera que no se ve**, más cerca del jugador y fuera del marco, que ilumina el pupitre del primer plano.
+  - **una ventana delantera que no se ve**, más cerca del jugador y fuera del dibujo, que ilumina el pupitre del primer plano.
 - **La sombra que proyecta un objeto cae a su derecha**, sobre lo que tenga debajo, como la sombra de las cartas (`box-shadow` de `src/cards/Card.css`). La sombra de un enemigo cae sobre el pupitre, a la derecha de donde pisa. *Revisión.*
 - Los fluorescentes dan una luz general y no proyectan sombras propias.
 - **El fondo está en penumbra.** Todo lo que hay detrás del pupitre del primer plano (paredes, suelo, pizarra, pupitres del fondo) se dibuja un tono más oscuro de su rampa (§6), de forma uniforme. Solo recupera su tono claro donde le da el sol de la ventana del fondo. *Revisión.*
@@ -211,4 +216,3 @@ Assets actuales que incumplen la guía y hay que redibujar, ajustar o retirar:
 | `health-cross-*` | La vida con filas de símbolos se retira | 12 |
 | `health-neuron-*`, `block-shield-*`, `discard-shredder*`, `intent-attack` | Miden 16×16 en vez de 12×12 (§2). Revisar con la vista baja (§1), el contorno (§5) y los colores (§6) | 12 |
 | Texturas de las cartas | Se pintan a ×2 fijo: pasar a la escala entera (§3) | 14 |
-| Fondo del pupitre en WebGL (`src/background/`) | Lo sustituye el aula en PNG (ADR-0013) | 11 |

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { SwirlBackground } from './background/SwirlBackground';
+import { GameFrame } from './classroom/GameFrame';
 import { FpsCounter } from './debug/FpsCounter';
 import { isDebugMode } from './debug/debugMode';
 import { CombatScreen } from './prototype/CombatScreen';
@@ -65,12 +65,13 @@ export function App() {
   const screenElement =
     screen === 'credits' ? <CreditsScreen onBack={goBack} /> : <CombatScreen onOpenCredits={openCredits} />;
 
-  // The background stays in place while the screens change on top of it.
+  // The classroom of the frame stays in place while the screens change on
+  // top of it. The debug counter goes outside the frame, at a corner of the
+  // screen.
   return (
     <>
-      <SwirlBackground />
+      <GameFrame>{screenElement}</GameFrame>
       {isDebugMode(window.location.search) && <FpsCounter />}
-      {screenElement}
     </>
   );
 }

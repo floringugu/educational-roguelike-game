@@ -182,10 +182,10 @@ describe('NFR-ACS-001: contrast of text and background', () => {
   //   - A ::before or ::after with empty content is only a drawing (the
   //     tape that holds the art of a card): it holds no text, so its
   //     background is not one of those.
-  //   - The texts drawn right on the desk of the background (deskText and
-  //     deskTitle) are never inside a container with a background: their
-  //     contrast is checked against the colors of the desk in
-  //     tests/background/swirl-colors.test.ts.
+  //   - The texts drawn right on the background (deskText and deskTitle)
+  //     are never inside a container with a background. Their contrast over
+  //     the classroom is not checked yet: ticket 12 moves them onto the
+  //     panels of the interface.
   it('lists every pair of text and background that the CSS uses', () => {
     const rolesDrawnOnTheDesk = new Set<ColorRole>(['deskText', 'deskTitle']);
     const usedPairs = new Set<string>();
