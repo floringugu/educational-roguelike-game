@@ -2,6 +2,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App, screenFromHistoryState } from './App';
 import { CreditsScreen } from './screens/CreditsScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 import { LICENSES } from './data/licenses';
 import { es } from './i18n/es';
 
@@ -36,6 +37,26 @@ describe('App', () => {
     expect(html).toContain(es.enemies.midterm.description);
     expect(html).toContain(es.combat.blockLabel);
     expect(html).toContain(es.combat.discardLabel);
+  });
+
+  it('has a menu of three lines with Ajustes and Créditos, closed at first', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html).toContain(`aria-label="${es.combat.menuButton}"`);
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).toContain(es.combat.settingsButton);
+    expect(html).toMatch(/<ul id="[^"]+" class="combat-menu__list" hidden="">/);
+  });
+
+  it('shows the bar of the player: draw pile, energy, health, block, discard pile and end turn', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html).toContain(es.combat.drawPileLabel);
+    expect(html).toContain(es.combat.energyLabel);
+    expect(html).toContain(`aria-label="${es.combat.playerHealthLabel}"`);
+    expect(html).toContain('aria-valuenow="26"');
+    // In H1 the turn does not end yet: the bell says so to screen readers.
+    expect(html).toMatch(new RegExp(`aria-disabled="true"><span[^>]*>${es.combat.endTurnButton}</span>`));
   });
 
   it('shows the enemy with its health bar and its intent: the action and its value (FR-CMB-005)', () => {
@@ -73,8 +94,10 @@ describe('App', () => {
 
   it('opens the screen saved in the browser history', () => {
     vi.stubGlobal('window', { history: { state: { screen: 'credits' } }, location: { search: '' } });
+    expect(renderToStaticMarkup(<App />)).toContain(es.credits.intro);
 
-    expect(renderToStaticMarkup(<App />)).toContain(es.credits.title);
+    vi.stubGlobal('window', { history: { state: { screen: 'settings' } }, location: { search: '' } });
+    expect(renderToStaticMarkup(<App />)).toContain('class="settings-screen"');
   });
 
   it('draws the screen inside the game frame, over the classroom (FR-VIS-001, ADR-0014)', () => {
@@ -82,7 +105,21 @@ describe('App', () => {
 
     expect(html).toContain('class="game-frame"');
     expect(html).toContain('--art-scale');
-    expect(html.indexOf('class="classroom"')).toBeLessThan(html.indexOf('class="combat-screen"'));
+    // The classroom also has the classes of its motion, such as
+    // "classroom--animated".
+    const classroomStart = html.search(/class="classroom[ "]/);
+    expect(classroomStart).toBeGreaterThanOrEqual(0);
+    expect(classroomStart).toBeLessThan(html.indexOf('class="combat-screen"'));
+  });
+
+  it('draws the classroom in five planes, from the city to the desk (ADR-0017)', () => {
+    const html = renderToStaticMarkup(<App />);
+
+    expect(html.match(/class="classroom__plane"/g)).toHaveLength(5);
+    const planeImages = ['classroom-city', 'classroom-room', 'classroom-back-desks', 'classroom-light', 'classroom-desk'];
+    const positions = planeImages.map((name) => html.indexOf(name));
+    expect(positions.every((position) => position >= 0)).toBe(true);
+    expect([...positions].sort((a, b) => a - b)).toEqual(positions);
   });
 
   it('shows the frame rate counter only in debug mode', () => {
@@ -96,12 +133,22 @@ describe('App', () => {
 describe('screenFromHistoryState', () => {
   it('reads the screen saved by the app', () => {
     expect(screenFromHistoryState({ screen: 'credits' })).toBe('credits');
+    expect(screenFromHistoryState({ screen: 'settings' })).toBe('settings');
   });
 
   it('falls back to the home screen for anything else', () => {
     expect(screenFromHistoryState(null)).toBe('home');
     expect(screenFromHistoryState({ screen: 'unknown' })).toBe('home');
     expect(screenFromHistoryState('credits')).toBe('home');
+  });
+});
+
+describe('SettingsScreen', () => {
+  it('has its title and a way back to the combat', () => {
+    const html = renderToStaticMarkup(<SettingsScreen onBack={() => undefined} />);
+
+    expect(html).toContain(es.settings.title);
+    expect(html).toContain(es.settings.back);
   });
 });
 

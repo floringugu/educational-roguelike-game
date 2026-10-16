@@ -36,11 +36,10 @@ export const ENEMY_INTENTS: readonly Intent[] = [
   { kind: 'attack', amount: 6 },
 ];
 
-// The two enemies of the prototype. They take turns: when one is defeated,
-// the other one comes in. So both styles of enemy art can be judged on the
-// phone: a normal enemy, a student's worry drawn in pixel art, and a
-// character, a caricature drawn in pen as in the margin of a notebook.
-export const MOCK_ENEMY_IDS = ['midterm', 'mathTeacher'] as const;
+// The enemies of the prototype. When one is defeated, the next one comes in;
+// after the last, the first one again. Since ticket 12 there is only the
+// Examen, so it comes back with full health.
+export const MOCK_ENEMY_IDS = ['midterm'] as const;
 export type MockEnemyId = (typeof MOCK_ENEMY_IDS)[number];
 
 const ENEMY_MAX_HEALTH = 40;
@@ -124,7 +123,7 @@ export function isEnemyDefeated(combat: MockCombat): boolean {
   return combat.enemy.health === 0;
 }
 
-// Once its defeat has been shown, the other enemy comes in with full health,
+// Once its defeat has been shown, the next enemy comes in with full health,
 // as if a new combat started: the player gets the health they started with
 // again, so there is always something to heal.
 export function bringNextEnemy(combat: MockCombat): MockCombat {

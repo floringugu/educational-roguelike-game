@@ -1,6 +1,6 @@
 # Guía de arte
 
-Reglas para que todo el arte de Empollatro parezca del mismo juego. Desarrolla [ADR-0013](adr/0013-aula-en-vista-baja-y-pupitre-verde.md), [ADR-0014](adr/0014-pantalla-fija-de-9-16.md) y [ADR-0015](adr/0015-aula-con-margen-sin-franjas-en-el-movil.md), y se aplica a los sprites (`src/assets/sprites/`), a las texturas (`src/assets/textures/`) y a los fondos (`src/assets/backgrounds/`), todos de arte propio ([ADR-0011](adr/0011-arte-propio.md)). La única excepción es la ciudad que se ve por la ventana, un trozo del paquete CC0 *City Mega Pack* de GrafxKid pasado a la paleta ([ADR-0004](adr/0004-arquitectura-visual-hibrida.md)): es una capa aparte, `classroom-city.png`, debajo del aula, con su propia entrada en el registro de licencias (R-4).
+Reglas para que todo el arte de Empollatro parezca del mismo juego. Desarrolla [ADR-0013](adr/0013-aula-en-vista-baja-y-pupitre-verde.md), [ADR-0014](adr/0014-pantalla-fija-de-9-16.md), [ADR-0015](adr/0015-aula-con-margen-sin-franjas-en-el-movil.md), [ADR-0016](adr/0016-interfaz-del-combate-de-papeleria.md) y [ADR-0017](adr/0017-aula-en-planos-y-camara.md), y se aplica a los sprites (`src/assets/sprites/`), a las texturas (`src/assets/textures/`) y a los fondos (`src/assets/backgrounds/`), todos de arte propio ([ADR-0011](adr/0011-arte-propio.md)). La única excepción es la ciudad que se ve por la ventana, un trozo del paquete CC0 *City Mega Pack* de GrafxKid pasado a la paleta ([ADR-0004](adr/0004-arquitectura-visual-hibrida.md)): es el plano más lejano del aula, `classroom-city.png` (ADR-0017), con su propia entrada en el registro de licencias (R-4).
 
 Cada regla dice cómo se comprueba:
 
@@ -25,27 +25,39 @@ Todo se ve como lo vería un alumno sentado en su silla: los ojos quedan poco po
 
 | Asset | Tamaño en píxeles del arte | En un móvil de 1080 píxeles físicos de ancho, a ×6 | Cómo se comprueba |
 | --- | --- | --- | --- |
-| Iconos de la interfaz | 12×12 | 72×72 | test (ticket 12) |
+| Iconos de la interfaz | 16×16 | 96×96 | test |
 | Dibujo de las cartas | 24×24 | 144×144 | test (ticket 14) |
 | Enemigos | 88×96 | 528×576 | test (ticket 13) |
-| Retrato del enemigo, en el panel del enemigo | 16×16 | 96×96 | test (ticket 13) |
-| Aula | 216×432, con la zona segura de 180×320 en el centro | 1296×2592 | test (ticket 11) |
-| Capa de luz | la misma que el aula | la misma que el aula | test (ticket 11) |
+| Retrato del enemigo, en el panel del enemigo | 16×16 | 96×96 | test |
+| Papelería de la interfaz (ADR-0016) | contadores 23×33 (la vida, 27×33), panel del enemigo 87×28, Terminar turno 41×28, menú 21×21, bocadillo de la intención 31×21 | ×6 | test |
+| Aula | 216×432, con la zona segura de 180×320 en el centro, en cinco planos (ADR-0017) | 1296×2592 | test (tickets 11 y 16) |
+| Planos opacos del aula: la ciudad, la sala, los pupitres del fondo y el pupitre | 240×456: el aula con su borde repetido 12 píxeles alrededor (§7) | 1440×2736 | test (ticket 16) |
+| Capa de luz | 216×432, como el aula | 1296×2592 | test (ticket 11) |
+| Sombra de un enemigo | 59×7 | 354×42 | test (ticket 16) |
+| Sprites del aula que cambian de dibujo, como el árbol o el segundero | una tira con los fotogramas uno al lado del otro, cada uno del tamaño del sprite (§7) | ×6 | test (ticket 16) |
 | Texturas | el tamaño con que las pinta el CSS, dividido entre la escala | según el CSS | test |
 
-- **La zona segura** son los 180×320 del centro del aula, y todas las pantallas la enseñan entera (ADR-0015). El enemigo, los textos y la interfaz van dentro de ella. *Test (ticket 11).*
+- **La zona segura** son los 180×320 del centro del aula, y todas las pantallas la enseñan entera (ADR-0015). El enemigo, los textos y la interfaz van dentro de ella, salvo la mano de cartas, que se coloca desde el borde de abajo del marco (ADR-0016). *Test (ticket 11).*
 - **El margen** rodea la zona segura: 18 píxeles del arte a cada lado y 56 arriba y abajo. Continúa el aula (el techo con otro fluorescente, la ventana con su marco, el corcho con una foto de clase, los pupitres del fondo, el suelo y el pupitre verde) y se ve más o menos según la pantalla (§3). No lleva nada que haga falta para jugar. *Revisión.*
+- **Los planos** (ADR-0017): el aula se dibuja en cinco planos para que la cámara los mueva por separado. Del más lejano al más cercano:
+  - la ciudad, con la nube y los árboles;
+  - la sala: las paredes, la ventana, la pizarra, el corcho, el reloj, los altavoces y el radiador;
+  - los pupitres del fondo, con las mochilas y la caja de los móviles requisados;
+  - la capa de luz (§4);
+  - el pupitre verde, con todo lo que hay encima, el enemigo incluido.
+
+  Cada cosa va en el plano en el que está apoyada. La interfaz no va en ningún plano: no se mueve con la cámara. *Revisión.*
 - **La composición** de la zona segura es la de la imagen de referencia. De arriba abajo, en píxeles del arte (x e y desde la esquina de arriba a la izquierda de la zona segura; en el margen son menores que 0 o mayores que 180 y 320):
-  - el techo con un fluorescente, y el botón del menú arriba a la izquierda, de 22×22;
+  - el techo con un fluorescente, y el menú arriba a la izquierda, un pósit de 21×21 en x 5 e y 5;
   - la pared de la izquierda, vista de lado hasta la esquina con la pared del fondo (x 34), con la ventana con persiana (x 0-33, y 0-113 con el alféizar) y la luz que entra por ella (§4). Por la ventana se ven la ciudad, con torres grises y marrones, y delante unos árboles de copa redonda, y debajo el radiador de hierro con el bocadillo en papel de aluminio encima (x 2-26, desde y 112 hasta el pupitre verde);
-  - el panel del enemigo arriba, en el centro (x 47-133, y 18-36), entre los dos altavoces, que están a la misma altura (y 22-32), y el reloj arriba a la derecha;
+  - el panel del enemigo arriba, en el centro (x 47-133, y 11-38), una tira de libreta pegada en la pared entre los dos altavoces, que están a la misma altura (y 22-32), y el reloj arriba a la derecha;
   - la pizarra (x 46-150, y 41-108), con sus dos zonas de texto, y a su derecha el horario de corcho con el pósit (x 152-180, y 42-100);
   - la pared de dos tonos, que cambia de color en y 86, los pupitres del fondo con mochilas a los lados y el suelo, hasta y 157;
   - el pupitre verde del primer plano, desde y 157, con la punta del estuche asomando por la esquina de la izquierda y la del cuaderno de espiral, con el boli, por la de la derecha, en diagonal hacia el punto de fuga, y garabatos escritos en la formica a los dos lados (x 14-46 y x 136-154, y 184-216), que están por definir;
-  - repartidas por todo el pupitre, hasta su borde de delante, cosas de estudiante pintadas en el aula, que no se mueven: una botella de agua (x 21-30, y 160-182), una chuleta doblada medio escondida bajo el cuaderno (x 158-174, y 186-197), un chicle (x 102-111, y 226-230), un taco de pósits (x 13-22, y 233-241), una calculadora (x 146-157, y 234-250) y una regla de madera (x 42-83, y 254-268). La mano de cartas tapa en parte las de abajo;
+  - repartidas por todo el pupitre, hasta su borde de delante, cosas de estudiante pintadas en el aula, que no se mueven: una botella de agua (x 21-30, y 160-182), una chuleta doblada medio escondida bajo el cuaderno (x 158-174, y 186-197), un chicle (x 102-111, y 226-230), un taco de pósits (x 13-22, y 233-241), una calculadora (x 146-157, y 234-250) y una regla de madera (x 42-83, y 254-268). Los contadores y la mano de cartas tapan en parte las de abajo;
   - el enemigo de pie en el centro del pupitre, no en su borde (x 46-134, y 92-188), con los pies en y 188;
-  - la mano de cartas (y 217-281);
-  - la barra inferior (y 285-320), con botones de al menos 22 píxeles del arte de alto (§3).
+  - los contadores (la pila de robo, la energía, la vida, el bloqueo y el descarte) y Terminar turno, de pie sobre el pupitre, en una fila de 33 píxeles del arte de alto que va de x 0 a 180. Su base está como mucho en y 275 y siempre por encima de la mano: en una pantalla que solo enseña la zona segura, como la de 360×640, la fila sube hasta y 207-240;
+  - la mano de cartas, abajo del todo, colocada desde el borde de abajo del marco y no desde la zona segura. Las cartas tienen su tamaño en px CSS, así que en un móvil alargado la mano baja hasta el margen.
 - El boceto [`docs/arte/boceto-aula.png`](arte/boceto-aula.png) es la zona segura a tamaño final, ampliada ×3, con las zonas de la interfaz, del enemigo y de los textos. Al lado enseña cómo quedaba el marco fijo de 9:16 de ADR-0014 en un móvil de 412×915 y en un PC de 1920×1080, antes de añadir el margen. El aula final está en `art/classroom.aseprite`.
 
 ## 3. Escala entera
@@ -68,7 +80,7 @@ Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, l
 
 - **En el móvil, el marco llena la pantalla**, sin franjas. En tableta y PC, que son más anchos que el aula, el marco va centrado y lo que sobra son **franjas lisas de `ink`** a los lados. Solo un móvil más alargado que el aula entero, de 2:1, deja franjas finas arriba y abajo. *Revisión.*
 - **Botones táctiles:** miden al menos 44×44 px CSS (NFR-USA-002). En un móvil de 1080 píxeles físicos, un píxel del arte mide unos 2 px CSS, así que un botón mide al menos 22×22 píxeles del arte. *Revisión.*
-- **Los textos van a media escala:** cada píxel de la fuente mide la mitad que un píxel del arte, como en la referencia. Con una escala impar, se redondea hacia arriba al píxel físico entero: a ×3, cada píxel de la fuente mide 2 píxeles físicos. *Revisión.*
+- **Los textos van a media escala:** cada píxel de la fuente mide la mitad que un píxel del arte, como en la referencia. Con una escala impar, se redondea hacia arriba al píxel físico entero: a ×3, cada píxel de la fuente mide 2 píxeles físicos, y las letras salen un 33 % más anchas que a media escala exacta (un 20 % a ×5 y un 14 % a ×7). Por eso la papelería de la interfaz se mide para que sus textos quepan a ×3. *Revisión*, a ×3, ×4, ×6 y ×7.
 - Siempre con `image-rendering: pixelated`, para que el navegador no difumine los píxeles. *Revisión.*
 
 ## 4. Luz y sombra
@@ -78,6 +90,7 @@ Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, l
   - **la ventana del fondo**, con persiana, que se ve en la pared lateral (§1, §2) y da el sol del fondo;
   - **una ventana delantera que no se ve**, más cerca del jugador y fuera del dibujo, que ilumina el pupitre del primer plano.
 - **La sombra que proyecta un objeto cae a su derecha**, sobre lo que tenga debajo, como la sombra de las cartas (`box-shadow` de `src/cards/Card.css`). La sombra de un enemigo cae sobre el pupitre, a la derecha de donde pisa. *Revisión.*
+  - Es un sprite aparte, como `enemy-midterm-shadow`: un óvalo plano del pupitre un tono más oscuro de su rampa (§6), opaco. Así se queda en el pupitre cuando el enemigo cae o se inclina (ADR-0017).
 - Los fluorescentes dan una luz general y no proyectan sombras propias.
 - **El fondo está en penumbra.** Todo lo que hay detrás del pupitre del primer plano (paredes, suelo, pizarra, pupitres del fondo) se dibuja un tono más oscuro de su rampa (§6), de forma uniforme. Solo recupera su tono claro donde le da el sol de la ventana del fondo. *Revisión.*
 - **La mancha de sol** es la luz de la ventana del fondo proyectada sobre la parte baja de la pared del fondo y sobre el suelo:
@@ -86,31 +99,32 @@ Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, l
   - Pasa también por detrás del enemigo y asoma a los dos lados de él, así que se ve aunque el enemigo tape el centro.
   - No sube a la pizarra, para que sus textos se sigan leyendo, ni llega al pupitre del primer plano.
   - Sus bordes no tienen una línea marcada: se funden con la penumbra con un tramado, y son más difusos cuanto más lejos de la ventana caen.
-- **El pupitre del primer plano** recibe la luz de la ventana delantera, que no se ve. Está más claro en la esquina de delante a la izquierda y se va oscureciendo hacia el fondo y hacia la derecha, en una transición suave, con tramado y sin líneas. Es luz opaca, dibujada en el PNG del aula con los tonos de su rampa, no en la capa de luz.
+- **El pupitre del primer plano** recibe la luz de la ventana delantera, que no se ve. Está más claro en la esquina de delante a la izquierda y se va oscureciendo hacia el fondo y hacia la derecha, en una transición suave, con tramado y sin líneas. Es luz opaca, dibujada en el plano del pupitre con los tonos de su rampa, no en la capa de luz.
 - **La pared de la ventana** está en penumbra, sin rayos ni manchas de sol encima. El radiador y el bocadillo de papel de aluminio se dibujan ya en penumbra, para que se lean bien.
 - **La capa de luz** es la única excepción a la regla de píxeles opacos (§7):
-  - Es el fichero `src/assets/backgrounds/classroom-light.png`, del mismo tamaño que el aula y encima de ella.
+  - Es el fichero `src/assets/backgrounds/classroom-light.png`, del mismo tamaño que el aula. Va entre los pupitres del fondo y el pupitre, y se mueve con la sala, sobre la que cae (ADR-0017).
   - Aclara la mancha de sol y dibuja, muy tenue y plano, el haz de luz que cruza el aire desde la ventana hasta la mancha. El haz no pasa por encima de la pizarra ni de la pared de la ventana.
   - Acaba en el suelo, detrás del pupitre del primer plano: no llega al pupitre, a las cartas ni a la interfaz.
   - Solo usa colores de la rampa de luz (§6): `gold` en el haz y en los bordes de la mancha, y `sunbeam` en el centro de la mancha.
   - Cada píxel tiene una de estas transparencias, de 255: **0** (no pinta), **64**, **128** o **192**. *Test (ticket 11).*
+  - Por el haz suben motas de polvo: píxeles sueltos de `gold` (el rol `classroomDust` de la paleta), con transparencia de 64 o 128, como la capa de luz. Las dibuja el CSS, no un PNG.
 
 ## 5. Contorno
 
 *Revisión.*
 
-- **Enemigos e iconos de la interfaz:** contorno exterior de 1 píxel en `ink`. Así se separan del aula. Ya lo llevan los escudos, las neuronas, la trituradora y el Examen.
+- **Enemigos, iconos y papelería de la interfaz:** contorno exterior de 1 píxel en `ink`. Así se separan del aula. Ya lo llevan los iconos, los recortes de libreta, los pósits, el bocadillo y el Examen.
 - **Dibujo de las cartas:** sin contorno. Sus bordes son de un tono claro, para que el dibujo destaque sobre la ventana oscura (`bark`) de la carta.
 - **El aula y sus objetos animables:** sin contorno en `ink`. Cada forma se cierra con el tono más oscuro de su propia rampa, para que el aula quede detrás de los enemigos y de la interfaz.
 
 ## 6. Colores
 
 - Solo colores de la paleta de `src/theme/palette.ts`, que tiene hasta 32 (FR-VIS-004). *Test.*
-- **Máximo por sprite, contorno incluido.** El aula no tiene máximo. *Revisión.*
+- **Máximo por sprite, contorno incluido.** El aula no tiene máximo. *Test en los iconos y los retratos; revisión en el resto.*
 
   | Asset | Colores |
   | --- | --- |
-  | Iconos de 12×12 | 6 |
+  | Iconos de 16×16 | 6 |
   | Dibujo de las cartas, 24×24 | 8 |
   | Retrato del enemigo | 8 |
   | Enemigos, 88×96 | 12 |
@@ -124,12 +138,26 @@ Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, l
   - el pupitre verde y la parte de abajo de la pared: `spruce → moss → fern → celadon`
   - la pizarra: `spruce → teal`, la tiza borrada
   - la parte de arriba de la pared: `umber → taupe → sand`
-  - los paneles de la interfaz y el metal: `ink → slate → steel`
+  - el metal del aula, como el reloj y las patas de los pupitres: `ink → slate → steel`
 - La muestra [`docs/arte/paleta.png`](arte/paleta.png) enseña los 32 colores en estas rampas, cada uno con su nombre. Un color con el borde discontinuo ya ha salido en una rampa de más arriba.
 
 ## 7. Píxeles
 
 - **Sin semitransparencias:** cada píxel es opaco o del todo transparente. La capa de luz es la única excepción (§4). *Test.*
+- **Cómo se exporta el aula** (ADR-0017). Cada plano opaco es la fusión de estas capas de `art/classroom.aseprite`:
+
+  | Plano | Fichero | Capas |
+  | --- | --- | --- |
+  | La ciudad | `classroom-city.png` | `city` |
+  | La sala | `classroom-room.png` | `walls`, `window`, `window-frame`, `board`, `cork` y `clock-light` |
+  | Los pupitres del fondo | `classroom-back-desks.png` | `back-desks` |
+  | El pupitre | `classroom-desk.png` | `desk`, `desk-marks`, `desk-shadows` y `desk-items` |
+
+  - Después de fusionarlo, se le añaden 12 píxeles alrededor que repiten su borde: cada píxel nuevo copia el del borde más cercano. Así la cámara nunca deja ver un hueco. *Test (ticket 16).*
+  - La capa `light` se exporta tal cual, sin borde, como `classroom-light.png`.
+  - Las demás capas son los sprites del aula, que se exportan aparte.
+  - En `walls`, el hueco del cristal está borrado para que se vea la ciudad, y la pared sigue 16 filas por debajo del borde del pupitre, que se mueve más que ella y la destaparía. La capa `city` está crecida 3 píxeles repitiendo su borde, para llenar el cristal aunque la pared se mueva delante.
+  - Un sprite que cambia de dibujo es una tira con los fotogramas uno al lado del otro. El primero es el que está dibujado en el `.aseprite`, el que se ve en reposo.
 - **Sin antialiasing:** los bordes no se suavizan con tonos intermedios. *Revisión.*
 - **Tramado (dithering) solo en las texturas y en las superficies grandes del aula**, como la pared o el techo. Los sprites usan zonas de color lisas. *Revisión.*
 - **En los enemigos, formas grandes:** pocas zonas de color y nada de líneas sueltas de 1 píxel. Deben leerse en el móvil igual de claro que los iconos. *Revisión.*
@@ -212,7 +240,4 @@ Assets actuales que incumplen la guía y hay que redibujar, ajustar o retirar:
 | --- | --- | --- |
 | `card-art-*` | Miden 16×16 (§2) y no siguen la vista baja (§1) | 14 |
 | `enemy-midterm` | Mide 96×96 en vez de 88×96 y no está de pie (§1, §2); texto «EXAMEN» (§8) | 13 |
-| `enemy-math-teacher` | Sin contorno (§5); 14 colores (§6); líneas finas (§7); texto «MATES» (§8). Se propone retirarlo | 13 |
-| `health-cross-*` | La vida con filas de símbolos se retira | 12 |
-| `health-neuron-*`, `block-shield-*`, `discard-shredder*`, `intent-attack` | Miden 16×16 en vez de 12×12 (§2). Revisar con la vista baja (§1), el contorno (§5) y los colores (§6) | 12 |
 | Texturas de las cartas | Se pintan a ×2 fijo: pasar a la escala entera (§3) | 14 |

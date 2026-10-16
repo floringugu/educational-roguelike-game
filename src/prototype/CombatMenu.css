@@ -1,0 +1,95 @@
+/* The menu at the top left of the safe area (art guide §2): a small post-it
+   of 21x21 pixels of the art with three lines drawn on it (ADR-0016), stuck
+   on the ceiling 5 pixels of the art in from the left and 5 from the top, so
+   that its area of touch (below) fits in the screen. */
+.combat-menu {
+  position: absolute;
+  left: calc(var(--safe-left) + 5 * var(--art-pixel));
+  top: calc(var(--safe-top) + 5 * var(--art-pixel));
+  /* Over the enemy and the hand while the list is open. */
+  z-index: 1;
+}
+
+.combat-menu__button {
+  position: relative;
+  display: block;
+  width: calc(21 * var(--art-pixel));
+  height: calc(21 * var(--art-pixel));
+  padding: 0;
+  background-color: transparent;
+  background-image: url('../assets/sprites/menu-post-it.png');
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  border: 0;
+  cursor: pointer;
+}
+
+/* With a small scale the button would be under 44x44 px CSS (NFR-USA-002):
+   this empty layer, with no drawing, makes the area that takes the touch
+   bigger than the drawing until it reaches them. */
+.combat-menu__button::after {
+  content: '';
+  position: absolute;
+  inset: min(0px, calc((21 * var(--art-pixel) - 44px) / 2));
+}
+
+/* The list opens under the button, as a sheet of a notebook: paper with an
+   ink outline and a hard shadow, the red line of the margin on the left and
+   a ruled line between the entries, like the cards. */
+.combat-menu__list {
+  position: absolute;
+  top: calc(100% + 2 * var(--art-pixel));
+  left: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--color-note-text);
+  background-color: var(--color-note);
+  border: var(--art-pixel) solid var(--color-note-edge);
+  box-shadow: var(--art-pixel) var(--art-pixel) 0 var(--color-note-edge);
+}
+
+/* The margin: a drawing with no text, so it is not a text background. */
+.combat-menu__list::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: calc(5 * var(--art-pixel));
+  width: var(--art-pixel);
+  background-color: var(--color-note-margin);
+}
+
+.combat-menu__list li + li {
+  border-top: var(--art-pixel) solid var(--color-note-rule);
+}
+
+/* Each entry is at least 44 px CSS tall, easy to tap with a thumb
+   (NFR-USA-002), and starts after the margin. */
+.combat-menu__entry {
+  display: block;
+  width: 100%;
+  min-width: 44px;
+  min-height: max(44px, calc(22 * var(--art-pixel)));
+  padding: 0 calc(5 * var(--art-pixel)) 0 calc(9 * var(--art-pixel));
+  font-family: var(--font-display);
+  /* Half scale (FR-VIS-008): m6x11plus has 18 pixels of its own per em. */
+  font-size: calc(18 * var(--font-pixel));
+  line-height: 1;
+  text-align: start;
+  white-space: nowrap;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.combat-menu__button:focus-visible {
+  outline: calc(2 * var(--font-pixel)) solid var(--color-accent);
+  outline-offset: var(--art-pixel);
+}
+
+.combat-menu__entry:focus-visible {
+  outline: calc(2 * var(--font-pixel)) solid var(--color-accent);
+  outline-offset: calc(-2 * var(--font-pixel));
+}

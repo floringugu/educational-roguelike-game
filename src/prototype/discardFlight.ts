@@ -1,6 +1,6 @@
 // The flight of a played card to the paper shredder of the discard pile, and
 // the shredder cutting it into strips (ticket 06). They use the animations of
-// the browser (Element.animate), like the shake of the screen, so React does
+// the browser (Element.animate), like the camera of the classroom, so React does
 // not draw the screen again on every frame.
 
 // How long the card flies to the slot of the shredder, and how long it takes
@@ -10,9 +10,9 @@ const SWALLOW_MS = 260;
 
 // Where the slot of the shredder is in its sprite: its middle, 4.5 of the 16
 // sprite pixels from the top (it is the row 4), and how wide its opening is,
-// 10 of the 16.
+// 8 of the 16.
 const SLOT_TOP_SHARE = 4.5 / 16;
-const SLOT_WIDTH_SHARE = 10 / 16;
+const SLOT_WIDTH_SHARE = 8 / 16;
 
 // Copies the card element and makes the copy fly from where the card is to the
 // slot of the shredder and go in through it. The copy floats over the whole

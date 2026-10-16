@@ -18,20 +18,176 @@
      the classroom off the physical pixels with a ratio such as 2.625, and
      it blurred. */
   will-change: transform;
+  /* The planes repeat their edge beyond the drawing (ADR-0017), and the
+     frame shows one CSS pixel past its own edge: on a PC, with the whole
+     drawing in the frame, that edge would show over the ink bands. */
+  overflow: hidden;
+  overflow: clip;
   /* Under the screen, which can be touched through it. */
   pointer-events: none;
 }
 
+/* A plane covers the drawing, and the camera moves it (camera.ts). */
+.classroom__plane {
+  position: absolute;
+  inset: 0;
+}
+
 .classroom__image,
-.classroom__sprite {
+.classroom__sprite,
+.classroom__frames {
   position: absolute;
   display: block;
   /* Keep the pixels sharp at any scale. */
   image-rendering: pixelated;
 }
 
-.classroom__image {
+/* A strip of frames is shown through a window as big as one frame. */
+div.classroom__sprite {
+  overflow: hidden;
+}
+
+.classroom__frames {
+  left: 0;
+  top: 0;
+  max-width: none;
+}
+
+/* A speck of dust: one pixel of the art in the beam of light. It is only
+   seen while it rises, half transparent like the light (art guide §4). The
+   pixel is drawn by an empty ::before, which holds no text. */
+.classroom__mote {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.classroom__mote::before {
+  content: '';
+  position: absolute;
   inset: 0;
-  width: 100%;
-  height: 100%;
+  background-color: var(--color-classroom-dust);
+}
+
+/* The slow loops of the classroom (ticket 15, FR-VIS-001). They only move
+   with transform and opacity, and in steps of whole pixels of the art, so
+   the pixel art stays sharp. They start at the drawing: the first frame of
+   each loop is the classroom at rest. */
+
+/* The cloud crosses the window from left to right, one pixel at a time,
+   in 51 seconds. It starts at its place in the drawing, 45 pixels into its
+   way. */
+.classroom--animated .classroom__cloud {
+  animation: classroom-cloud-drift 51s steps(57) -40.3s infinite;
+}
+
+/* The trees sway in 4 frames. */
+.classroom--animated .classroom__tree > .classroom__frames {
+  animation: classroom-tree-sway 4.8s steps(4) infinite;
+}
+
+/* The second hand ticks once per second. Its first frame is the drawn one,
+   at 24 seconds. */
+.classroom--animated .classroom__clock-second-hand > .classroom__frames {
+  animation: classroom-second-hand-tick 60s steps(60) infinite;
+}
+
+/* The loose slat of the blind rattles twice every 7 seconds. */
+.classroom--animated .classroom__blind-slat {
+  animation: classroom-slat-rattle 7s steps(1, end) infinite;
+}
+
+/* Each speck of dust rises 8 pixels and drifts 3 to the right. Its
+   duration and its start come from Classroom.tsx. */
+.classroom--animated .classroom__mote {
+  animation-name: classroom-dust-rise;
+  animation-timing-function: steps(1, end);
+  animation-iteration-count: infinite;
+}
+
+/* While the tab is hidden, the loops wait where they are. */
+.classroom--paused .classroom__sprite,
+.classroom--paused .classroom__frames,
+.classroom--paused .classroom__mote {
+  animation-play-state: paused;
+}
+
+@keyframes classroom-cloud-drift {
+  from {
+    transform: translateX(-45px);
+  }
+  to {
+    transform: translateX(12px);
+  }
+}
+
+@keyframes classroom-tree-sway {
+  to {
+    transform: translateX(-188px);
+  }
+}
+
+@keyframes classroom-second-hand-tick {
+  to {
+    transform: translateX(-660px);
+  }
+}
+
+@keyframes classroom-slat-rattle {
+  0%,
+  88% {
+    transform: none;
+  }
+  90% {
+    transform: translateY(1px);
+  }
+  93% {
+    transform: none;
+  }
+  95% {
+    transform: translateY(1px);
+  }
+  97% {
+    transform: none;
+  }
+}
+
+@keyframes classroom-dust-rise {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+  12.5% {
+    transform: translate(0, -1px);
+    opacity: 0.25;
+  }
+  25% {
+    transform: translate(1px, -2px);
+    opacity: 0.25;
+  }
+  37.5% {
+    transform: translate(1px, -3px);
+    opacity: 0.5;
+  }
+  50% {
+    transform: translate(2px, -4px);
+    opacity: 0.5;
+  }
+  62.5% {
+    transform: translate(2px, -5px);
+    opacity: 0.5;
+  }
+  75% {
+    transform: translate(2px, -6px);
+    opacity: 0.25;
+  }
+  87.5% {
+    transform: translate(3px, -7px);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translate(3px, -8px);
+    opacity: 0;
+  }
 }

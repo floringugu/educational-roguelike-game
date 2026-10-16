@@ -1,137 +1,98 @@
-/* The combat screen of the prototype (ticket 06): the title and the credits
-   at the top, the enemy in the middle and, at the bottom, where the thumb
-   reaches, the health and block of the player and the hand
-   (NFR-USA-002). */
+/* The combat screen of the prototype (ticket 06), laid out as in the art
+   guide (§2, ticket 12). Everything is placed in pixels of the art from the
+   top left corner of the safe area of 180x320, which every screen shows
+   whole (ADR-0015): `calc(n * var(--art-pixel))` from --safe-left and
+   --safe-top. The menu, the enemy panel, the enemy and the bar have their
+   own CSS files, next to their components. */
 .combat-screen {
-  min-height: 100cqh;
+  /* The corner of the safe area inside the frame: the classroom starts at
+     --classroom-left and --classroom-top (set by GameFrame.tsx, 0 or
+     negative), and its safe area 18 and 56 pixels of the art further in. */
+  --safe-left: calc(var(--classroom-left) + 18 * var(--art-pixel));
+  --safe-top: calc(var(--classroom-top) + 56 * var(--art-pixel));
+  /* The hand goes at the bottom, under the green desk, and is placed from
+     the bottom edge of the frame (ADR-0015), over the gesture bar of the
+     phone if it has one. A phone longer than 9:16 shows the floor under the
+     desk, and the cards fall there. */
+  --hand-bottom: calc(100cqh - env(safe-area-inset-bottom, 0px));
+  /* The counters stand on the desk, whose top ends at y 275 of the safe
+     area, and always over the hand (ADR-0016). The hand is as tall as a card
+     (84px wide, 5:7), plus 30px for the cards at the sides of the fan, which
+     sit lower (see .combat-screen__hand), and 12px for the cost that sticks
+     out at the top and a gap. The row of counters is 33 pixels of the art. */
+  --bar-top: calc(
+    min(
+      calc(var(--safe-top) + 275 * var(--art-pixel)),
+      calc(var(--hand-bottom) - 30px - 5.25rem * 7 / 5 - 12px)
+    ) -
+      33 * var(--art-pixel)
+  );
+
+  position: relative;
+  height: 100cqh;
   /* A card dragged past the edge of the screen must not make the page
      scroll sideways. */
   overflow: clip;
 }
 
-.combat-screen__content {
-  display: flex;
-  flex-direction: column;
-  min-height: 100cqh;
-  /* At the bottom, room for the arc of the fan and for the gesture bar of
-     the phone. */
-  padding: 0.5rem 1rem max(1.5rem, env(safe-area-inset-bottom));
+/* The hand is measured in CSS pixels, so the line above can fall between
+   two pixels of the art and blur the stationery of the bar. Where the
+   browser can round, the row starts a whole number of pixels of the art
+   below the corner of the safe area, on the grid of the classroom. It is
+   rounded from --safe-top and not from 0 because the classroom can start
+   at any whole physical pixel (GameFrame.tsx). */
+@supports (top: round(down, 1px, 1px)) {
+  .combat-screen {
+    --bar-top: calc(
+      var(--safe-top) +
+        round(
+          down,
+          calc(
+            min(
+                calc(var(--safe-top) + 275 * var(--art-pixel)),
+                calc(var(--hand-bottom) - 30px - 5.25rem * 7 / 5 - 12px)
+              ) -
+              33 * var(--art-pixel) - var(--safe-top)
+          ),
+          var(--art-pixel)
+        )
+    );
+  }
 }
 
-.combat-screen__top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-}
-
-.combat-screen__title {
-  margin: 0;
-  font-family: var(--font-display);
-  font-size: 36px; /* twice the size m6x11plus is drawn for */
-  font-weight: normal;
-  line-height: 1;
-  /* Drawn right on the light floor of the background (ticket 04). */
-  color: var(--color-desk-title);
-}
-
-.combat-screen__credits {
-  /* At least 44x44 px to be easy to tap with a thumb. */
-  min-width: 44px;
-  min-height: 44px;
-  padding: 0.5rem 1rem;
-  font: inherit;
-  color: var(--color-text);
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-text-muted);
-}
-
-.combat-screen__arena {
-  display: flex;
-  flex: 1;
-  align-items: center;
-  justify-content: center;
-  padding: 1rem 0;
-}
-
-/* The health, the block and the discard pile of the player, in one row over
-   the hand. */
-.combat-screen__player {
-  position: relative;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  margin-bottom: 1.25rem;
-}
-
-.combat-screen__player-health {
-  flex: 1;
-  min-width: 0;
-}
-
-.combat-screen__counter {
-  position: relative;
-  margin: 0;
-  line-height: 1;
-}
-
-.combat-screen__counter .sprite {
-  display: block;
-}
-
-/* The names of the counters, for screen readers only. */
-.combat-screen__counter-label {
+/* Read by screen readers, not shown. */
+.combat-screen__hidden-text {
   position: absolute;
   width: 1px;
   height: 1px;
+  margin: 0;
   overflow: hidden;
   clip-path: inset(50%);
   white-space: nowrap;
 }
 
-/* The number, inside the drawing: in the middle of the shield, and on the
-   front of the shredder, under its slot. */
-.combat-screen__counter-value {
+/* The hand, centered on the safe area, at the bottom of the frame
+   (--hand-bottom). The cards keep their size in CSS pixels (Hand.css), so
+   the hand is placed from that edge and not from the classroom: the bottom
+   of the middle card is 30 px CSS over it. The cards at the sides of the
+   fan sit 16 px lower, their turn drops a corner 6 px more and their shadow
+   adds 4: they end 4 px over the edge. */
+.combat-screen__hand {
   position: absolute;
-  left: 0;
-  right: 0;
-  top: 10px;
-  font-family: var(--font-display);
-  font-size: 18px; /* the size m6x11plus is drawn for */
-  text-align: center;
-  color: var(--color-text);
+  left: var(--safe-left);
+  bottom: calc(100cqh - var(--hand-bottom) + 30px);
+  width: calc(180 * var(--art-pixel));
 }
 
-.combat-screen__shredder {
-  position: relative;
-  display: block;
-}
-
-.combat-screen__shredder .combat-screen__counter-value {
-  top: 24px;
-}
-
-/* The strips come out of the bottom of the shredder (its last 2 sprite
-   pixels are the feet). They are cut at that edge, so before and after the
-   cut they cannot be seen. */
-.combat-screen__strips {
-  position: absolute;
-  top: 42px;
-  left: 0;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.combat-screen__strips-paper {
-  display: block;
-  transform: translateY(-100%);
-}
-
-/* What the last card did to the player, floating up from the row. */
+/* What the last card did to the player, floating up from the health of the
+   bar. */
 .combat-screen__player-tag {
   position: absolute;
   bottom: 100%;
-  left: 40%;
+  left: 0;
+  right: 0;
+  width: fit-content;
+  margin: 0 auto;
   animation: tag-float 900ms ease-out forwards;
 }
 
@@ -139,13 +100,14 @@
    player. It is only a picture of the change: the numbers of the bars and
    counters already say it. */
 .effect-tag {
-  padding: 2px 6px;
+  padding: var(--art-pixel) calc(2 * var(--art-pixel));
   font-family: var(--font-display);
-  font-size: 36px; /* twice the size m6x11plus is drawn for */
+  /* Half scale (FR-VIS-008): m6x11plus has 18 pixels of its own per em. */
+  font-size: calc(18 * var(--font-pixel));
   line-height: 1;
   color: var(--color-text);
-  border: 2px solid var(--color-background);
-  box-shadow: 2px 2px 0 var(--color-background);
+  border: var(--art-pixel) solid var(--color-background);
+  box-shadow: var(--art-pixel) var(--art-pixel) 0 var(--color-background);
   pointer-events: none;
 }
 
@@ -167,7 +129,7 @@
 @keyframes tag-float {
   0% {
     opacity: 0;
-    transform: translateY(8px) scale(0.6);
+    transform: translateY(calc(4 * var(--art-pixel))) scale(0.6);
   }
   15% {
     opacity: 1;
@@ -178,7 +140,7 @@
   }
   100% {
     opacity: 0;
-    transform: translateY(-40px) scale(1);
+    transform: translateY(calc(-20 * var(--art-pixel))) scale(1);
   }
 }
 

@@ -46,7 +46,7 @@ Los términos del dominio están en el [Glosario](GLOSARIO.md) y aquí se usan c
 ### 1.4 Referencias
 
 - [Auditoría del estado actual (v0)](00-auditoria-estado-actual.md).
-- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0015](adr/0015-aula-con-margen-sin-franjas-en-el-movil.md).
+- ADRs [0001](adr/0001-rehacer-desde-cero.md) a [0017](adr/0017-aula-en-planos-y-camara.md).
 - [Guía de arte](GUIA-DE-ARTE.md) (ADR-0013).
 - La investigación de modelos, precios, estética y Supabase del 2026-09-29/30 está resumida en los ADR 0004, 0005 y 0007.
 
@@ -818,10 +818,10 @@ Antes de abrir el producto al público deberá estar publicada una política de 
 
 ### 3.17 Presentación visual (VIS)
 
-**FR-VIS-001** · M · H1 · Q24.1 a, ADR-0013
-El fondo de la pantalla de combate deberá ser el **aula**: un PNG dibujado píxel a píxel, con la capa de luz encima y animaciones de sprites en el DOM hechas con CSS, sin WebGL. Las animaciones del aula:
+**FR-VIS-001** · M · H1 · Q24.1 a, ADR-0013, ADR-0017
+El fondo de la pantalla de combate deberá ser el **aula**: cinco PNG dibujados píxel a píxel, uno por plano, y uno de ellos es la capa de luz. Una cámara los mueve por planos, los cercanos más que los lejanos. Las animaciones van en el DOM, hechas con CSS o con la Web Animations API, sin WebGL. Las animaciones del aula:
 
-- solo mueven `transform` y `opacity`, o cambian de fotograma con CSS;
+- solo mueven `transform` y `opacity`, en píxeles enteros del arte, o cambian de fotograma;
 - se pausan cuando la pestaña está oculta;
 - se paran si la media baja de 30 fps durante 5 s, y el aula queda quieta.
 - *Verificación:* MAN, INS.

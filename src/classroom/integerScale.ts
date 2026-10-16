@@ -32,6 +32,12 @@ export type FramePlacement = {
   // One pixel of the art in CSS pixels: N divided by the devicePixelRatio.
   // The CSS variable --art-scale of the game frame takes this value.
   artPixel: number;
+  // One pixel of the pixel font in CSS pixels. The texts go at half scale
+  // (art guide §3): a pixel of the font is half a pixel of the art, rounded
+  // up to a whole physical pixel when N is odd. At x3 it is 2 physical
+  // pixels; at 1.5 the letters would blur. The CSS variable --font-scale of
+  // the game frame takes this value.
+  fontPixel: number;
   // The frame: the part of the screen covered by the classroom.
   left: number;
   top: number;
@@ -128,6 +134,7 @@ export function placeFrame(
   return {
     scale,
     artPixel: scale / ratio,
+    fontPixel: Math.ceil(scale / 2) / ratio,
     left: frameLeft / ratio,
     top: frameTop / ratio,
     width: frameWidth / ratio,

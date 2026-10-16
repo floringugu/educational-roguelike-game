@@ -2,11 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { usePrefersReducedMotion } from '../background/usePrefersReducedMotion';
 import type { CardData } from '../cards/cardData';
 import { Hand } from '../cards/Hand';
-import { Sprite } from '../components/Sprite';
+import { settleMove, shakeMove } from '../classroom/camera';
+import { useCamera } from '../classroom/useCamera';
 import { es } from '../i18n/es';
+import { BottomBar } from './BottomBar';
+import { CombatMenu } from './CombatMenu';
 import { flyCardToShredder, runShredder } from './discardFlight';
+import { EnemyPanel } from './EnemyPanel';
 import { EnemyView } from './EnemyView';
-import { HealthMeter } from './HealthMeter';
 import {
   bringNextEnemy,
   dealNewHand,
@@ -25,8 +28,16 @@ import './CombatScreen.css';
 // card can be seen before the new hand comes in and the block is lost.
 const NEW_HAND_DELAY_MS = 1000;
 
+// The energy of the bottom bar. In H1 it is only drawn, always full: playing
+// a card does not spend it. Its rules come with the engine of H2.
+const H1_ENERGY = 3;
+
+// The prototype deals each new hand from the discard pile, so its draw pile
+// is always empty.
+const H1_DRAW_PILE_COUNT = 0;
 
 type CombatScreenProps = {
+  onOpenSettings: () => void;
   onOpenCredits: () => void;
 };
 
@@ -47,14 +58,16 @@ type PlayerTag = {
 };
 
 // The combat screen of the H1 prototype (ticket 06), to judge how playing a
-// card looks and feels. There is an enemy with its name, its health and its
-// intent, the health and block of the player, and the hand of test cards.
+// card looks and feels. Its layout is the one of the art guide (§2, ticket
+// 12): the menu at the top left, the panel of the enemy at the top, the
+// enemy with its intent on the green desk, the hand of test cards and, under
+// it, the bar with the counters of the player.
 // Playing a card asks a question (FR-CMB-001): answered right, the card does
-// its effect and, if it hits, the screen shakes; failed, it does nothing.
-// Either way it goes to the discard pile.
+// its effect and, if it hits, the camera shakes the classroom (ADR-0017);
+// failed, it does nothing. Either way it goes to the discard pile.
 //
 // It is throwaway code (ADR-0003): the rules are faked by mockCombat.ts.
-export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
+export function CombatScreen({ onOpenSettings, onOpenCredits }: CombatScreenProps) {
   const [combat, setCombat] = useState(() => startMockCombat(TEST_HAND));
   const [openQuestion, setOpenQuestion] = useState<OpenQuestion | null>(null);
   // Hits since the last enemy came in, and the damage of the last one.
@@ -67,11 +80,11 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
   // count them until they go in.
   const [cardsInFlight, setCardsInFlight] = useState(0);
   const previousQuestionId = useRef<string | null>(null);
-  const screenElement = useRef<HTMLElement>(null);
   const handElement = useRef<HTMLDivElement>(null);
   const shredderElement = useRef<HTMLSpanElement>(null);
   const stripsElement = useRef<HTMLSpanElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const camera = useCamera();
 
   const enemyIsDefeated = isEnemyDefeated(combat);
   const handIsEmpty = isHandEmpty(combat);
@@ -106,7 +119,7 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
     if (applied?.kind === 'damage') {
       setEnemyHits(enemyHits + 1);
       setLastDamage(applied.amount);
-      shakeScreen(applied.amount);
+      camera.play(shakeMove(applied.amount));
     } else if (applied !== null) {
       setPlayerTag({ number: (playerTag?.number ?? 0) + 1, effect: applied });
     }
@@ -141,6 +154,12 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
     });
   }
 
+  // When the combat starts, the camera sits down at the desk, and then the
+  // enemy drops onto it (EnemyView).
+  useEffect(() => {
+    camera.play(settleMove());
+  }, [camera]);
+
   // After the last card, a new hand is dealt with a pause. Not while the
   // enemy falls: the next enemy comes in first, and then the hand.
   useEffect(() => {
@@ -161,101 +180,57 @@ export function CombatScreen({ onOpenCredits }: CombatScreenProps) {
     setPlayerTag(null);
   }
 
-  // The whole screen shakes with a hit, harder the more damage it does. It
-  // uses the animations of the browser (Element.animate), which run without
-  // drawing the screen again with React. Not with reduced motion (FR-VIS-007).
-  function shakeScreen(damage: number) {
-    if (prefersReducedMotion) {
-      return;
-    }
-    const pixels = Math.min(4 + damage / 2, 10);
-    screenElement.current?.animate(
-      [
-        { transform: 'translate(0, 0)' },
-        { transform: `translate(${-pixels}px, ${pixels / 2}px)` },
-        { transform: `translate(${pixels}px, ${-pixels / 2}px)` },
-        { transform: `translate(${-pixels / 2}px, ${pixels / 4}px)` },
-        { transform: `translate(${pixels / 4}px, 0)` },
-        { transform: 'translate(0, 0)' },
-      ],
-      { duration: 350, easing: 'ease-out' },
-    );
-  }
-
   return (
-    <main ref={screenElement} className="combat-screen">
+    <main className="combat-screen">
       {/* While the question is open, the rest of the screen cannot be
           touched or reached with the keyboard. Neither can the hand while
           the enemy falls. */}
       <div className="combat-screen__content" inert={openQuestion !== null}>
-        <header className="combat-screen__top">
-          <h1 className="combat-screen__title" tabIndex={-1}>
-            {es.app.name}
-          </h1>
-          <button type="button" className="combat-screen__credits" onClick={onOpenCredits}>
-            {es.combat.creditsButton}
-          </button>
-        </header>
+        {/* The title of the screen is only for screen readers: the app moves
+            the focus to it when this screen opens again. */}
+        <h1 className="combat-screen__hidden-text" tabIndex={-1}>
+          {es.app.name}
+        </h1>
 
-        <div className="combat-screen__arena">
-          <EnemyView
-            enemy={combat.enemy}
-            hits={enemyHits}
-            lastDamage={lastDamage}
-            arrivals={enemyArrivals}
-            onDefeatShown={handleEnemyDefeatShown}
-          />
-        </div>
+        <CombatMenu onOpenSettings={onOpenSettings} onOpenCredits={onOpenCredits} />
 
-        <section className="combat-screen__player">
-          <div className="combat-screen__player-health">
-            <HealthMeter
-              health={combat.player.health}
-              maxHealth={combat.player.maxHealth}
-              label={es.combat.playerHealthLabel}
-              kind="player"
-            />
-          </div>
-          {/* The block is a shield drawn with a pen, dimmed when there is
-              none. The discard pile is a paper shredder. Their names are
-              only for screen readers: the drawings say what they are. */}
-          <p className="combat-screen__counter combat-screen__counter--block">
-            <span className="combat-screen__counter-label">{es.combat.blockLabel}</span>
-            <Sprite
-              id={combat.player.block > 0 ? 'block-shield-full' : 'block-shield-empty'}
-              description=""
-            />
-            <span className="combat-screen__counter-value">{combat.player.block}</span>
-          </p>
-          <p className="combat-screen__counter combat-screen__counter--discard">
-            <span className="combat-screen__counter-label">{es.combat.discardLabel}</span>
-            {/* The strips of paper, hidden under the shredder until it cuts a
-                card. */}
-            <span className="combat-screen__strips">
-              <span ref={stripsElement} className="combat-screen__strips-paper">
-                <Sprite id="discard-shredder-strips" description="" />
-              </span>
-            </span>
-            <span ref={shredderElement} className="combat-screen__shredder">
-              <Sprite id="discard-shredder" description="" />
-              <span className="combat-screen__counter-value">{shownDiscardCount}</span>
-            </span>
-          </p>
-          {playerTag !== null && (
-            <span
-              key={playerTag.number}
-              className={`effect-tag effect-tag--${playerTag.effect.kind} combat-screen__player-tag`}
-              aria-hidden="true"
-            >
-              {es.combat.gainSign}
-              {playerTag.effect.amount}
-            </span>
-          )}
-        </section>
+        <EnemyPanel enemy={combat.enemy} />
 
-        <div ref={handElement} inert={enemyIsDefeated}>
+        <EnemyView
+          enemy={combat.enemy}
+          hits={enemyHits}
+          lastDamage={lastDamage}
+          arrivals={enemyArrivals}
+          onDefeatShown={handleEnemyDefeatShown}
+        />
+
+        <div ref={handElement} className="combat-screen__hand" inert={enemyIsDefeated}>
           <Hand cards={combat.hand} onPlayCard={handlePlayCard} />
         </div>
+
+        <BottomBar
+          drawPileCount={H1_DRAW_PILE_COUNT}
+          energy={H1_ENERGY}
+          maxEnergy={H1_ENERGY}
+          health={combat.player.health}
+          maxHealth={combat.player.maxHealth}
+          block={combat.player.block}
+          discardCount={shownDiscardCount}
+          shredderRef={shredderElement}
+          stripsRef={stripsElement}
+          healthTag={
+            playerTag !== null && (
+              <span
+                key={playerTag.number}
+                className={`effect-tag effect-tag--${playerTag.effect.kind} combat-screen__player-tag`}
+                aria-hidden="true"
+              >
+                {es.combat.gainSign}
+                {playerTag.effect.amount}
+              </span>
+            )
+          }
+        />
       </div>
 
       {openQuestion !== null && (

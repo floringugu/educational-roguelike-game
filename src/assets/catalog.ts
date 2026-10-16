@@ -24,11 +24,17 @@ export function getSpriteUrl(id: SpriteId): string {
   return url;
 }
 
-// The images of the classroom that cover the whole game frame (ADR-0015):
-// the city seen through the window, which is third-party art with an entry
-// of its own in the license register; the classroom itself, with a hole in
-// the glass of the window; and the layer of light drawn over everything else.
-export type BackgroundId = 'classroom-city' | 'classroom' | 'classroom-light';
+// The planes of the classroom that cover the whole game frame (ADR-0015,
+// ADR-0017), from the farthest to the nearest: the city seen through the
+// window, which is third-party art with an entry of its own in the license
+// register; the room, with a hole in the glass of the window; the desks at
+// the back; the layer of light; and the green desk in front.
+export type BackgroundId =
+  | 'classroom-city'
+  | 'classroom-room'
+  | 'classroom-back-desks'
+  | 'classroom-light'
+  | 'classroom-desk';
 
 const backgroundUrls = import.meta.glob<string>('./backgrounds/*.png', {
   eager: true,

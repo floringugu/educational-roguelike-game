@@ -4,6 +4,16 @@ import { describe, expect, it } from 'vitest';
 import { decodePng, pixelAt } from '../../scripts/png.ts';
 import { SPRITE_IDS } from '../../src/assets/sprite-ids.ts';
 import {
+  PLANE_PADDING,
+  depthDuring,
+  landingMove,
+  settleMove,
+  shakeMove,
+  stepKeyframes,
+  type CameraKeyframe,
+  type CameraMove,
+} from '../../src/classroom/camera.ts';
+import {
   CLASSROOM_HEIGHT,
   CLASSROOM_MARGIN_X,
   CLASSROOM_MARGIN_Y,
@@ -12,10 +22,12 @@ import {
   SAFE_AREA_WIDTH,
 } from '../../src/classroom/integerScale.ts';
 import {
+  CLASSROOM_PLANES,
   CLASSROOM_SPRITES,
   ENEMY_RECT,
   TEXT_ZONES,
   type ArtRect,
+  type ClassroomPlane,
 } from '../../src/classroom/classroomLayout.ts';
 import { LICENSES } from '../../src/data/licenses.ts';
 import { PALETTE, colorRoles } from '../../src/theme/palette.ts';
@@ -45,17 +57,94 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
     expect([...spriteFiles].sort()).toEqual([...catalogFiles].sort());
   });
 
-  // The enemies are 96x96 and the other sprites 16x16, until tickets 12 to
-  // 14 redraw them at the sizes of the art guide (§2). The sprites of the
-  // classroom have the size of their place in the drawing.
-  it('draws the enemies at 96x96, the classroom at its places and every other sprite at 16x16', () => {
-    const classroomSizes = new Map(CLASSROOM_SPRITES.map(({ id, rect }) => [id as string, rect]));
+  // The stationery of the combat interface (ADR-0016): the notebook scraps,
+  // the post-its and the bubble that the counters, the panel of the enemy,
+  // "Terminar turno", the menu and the intent are drawn on. Each one has its
+  // own size, with its shadow and its tape (art guide §2).
+  const STATIONERY_SIZES: Record<string, [number, number]> = {
+    'draw-pile-scrap': [23, 33],
+    'energy-scrap': [23, 33],
+    'health-scrap': [27, 33],
+    'block-scrap': [23, 33],
+    'discard-scrap': [23, 33],
+    'enemy-panel-scrap': [87, 28],
+    'end-turn-post-it': [41, 28],
+    'menu-post-it': [21, 21],
+    'intent-bubble': [31, 21],
+  };
+
+  // The size of each kind of sprite (art guide §2): the icons of the
+  // interface and the portrait of an enemy are 16x16 (ADR-0016). The enemies
+  // are still 96x96 and the art of the cards 16x16, until tickets 13 and 14
+  // redraw them at 88x96 and 24x24. The shadow of an enemy is as wide as its
+  // feet, under which it is drawn on the desk (ticket 13). The sprites of the
+  // classroom have the size of their place in the drawing, and a strip of
+  // frames has its frames side by side (ADR-0017).
+  function expectedSize(id: string): [number, number] {
+    const classroomSprite = CLASSROOM_SPRITES.find((sprite) => sprite.id === id);
+    if (classroomSprite !== undefined) {
+      const { rect, frames = 1 } = classroomSprite;
+      return [rect.width * frames, rect.height];
+    }
+    const stationerySize = STATIONERY_SIZES[id];
+    if (stationerySize !== undefined) {
+      return stationerySize;
+    }
+    if (id.startsWith('enemy-') && id.endsWith('-portrait')) {
+      return [16, 16];
+    }
+    if (id.startsWith('enemy-') && id.endsWith('-shadow')) {
+      return [59, 7];
+    }
+    if (id.startsWith('enemy-')) {
+      return [96, 96];
+    }
+    if (id.startsWith('card-art-')) {
+      return [16, 16];
+    }
+    return [16, 16];
+  }
+
+  // An icon of the interface is any sprite that is not of the classroom, of
+  // an enemy, of a card or a piece of stationery.
+  function isInterfaceIcon(id: string): boolean {
+    const isClassroom = CLASSROOM_SPRITES.some((sprite) => sprite.id === id);
+    return !isClassroom && !(id in STATIONERY_SIZES) && !id.startsWith('enemy-') && !id.startsWith('card-art-');
+  }
+
+  it('draws each kind of sprite at its size: icons and portraits at 16x16 (ADR-0016)', () => {
     for (const id of SPRITE_IDS) {
       const image = decodePng(readFileSync(`${assetsDirectory}sprites/${id}.png`));
-      const place = classroomSizes.get(id);
-      const side = id.startsWith('enemy-') ? 96 : 16;
-      const expected = place === undefined ? [side, side] : [place.width, place.height];
-      expect([image.width, image.height], id).toEqual(expected);
+      expect([image.width, image.height], id).toEqual(expectedSize(id));
+    }
+  });
+
+  it('has a sprite for every piece of stationery', () => {
+    for (const id of Object.keys(STATIONERY_SIZES)) {
+      expect(SPRITE_IDS as readonly string[], id).toContain(id);
+    }
+  });
+
+  // The most colors of each kind, outline included (art guide §6): 6 for an
+  // icon of the interface and 8 for the portrait of an enemy.
+  it('draws the icons with 6 colors at most and the portraits with 8 at most', () => {
+    for (const id of SPRITE_IDS) {
+      const isIcon = isInterfaceIcon(id);
+      const isPortrait = id.endsWith('-portrait');
+      if (!isIcon && !isPortrait) {
+        continue;
+      }
+      const image = decodePng(readFileSync(`${assetsDirectory}sprites/${id}.png`));
+      const colors = new Set<string>();
+      for (let y = 0; y < image.height; y += 1) {
+        for (let x = 0; x < image.width; x += 1) {
+          const { red, green, blue, alpha } = pixelAt(image, x, y);
+          if (alpha > 0) {
+            colors.add(`${red},${green},${blue}`);
+          }
+        }
+      }
+      expect(colors.size, id).toBeLessThanOrEqual(isPortrait ? 8 : 6);
     }
   });
 
@@ -81,7 +170,7 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
   });
 });
 
-describe('FR-VIS-001: the classroom (ticket 11)', () => {
+describe('FR-VIS-001: the classroom (tickets 11 and 16)', () => {
   const paletteColors = new Set<string>(Object.values(PALETTE));
 
   function hexAt(image: ReturnType<typeof decodePng>, x: number, y: number): string {
@@ -89,28 +178,87 @@ describe('FR-VIS-001: the classroom (ticket 11)', () => {
     return `#${[red, green, blue].map((value) => value.toString(16).padStart(2, '0')).join('')}`;
   }
 
-  // The classroom covers the whole frame (ADR-0015) together with the city
-  // under it: the classroom leaves a hole in the glass of the window, and
-  // the city, a separate image because it is third-party art (R-4), fills
-  // it. Each pixel is either opaque or fully transparent, in colors of the
-  // palette, and no pixel of the frame is left uncovered.
-  it('is a 216x432 drawing that, with the city under it, covers the frame in colors of the palette', () => {
-    const classroom = decodePng(readFileSync(`${assetsDirectory}backgrounds/classroom.png`));
-    const city = decodePng(readFileSync(`${assetsDirectory}backgrounds/classroom-city.png`));
-    expect([classroom.width, classroom.height]).toEqual([CLASSROOM_WIDTH, CLASSROOM_HEIGHT]);
-    expect([city.width, city.height]).toEqual([CLASSROOM_WIDTH, CLASSROOM_HEIGHT]);
-    let cityPixelsSeen = 0;
-    for (let y = 0; y < CLASSROOM_HEIGHT; y += 1) {
-      for (let x = 0; x < CLASSROOM_WIDTH; x += 1) {
-        for (const [name, image] of [['classroom', classroom], ['city', city]] as const) {
+  // The PNG of each plane of the classroom (ADR-0017), from the farthest to
+  // the nearest. The city is a plane of its own because it is third-party
+  // art (R-4).
+  const PLANE_FILES: Record<ClassroomPlane, string> = {
+    city: 'backgrounds/classroom-city.png',
+    room: 'backgrounds/classroom-room.png',
+    backDesks: 'backgrounds/classroom-back-desks.png',
+    light: 'backgrounds/classroom-light.png',
+    desk: 'backgrounds/classroom-desk.png',
+  };
+  const planeImages = Object.fromEntries(
+    CLASSROOM_PLANES.map((plane) => [plane, decodePng(readFileSync(`${assetsDirectory}${PLANE_FILES[plane]}`))]),
+  ) as Record<ClassroomPlane, ReturnType<typeof decodePng>>;
+
+  // The planes that cover the frame: all but the light, which is half
+  // transparent. They are checked from the nearest, which covers the most.
+  const OPAQUE_PLANES: ClassroomPlane[] = ['desk', 'backDesks', 'room', 'city'];
+
+  it('has a PNG for every plane, and no other background', () => {
+    const backgroundFiles = assetFiles.filter((file) => file.startsWith('backgrounds/'));
+    expect([...backgroundFiles].sort()).toEqual(Object.values(PLANE_FILES).sort());
+  });
+
+  // Each plane but the light repeats its edge PLANE_PADDING pixels all
+  // around (art guide §7), so the camera can move it without a gap at the
+  // edge of the frame. Each pixel is either opaque or fully transparent, in
+  // colors of the palette. The planes have many pixels, so the wrong ones are
+  // gathered and checked once, which is much faster than checking each one.
+  it('draws the opaque planes 12 pixels bigger on every side, in colors of the palette', () => {
+    for (const plane of OPAQUE_PLANES) {
+      const image = planeImages[plane];
+      expect([image.width, image.height], plane).toEqual([
+        CLASSROOM_WIDTH + 2 * PLANE_PADDING,
+        CLASSROOM_HEIGHT + 2 * PLANE_PADDING,
+      ]);
+      const wrongPixels: string[] = [];
+      for (let y = 0; y < image.height; y += 1) {
+        for (let x = 0; x < image.width; x += 1) {
           const { alpha } = pixelAt(image, x, y);
-          expect([0, 255], `${name} at ${x},${y}`).toContain(alpha);
-          if (alpha === 255) {
-            expect(paletteColors.has(hexAt(image, x, y)), `${name} uses ${hexAt(image, x, y)}`).toBe(true);
+          if (alpha !== 0 && alpha !== 255) {
+            wrongPixels.push(`${x},${y} is half transparent`);
+          } else if (alpha === 255 && !paletteColors.has(hexAt(image, x, y))) {
+            wrongPixels.push(`${x},${y} uses ${hexAt(image, x, y)}`);
           }
         }
-        if (pixelAt(classroom, x, y).alpha === 0) {
-          expect(pixelAt(city, x, y).alpha, `uncovered at ${x},${y}`).toBe(255);
+      }
+      expect(wrongPixels.slice(0, 5), plane).toEqual([]);
+    }
+  });
+
+  // Where each plane is, in pixels of the art from its place at rest.
+  type PlaneOffsets = Record<ClassroomPlane, [number, number]>;
+  const AT_REST: PlaneOffsets = { city: [0, 0], room: [0, 0], backDesks: [0, 0], light: [0, 0], desk: [0, 0] };
+
+  // The first pixel of the frame that no opaque plane covers, with each
+  // plane moved by its offset, or null if the planes cover them all.
+  function firstUncoveredPixel(offsets: PlaneOffsets): string | null {
+    for (let y = 0; y < CLASSROOM_HEIGHT; y += 1) {
+      for (let x = 0; x < CLASSROOM_WIDTH; x += 1) {
+        const isCovered = OPAQUE_PLANES.some((plane) => {
+          const [offsetX, offsetY] = offsets[plane];
+          const image = planeImages[plane];
+          return pixelAt(image, x + PLANE_PADDING - offsetX, y + PLANE_PADDING - offsetY).alpha === 255;
+        });
+        if (!isCovered) {
+          return `${x},${y}`;
+        }
+      }
+    }
+    return null;
+  }
+
+  // The room leaves a hole in the glass of the window, and the city fills it.
+  it('covers the frame with its planes at rest, and the city shows through the window', () => {
+    expect(firstUncoveredPixel(AT_REST)).toBeNull();
+    const room = planeImages.room;
+    const city = planeImages.city;
+    let cityPixelsSeen = 0;
+    for (let y = PLANE_PADDING; y < PLANE_PADDING + CLASSROOM_HEIGHT; y += 1) {
+      for (let x = PLANE_PADDING; x < PLANE_PADDING + CLASSROOM_WIDTH; x += 1) {
+        if (pixelAt(room, x, y).alpha === 0 && pixelAt(city, x, y).alpha === 255) {
           cityPixelsSeen += 1;
         }
       }
@@ -118,10 +266,51 @@ describe('FR-VIS-001: the classroom (ticket 11)', () => {
     expect(cityPixelsSeen).toBeGreaterThan(0);
   });
 
+  // The x and y of the keyframe that holds at `progress` (from 0 to 1): the
+  // last one that has started, since each one lasts until the next.
+  function translationAt(keyframes: CameraKeyframe[], progress: number): [number, number] {
+    const started = keyframes.filter((keyframe) => keyframe.offset <= progress);
+    const current = started[started.length - 1] ?? keyframes[0];
+    const match = /^translate\((-?\d+)px, (-?\d+)px\)$/.exec(current?.transform ?? '');
+    if (match === null) {
+      throw new Error(`Unexpected transform: ${current?.transform}`);
+    }
+    return [Number(match[1]), Number(match[2])];
+  }
+
+  // Every move of the camera, the shake with the most damage among them.
+  const MOVES: Array<[string, CameraMove]> = [
+    ['the shake of a small hit', shakeMove(1)],
+    ['the shake of a big hit', shakeMove(99)],
+    ['the settle at the start', settleMove()],
+    ['the landing', landingMove()],
+  ];
+
+  // The planes move by different distances, so the city must fill the
+  // window and the room must reach under the desks wherever the camera is.
+  it.each(MOVES)('covers the frame at every step of %s', (_name, move) => {
+    const keyframesOfPlane = Object.fromEntries(
+      CLASSROOM_PLANES.map((plane) => [plane, stepKeyframes(move, depthDuring(move, plane), 1)]),
+    ) as Record<ClassroomPlane, CameraKeyframe[]>;
+    const progresses = new Set(CLASSROOM_PLANES.flatMap((plane) => keyframesOfPlane[plane].map((k) => k.offset)));
+    const checkedSteps = new Set<string>();
+    for (const progress of progresses) {
+      const offsets = Object.fromEntries(
+        CLASSROOM_PLANES.map((plane) => [plane, translationAt(keyframesOfPlane[plane], progress)]),
+      ) as PlaneOffsets;
+      const step = JSON.stringify(offsets);
+      if (checkedSteps.has(step)) {
+        continue;
+      }
+      checkedSteps.add(step);
+      expect(firstUncoveredPixel(offsets), step).toBeNull();
+    }
+  });
+
   // The layer of light is the only exception to the rule of opaque pixels
   // (art guide §4): gold and sunbeam, with three levels of transparency.
-  it('has a layer of light of the same size, in light colors and three levels of transparency', () => {
-    const image = decodePng(readFileSync(`${assetsDirectory}backgrounds/classroom-light.png`));
+  it('has a layer of light as big as the drawing, in light colors and three levels of transparency', () => {
+    const image = planeImages.light;
     expect([image.width, image.height]).toEqual([CLASSROOM_WIDTH, CLASSROOM_HEIGHT]);
     const lightColors = [PALETTE.gold, PALETTE.sunbeam];
     let litPixels = 0;

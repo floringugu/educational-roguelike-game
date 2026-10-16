@@ -4,15 +4,21 @@ import { FpsCounter } from './debug/FpsCounter';
 import { isDebugMode } from './debug/debugMode';
 import { CombatScreen } from './prototype/CombatScreen';
 import { CreditsScreen } from './screens/CreditsScreen';
+import { SettingsScreen } from './screens/SettingsScreen';
 
-type Screen = 'home' | 'credits';
+type Screen = 'home' | 'credits' | 'settings';
 
 // Returns the screen saved in an entry of the browser history. The first
 // entry has no saved screen: that is the home screen. The state can be
 // anything that a page saved, so it is checked before reading it.
 export function screenFromHistoryState(state: unknown): Screen {
-  if (typeof state === 'object' && state !== null && 'screen' in state && state.screen === 'credits') {
-    return 'credits';
+  if (typeof state === 'object' && state !== null && 'screen' in state) {
+    if (state.screen === 'credits') {
+      return 'credits';
+    }
+    if (state.screen === 'settings') {
+      return 'settings';
+    }
   }
   return 'home';
 }
@@ -56,14 +62,23 @@ export function App() {
     setScreen('credits');
   }
 
+  function openSettings() {
+    window.history.pushState({ screen: 'settings' }, '');
+    setScreen('settings');
+  }
+
   // The back button of the screen does the same as the back gesture, so the
   // history stays in step with what is shown.
   function goBack() {
     window.history.back();
   }
 
-  const screenElement =
-    screen === 'credits' ? <CreditsScreen onBack={goBack} /> : <CombatScreen onOpenCredits={openCredits} />;
+  let screenElement = <CombatScreen onOpenSettings={openSettings} onOpenCredits={openCredits} />;
+  if (screen === 'credits') {
+    screenElement = <CreditsScreen onBack={goBack} />;
+  } else if (screen === 'settings') {
+    screenElement = <SettingsScreen onBack={goBack} />;
+  }
 
   // The classroom of the frame stays in place while the screens change on
   // top of it. The debug counter goes outside the frame, at a corner of the
