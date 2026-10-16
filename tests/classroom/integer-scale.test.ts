@@ -38,6 +38,15 @@ describe('placeFrame (ADR-0014, ADR-0015)', () => {
     expect(placeFrame(1920, 1080, 1).artPixel).toBe(3);
   });
 
+  it('gives the size of a pixel of the font, half a pixel of the art rounded up (art guide §3)', () => {
+    // x6 at a ratio of 3: the art pixel is 2 CSS pixels, the font pixel 1.
+    expect(placeFrame(360, 800, 3).fontPixel).toBe(1);
+    // x4 at a ratio of 2: 2 physical pixels, 1 CSS pixel.
+    expect(placeFrame(360, 640, 2).fontPixel).toBe(1);
+    // x3 at a ratio of 1: half of 3 is 1.5, rounded up to 2 physical pixels.
+    expect(placeFrame(1920, 1080, 1).fontPixel).toBe(2);
+  });
+
   it('fills the whole screen of a phone, with no bands', () => {
     // 1080x2400 physical pixels at x6: the classroom measures 1296x2592, and
     // the screen shows its middle part.

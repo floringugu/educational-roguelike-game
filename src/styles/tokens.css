@@ -57,6 +57,17 @@
   --color-panel-text: #fff7de;
   --color-health-bar: #e2584a;
   --color-health-bar-track: #1c1426;
+  /* The stationery of the combat interface (ADR-0016): notebook paper and
+     post-its. */
+  --color-note: #fff7de;
+  --color-note-text: #1c1426;
+  --color-note-rule: #a2c8f2;
+  --color-note-margin: #e2584a;
+  --color-note-edge: #1c1426;
+  --color-post-it: #ffd04e;
+  --color-post-it-text: #1c1426;
+  /* The specks of dust in the beam of light of the classroom. */
+  --color-classroom-dust: #ffd04e;
 
   /* m6x11plus for titles and numbers; Pixelify Sans for reading (FR-VIS-005).
      The fallback fonts are only used while the files load. */

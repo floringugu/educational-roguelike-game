@@ -1,6 +1,6 @@
 # ADR-0015: Aula con margen y sin franjas en el móvil
 
-- **Estado:** Aceptada
+- **Estado:** Aceptada. La colocación de la mano la modifica [ADR-0016](0016-interfaz-del-combate-de-papeleria.md).
 - **Fecha:** 2026-10-13
 - **Origen:** FR-VIS-008, ticket 11 de H1. Modifica ADR-0014.
 
@@ -17,7 +17,7 @@ Casi todos los móviles de hoy son más alargados que 9:16, de 9:19,5 a 9:20. Po
 - **El marco es la parte de la pantalla que cubre el aula** a esa escala: tanto como quepa, hasta los 216×432. El aula se centra en el marco, y lo que no cabe del margen se queda fuera, a partes iguales a cada lado.
 - **En el móvil, el aula llena la pantalla**, sin franjas. En tableta y PC, que son más anchos, quedan **franjas lisas de `ink`** a los lados, con el marco centrado.
 - **Las posiciones se cuentan desde la esquina de la zona segura.** Un sprite del margen tiene una x o una y menor que 0, o mayor que 180 o 320.
-- **El enemigo, los textos y la interfaz van dentro de la zona segura**, porque es lo único que se ve en todas las pantallas. Lo que vaya pegado al borde de la pantalla, como la barra inferior, se coloca respecto al borde del marco, que cambia según el móvil.
+- **El enemigo, los textos y la interfaz van dentro de la zona segura**, porque es lo único que se ve en todas las pantallas. Lo que vaya pegado al borde de la pantalla, como la barra inferior, se coloca respecto al borde del marco, que cambia según el móvil. Modificado por [ADR-0016](0016-interfaz-del-combate-de-papeleria.md): la mano se coloca desde el borde inferior del marco y puede salir de la zona segura por abajo.
 - **El estuche, el cuaderno y el boli** se desplazan 18 píxeles del arte hacia fuera, con los bordes del pupitre, sin cambiar de tamaño. Un móvil que solo enseña la zona segura ve su punta, como en la referencia; uno más ancho ve un poco más.
 
 El resto de ADR-0014 sigue igual: la escala en píxeles físicos, los tamaños de los sprites y los textos a media escala.

@@ -1,0 +1,111 @@
+/* The panel of the enemy (ticket 12): a torn strip of a notebook taped to
+   the wall with two pieces of tape (ADR-0016), x 47-133 and y 11-38 of the
+   safe area (art guide §2), between the loudspeakers and above the
+   chalkboard, so it never covers the text zones of the board. It is 87x28
+   pixels of the art: the 16x16 portrait left of the red margin (x 20), and
+   the name and the health on the ruled lines (rows 13 and 24). The paper
+   inside the ink outline goes from x 1 to 84 and from the row 3 to 23. The
+   --safe-left and --safe-top of the safe area come from CombatScreen.css. */
+.enemy-panel {
+  position: absolute;
+  left: calc(var(--safe-left) + 47 * var(--art-pixel));
+  top: calc(var(--safe-top) + 11 * var(--art-pixel));
+  width: calc(87 * var(--art-pixel));
+  height: calc(28 * var(--art-pixel));
+  margin: 0;
+  /* Over the enemy, which drops past it when it comes in (ADR-0017). */
+  z-index: 1;
+  font-family: var(--font-display);
+  /* Half scale (FR-VIS-008): m6x11plus has 18 pixels of its own per em. */
+  font-size: calc(18 * var(--font-pixel));
+  background-image: url('../assets/sprites/enemy-panel-scrap.png');
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
+
+.enemy-panel .sprite {
+  position: absolute;
+  left: calc(2 * var(--art-pixel));
+  top: calc(6 * var(--art-pixel));
+  display: block;
+}
+
+/* The texts are placed on the lines of the strip: the name over the line of
+   the row 13 and the health over the one of the row 24. Their background is
+   the color of the paper, on the paper: it does not show, but it tells the
+   contrast test which background the text has (NFR-ACS-001). */
+.enemy-panel__name {
+  position: absolute;
+  left: calc(23 * var(--art-pixel));
+  top: calc(4 * var(--art-pixel));
+  max-width: calc(61 * var(--art-pixel));
+  height: calc(9 * var(--art-pixel));
+  margin: 0;
+  overflow: hidden;
+  line-height: calc(9 * var(--art-pixel));
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--color-note-text);
+  background-color: var(--color-note);
+}
+
+/* The health takes x 23 to 82 of the strip, 2 pixels short of its edge:
+   the bar on the left and the numbers on the right. With an odd scale the
+   numbers are a bit wider (art guide §3), and they grow towards the bar,
+   which leaves them room, and not out of the paper. */
+.enemy-panel__health {
+  position: absolute;
+  left: calc(23 * var(--art-pixel));
+  top: calc(15 * var(--art-pixel));
+  display: flex;
+  align-items: flex-start;
+  width: calc(60 * var(--art-pixel));
+}
+
+/* The bar, drawn like a box of pen filled with a highlighter: the red health
+   inside an ink outline, on the paper. Both are drawings with no text (empty
+   ::before and ::after), so they are not text backgrounds. */
+.enemy-panel__bar {
+  position: relative;
+  flex: none;
+  width: calc(35 * var(--art-pixel));
+  height: calc(5 * var(--art-pixel));
+  margin-top: calc(3 * var(--art-pixel));
+}
+
+.enemy-panel__bar::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-color: var(--color-note);
+  border: var(--art-pixel) solid var(--color-note-edge);
+}
+
+/* The width follows the health. It slides, so a hit can be seen draining
+   the bar. */
+.enemy-panel__bar::after {
+  content: '';
+  position: absolute;
+  top: var(--art-pixel);
+  bottom: var(--art-pixel);
+  left: var(--art-pixel);
+  width: calc((100% - 2 * var(--art-pixel)) * var(--health-share));
+  background-color: var(--color-health-bar);
+  transition: width 300ms ease-out;
+}
+
+.enemy-panel__numbers {
+  flex: none;
+  margin-left: auto;
+  height: calc(9 * var(--art-pixel));
+  line-height: calc(9 * var(--art-pixel));
+  white-space: nowrap;
+  color: var(--color-note-text);
+  background-color: var(--color-note);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .enemy-panel__bar::after {
+    transition: none;
+  }
+}

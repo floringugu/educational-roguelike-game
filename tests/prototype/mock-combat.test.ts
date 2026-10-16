@@ -124,18 +124,16 @@ describe('the mock combat of the prototype (ticket 06)', () => {
     expect(combat.enemy.intent).toEqual(ENEMY_INTENTS[1]);
   });
 
-  it('brings in the other enemy, with full health, when one is defeated', () => {
+  it('brings the Examen back, with full health, when it is defeated', () => {
     let combat = startMockCombat(TEST_HAND);
     expect(combat.enemy.id).toBe('midterm');
     combat = { ...combat, enemy: { ...combat.enemy, health: 0 }, player: { ...combat.player, block: 5 } };
     const next = bringNextEnemy(combat);
 
-    expect(next.enemy.id).toBe('mathTeacher');
+    expect(next.enemy.id).toBe(MOCK_ENEMY_IDS[0]);
     expect(isEnemyDefeated(next)).toBe(false);
     expect(next.enemy.health).toBe(next.enemy.maxHealth);
     expect(next.player.block).toBe(0);
-    // After the last enemy, the first one comes in again.
-    expect(bringNextEnemy(next).enemy.id).toBe(MOCK_ENEMY_IDS[0]);
   });
 
   it('has a name and a description in the text catalog for every enemy', () => {

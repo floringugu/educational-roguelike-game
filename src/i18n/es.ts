@@ -8,10 +8,16 @@ export const es = {
   // The combat screen of the prototype (ticket 06).
   combat: {
     creditsButton: 'Créditos',
+    // The menu at the top left (ticket 12).
+    menuButton: 'Menú',
+    settingsButton: 'Ajustes',
     enemyHealthLabel: 'Vida del enemigo',
     playerHealthLabel: 'Tu vida',
     blockLabel: 'Bloqueo',
     discardLabel: 'Descarte',
+    drawPileLabel: 'Pila de robo',
+    energyLabel: 'Energía',
+    endTurnButton: 'Terminar turno',
     // Read before the value of the intent: "Va a atacar con 8".
     intentAttack: 'Va a atacar con',
     // Between the health left and the maximum: "26/40".
@@ -26,11 +32,6 @@ export const es = {
     midterm: {
       name: 'El Parcial',
       description: 'Un examen arrugado con un 3 en rojo, al que alguien ha pintado a boli una cara furiosa con dientes de grapa, brazos, piernas y zapatillas rojas. Lleva una regla en una mano y un boli rojo en la otra',
-    },
-    mathTeacher: {
-      name: 'Don Ramiro, el de Mates',
-      description:
-        'Caricatura a boli de un profesor despeinado, con gafas enormes, bigote, la lengua fuera, bata manchada de tinta, un libro de Mates y el dedo en alto, en un trozo de hoja cuadriculada',
     },
   },
   // The question that appears when a card is played (FR-CMB-001,
@@ -69,6 +70,11 @@ export const es = {
     attack: 'Ataque',
     defense: 'Defensa',
     skill: 'Habilidad',
+  },
+  // The settings screen. Ticket 07 fills it; for now it has only its title.
+  settings: {
+    title: 'Ajustes',
+    back: 'Volver',
   },
   credits: {
     title: 'Créditos',

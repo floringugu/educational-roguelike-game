@@ -1,5 +1,9 @@
 .game-frame {
   --art-pixel: calc(var(--art-scale) * 1px);
+  /* One pixel of the pixel font, half a pixel of the art (art guide §3).
+     m6x11plus is 18 pixels of its own per em: at a font-size of
+     calc(18 * var(--font-pixel)) each of its pixels is one --font-pixel. */
+  --font-pixel: calc(var(--font-scale) * 1px);
 
   position: fixed;
   /* Nothing is drawn over the ink bands. The browser cuts at the edge of

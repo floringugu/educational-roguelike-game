@@ -1,6 +1,6 @@
 # ADR-0014: Pantalla fija de 9:16
 
-- **Estado:** Aceptada. El tamaño del aula, el marco y las franjas los modifica [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md).
+- **Estado:** Aceptada. El tamaño del aula, el marco y las franjas los modifica [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md), y el tamaño de los iconos, [ADR-0016](0016-interfaz-del-combate-de-papeleria.md).
 - **Fecha:** 2026-10-12
 - **Origen:** FR-VIS-008, NFR-USA-002, ticket 10 de H1. Modifica ADR-0013.
 
@@ -19,7 +19,7 @@ Al bocetarla (ticket 10) salieron dos problemas:
 - **El aula es un PNG de 180×320 píxeles**, que es todo el marco. No hay zona segura: todo el aula se ve siempre. Modificado por [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md): el aula mide 216×432, con una zona segura de 180×320 en el centro.
 - **La escala entera se calcula en píxeles físicos** de la pantalla, no en píxeles CSS: es la mayor con la que el marco cabe entero. Un móvil de 1080 píxeles físicos de ancho pinta cada píxel del arte a 6×6 y llena el ancho; uno de 720 lo pinta a 4×4 y uno de 1440 a 8×8.
 - **Fuera del marco, franjas lisas de `ink`**, con el marco centrado. En un móvil más alargado que 9:16 quedan arriba y abajo; en tableta y PC, a los lados. Modificado por [ADR-0015](0015-aula-con-margen-sin-franjas-en-el-movil.md): en el móvil no quedan franjas.
-- **Tamaños de los sprites**, que fija la guía de arte: enemigos de 88×96, retrato del enemigo de 16×16, iconos de 12×12 y dibujos de las cartas de 24×24.
+- **Tamaños de los sprites**, que fija la guía de arte: enemigos de 88×96, retrato del enemigo de 16×16, iconos de 12×12 y dibujos de las cartas de 24×24. Modificado por [ADR-0016](0016-interfaz-del-combate-de-papeleria.md): iconos de 16×16.
 - **Los textos se pintan a media escala:** cada píxel de la fuente mide la mitad que un píxel del arte, como en la referencia.
 
 El resto de ADR-0013 sigue igual: la vista baja, el pupitre verde, el PNG con sprites en el DOM sin WebGL, la paleta de 32 colores, la capa de luz y los textos del catálogo.

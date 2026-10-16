@@ -1,6 +1,6 @@
 # ADR-0013: Aula en vista baja y pupitre verde
 
-- **Estado:** Aceptada. El tamaño del aula, la escala y los tamaños de los sprites los modifica [ADR-0014](0014-pantalla-fija-de-9-16.md).
+- **Estado:** Aceptada. El tamaño del aula, la escala y los tamaños de los sprites los modifica [ADR-0014](0014-pantalla-fija-de-9-16.md), y el PNG único, [ADR-0017](0017-aula-en-planos-y-camara.md).
 - **Fecha:** 2026-10-11
 - **Origen:** FR-VIS-001, FR-VIS-004, FR-VIS-007, NFR-ACS-001, NFR-I18N-001, R-3, R-4. Amplía ADR-0004 y ADR-0011.
 
@@ -13,7 +13,7 @@ El dueño quiere que la pantalla de combate se parezca a dos imágenes de refere
 ## Decisión
 
 - **Vista baja, casi de frente**, como la de un alumno sentado. El pupitre de formica verde salvia ocupa el primer plano, el enemigo está de pie sobre él y detrás se ve el aula: la pizarra verde, las persianas, los fluorescentes, el reloj, el horario de corcho, los altavoces y otros pupitres con mochilas. La dirección vale para todo el juego, no solo para el combate.
-- **El aula es un PNG** dibujado píxel a píxel, de unos 480×520 píxeles, con una zona segura central que siempre se ve. Lo que se mueve son **sprites en el DOM animados con CSS**. **Sin WebGL.** Modificado por [ADR-0014](0014-pantalla-fija-de-9-16.md): el aula mide 180×320, es un marco fijo de 9:16 y no tiene zona segura.
+- **El aula es un PNG** dibujado píxel a píxel, de unos 480×520 píxeles, con una zona segura central que siempre se ve. Lo que se mueve son **sprites en el DOM animados con CSS**. **Sin WebGL.** Modificado por [ADR-0014](0014-pantalla-fija-de-9-16.md): el aula mide 180×320, es un marco fijo de 9:16 y no tiene zona segura. Modificado por [ADR-0017](0017-aula-en-planos-y-camara.md): el aula son cinco PNG, uno por plano, que mueve una cámara; sus animaciones pueden usar también la Web Animations API.
 - **Escala entera según la pantalla**, la misma para todo el pixel art: ×2 en el móvil y ×3 o ×4 en tableta y PC. El juego va en una **columna vertical centrada**; en pantallas anchas el aula sigue a los lados. Modificado por [ADR-0014](0014-pantalla-fija-de-9-16.md): la escala se calcula en píxeles físicos y fuera del marco quedan franjas lisas.
 - **Paleta de 32 colores** (FR-VIS-004), que conserva los 23 actuales y añade los del aula: el verde claro del pupitre, el verde azulado de la pizarra, la pared, la luz cálida y el gris de los paneles.
 - **Capa de luz:** la luz que entra por las persianas es un PNG aparte, encima del aula, con 2 o 3 niveles de transparencia. Es la **única excepción** a la regla de píxeles opacos.

@@ -1,32 +1,67 @@
-/* The enemy of the combat screen (ticket 06): its intent, its sprite, its
-   name and its health bar, one under the other. */
+/* The enemy of the combat screen (ticket 06), standing in the middle of the
+   green desk (ENEMY_RECT in src/classroom/classroomLayout.ts): its feet on
+   the line y 188 of the safe area. Its sprite is 96x96 pixels of the art,
+   centered on the 88 of the rectangle, so it starts at x 42. Ticket 13
+   redraws it at 88x96. */
 .enemy {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem;
-  width: min(100%, 12rem);
+  position: absolute;
+  left: calc(var(--safe-left) + 42 * var(--art-pixel));
+  top: calc(var(--safe-top) + 92 * var(--art-pixel));
+  width: calc(96 * var(--art-pixel));
+  height: calc(96 * var(--art-pixel));
+  /* The lean of a hit (EnemyView.tsx) turns the body in 3D, seen from 170
+     pixels of the art in front of its feet. */
+  perspective: calc(170 * var(--art-pixel));
+  perspective-origin: 50% 94%;
 }
 
-/* The intent, in a speech bubble over the head of the enemy: the icon of the
-   action and its value, big, so it is read at a glance (FR-CMB-005). */
+/* The intent over the head of the enemy (FR-CMB-005): a bubble of paper of
+   31x21 pixels of the art (ADR-0016), with the 16x16 icon of the action and
+   its value. It starts 10 pixels of the art above the sprite, at y 82 of the
+   safe area: below the text zones of the chalkboard, which end at y 81. Its
+   short tail (rows 18 to 20) rests on the top edge of the paper of the
+   enemy, which starts at the row 8 of its sprite, and ends over the row 10,
+   above the letters "EXAMEN" (rows 11 to 15). It starts at x 82, a whole
+   pixel of the art: centered, it could fall between two pixels and blur.
+   Over the enemy, so its tail is not hidden behind the head. */
 .enemy__intent {
+  position: absolute;
+  top: calc(-10 * var(--art-pixel));
+  left: calc(40 * var(--art-pixel));
+  z-index: 1;
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: flex-start;
+  gap: var(--art-pixel);
+  width: calc(31 * var(--art-pixel));
+  height: calc(21 * var(--art-pixel));
   margin: 0;
-  padding: 2px 10px 2px 6px;
-  color: var(--color-text);
-  background-color: var(--color-surface);
-  border: 2px solid var(--color-text-muted);
-  box-shadow: 2px 2px 0 var(--color-background);
+  padding: calc(2 * var(--art-pixel)) 0 0 calc(2 * var(--art-pixel));
+  background-image: url('../assets/sprites/intent-bubble.png');
+  background-size: 100% 100%;
+  image-rendering: pixelated;
 }
 
+.enemy__intent .sprite {
+  display: block;
+}
+
+/* The paper of the bubble goes from x 1 to 28 and from the row 1 to 17: the
+   value takes x 19 to 28 and the rows 4 to 12, after the icon. Its
+   background is the color of the paper, on the paper: it does not show, but
+   it tells the contrast test which background the text has (NFR-ACS-001). */
 .enemy__intent-value {
+  flex: none;
+  width: calc(10 * var(--art-pixel));
+  height: calc(9 * var(--art-pixel));
+  margin-top: calc(2 * var(--art-pixel));
   font-family: var(--font-display);
-  font-size: 36px; /* twice the size m6x11plus is drawn for */
-  line-height: 1;
+  /* Half scale (FR-VIS-008): m6x11plus has 18 pixels of its own per em. */
+  font-size: calc(18 * var(--font-pixel));
+  line-height: calc(9 * var(--art-pixel));
+  text-align: center;
+  white-space: nowrap;
+  color: var(--color-note-text);
+  background-color: var(--color-note);
 }
 
 /* Read by screen readers, not shown: the icon already says it. */
@@ -39,44 +74,41 @@
   white-space: nowrap;
 }
 
+/* The shadow of the enemy on the desk (ticket 13): the desk one step darker
+   along its own ramp (art guide §4 and §6), a flat oval of 59x7 pixels of
+   the art under its feet, which falls a little to the right of the light
+   of the window. Behind the body. */
+.enemy__shadow {
+  position: absolute;
+  left: calc(23 * var(--art-pixel));
+  top: calc(88 * var(--art-pixel));
+  display: block;
+  width: calc(59 * var(--art-pixel));
+  height: calc(7 * var(--art-pixel));
+  image-rendering: pixelated;
+}
+
+/* The body leans back from its feet when it is hit (EnemyView.tsx). It is
+   positioned, like the shadow, so it is drawn over it: the browser draws
+   the positioned elements after the others. */
 .enemy__body {
-  display: grid;
+  position: relative;
+  transform-origin: 50% 94%;
 }
 
-/* A hit: the enemy flashes and is pushed back. */
-.enemy__body--hit {
-  animation: enemy-hit 300ms ease-out;
+.enemy__body .sprite {
+  display: block;
 }
 
-/* Defeated: after the hit, it falls over and fades away. When this animation
-   ends, EnemyView.tsx brings it back. */
+/* Defeated: after the lean of the hit, it falls over and fades away, and its
+   shadow with it. When this animation ends, EnemyView.tsx brings the next
+   one. */
 .enemy__body--defeated {
-  animation:
-    enemy-hit 300ms ease-out,
-    enemy-fall 600ms ease-in 300ms forwards;
+  animation: enemy-fall 600ms ease-in 460ms forwards;
 }
 
-/* A new enemy comes in, with full health. */
-.enemy__body--arrived {
-  animation: enemy-rise 400ms ease-out;
-}
-
-@keyframes enemy-hit {
-  0% {
-    filter: brightness(3);
-    transform: translateX(0);
-  }
-  30% {
-    filter: brightness(3);
-    transform: translateX(10px) rotate(6deg);
-  }
-  60% {
-    filter: none;
-    transform: translateX(-4px) rotate(-2deg);
-  }
-  100% {
-    transform: none;
-  }
+.enemy__shadow--defeated {
+  animation: enemy-shadow-fade 600ms ease-in 460ms forwards;
 }
 
 @keyframes enemy-fall {
@@ -86,45 +118,25 @@
   }
 }
 
-@keyframes enemy-rise {
-  from {
+@keyframes enemy-shadow-fade {
+  to {
     opacity: 0;
-    transform: translateY(-16px) scale(0.8);
   }
 }
 
 /* The damage of the last hit floats up from the enemy and fades. */
 .enemy__damage {
   position: absolute;
-  top: 40%;
-  right: 0;
+  top: 30%;
+  right: calc(4 * var(--art-pixel));
   animation: tag-float 900ms ease-out forwards;
-}
-
-/* The name, just over the health bar. A long name, such as that of a
-   character, wraps to a second line instead of widening the enemy. */
-.enemy__name {
-  margin: 0 0 -0.25rem;
-  /* Drawn right on the light desk of the background (ticket 04). */
-  color: var(--color-desk-text);
-  font-family: var(--font-display);
-  font-size: 18px; /* the size m6x11plus is drawn for */
-  line-height: 1;
-  text-align: center;
-}
-
-.enemy__health {
-  display: flex;
-  justify-content: center;
-  width: 100%;
 }
 
 /* Without movement, the animations still happen, so their end can be
    waited for, but they take no time. */
 @media (prefers-reduced-motion: reduce) {
-  .enemy__body--hit,
   .enemy__body--defeated,
-  .enemy__body--arrived {
+  .enemy__shadow--defeated {
     animation-duration: 1ms;
     animation-delay: 0s;
   }

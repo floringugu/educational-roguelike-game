@@ -1,0 +1,185 @@
+/* The counters of the player (ticket 12), standing on the green desk over
+   the hand, as school stationery (ADR-0016): five scraps of a notebook taped
+   to the desk and a post-it. CombatScreen.css places the row (--bar-top).
+   The pieces are 23, 23, 27, 23, 23 and 41 pixels of the art wide, 3 apart,
+   from x 3 of the safe area: 178 of its 180. They are wide enough for their
+   texts at every scale, also at an odd one, where the font is a bit bigger
+   than half the art (art guide §3). */
+.bottom-bar {
+  position: absolute;
+  left: var(--safe-left);
+  top: var(--bar-top);
+  display: flex;
+  align-items: flex-start;
+  gap: calc(3 * var(--art-pixel));
+  width: calc(180 * var(--art-pixel));
+  height: calc(33 * var(--art-pixel));
+  margin: 0;
+  padding-left: calc(3 * var(--art-pixel));
+}
+
+/* A counter: a scrap of 23x33 pixels of the art, with its piece of tape at
+   the top, the 16x16 drawing under the tape and the number under it, over
+   the ruled line of the scrap. The paper inside the ink outline goes from
+   x 1 to 20, and the tape covers the rows 0 to 3. */
+.bottom-bar__counter {
+  position: relative;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: flex-start;
+  width: calc(23 * var(--art-pixel));
+  height: calc(33 * var(--art-pixel));
+  margin: 0;
+  padding: calc(4 * var(--art-pixel)) 0 0 calc(3 * var(--art-pixel));
+  font-family: var(--font-display);
+  /* Half scale (FR-VIS-008): m6x11plus has 18 pixels of its own per em. */
+  font-size: calc(18 * var(--font-pixel));
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+}
+
+/* Each scrap has its tape in the color of its drawing. */
+.bottom-bar__counter--draw-pile {
+  background-image: url('../assets/sprites/draw-pile-scrap.png');
+}
+
+.bottom-bar__counter--energy {
+  background-image: url('../assets/sprites/energy-scrap.png');
+}
+
+.bottom-bar__counter--block {
+  background-image: url('../assets/sprites/block-scrap.png');
+}
+
+.bottom-bar__counter--discard {
+  background-image: url('../assets/sprites/discard-scrap.png');
+}
+
+/* The health is the longest number ("26/40"): its scrap is 4 pixels of the
+   art wider, with its paper from x 1 to 24. */
+.bottom-bar__counter--health {
+  width: calc(27 * var(--art-pixel));
+  padding-left: calc(5 * var(--art-pixel));
+  background-image: url('../assets/sprites/health-scrap.png');
+}
+
+.bottom-bar__counter .sprite {
+  display: block;
+}
+
+/* The names of the counters, for screen readers only. */
+.bottom-bar__hidden-text {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* The number, centered on the paper of the scrap, in the rows 21 to 28:
+   right over the ruled line (row 29). Its background is the color of the
+   paper, on the paper: it does not show, but it tells the contrast test
+   which background the text has (NFR-ACS-001). It also goes over the strips
+   of the shredder while they fall. */
+.bottom-bar__value {
+  position: relative;
+  display: block;
+  width: calc(20 * var(--art-pixel));
+  height: calc(8 * var(--art-pixel));
+  margin: var(--art-pixel) 0 0 calc(-2 * var(--art-pixel));
+  line-height: calc(8 * var(--art-pixel));
+  text-align: center;
+  white-space: nowrap;
+  color: var(--color-note-text);
+  background-color: var(--color-note);
+}
+
+.bottom-bar__counter--health .bottom-bar__value {
+  width: calc(24 * var(--art-pixel));
+  margin-left: calc(-4 * var(--art-pixel));
+}
+
+.bottom-bar__shredder-box {
+  position: relative;
+  display: block;
+}
+
+.bottom-bar__shredder {
+  display: block;
+}
+
+/* The strips come out of the bottom of the shredder: its body ends at the
+   row 13 of the drawing and its feet are the row 14, so they start 14
+   pixels down. They are cut at that edge, so before and after the cut they
+   cannot be seen. */
+.bottom-bar__strips {
+  position: absolute;
+  top: calc(14 * var(--art-pixel));
+  left: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bottom-bar__strips-paper {
+  display: block;
+  transform: translateY(-100%);
+}
+
+/* "Terminar turno" is a big post-it of 41x28 pixels of the art, with the
+   text of the catalog on it. In H1 it does nothing yet. */
+.bottom-bar__end-turn {
+  position: relative;
+  display: block;
+  flex: none;
+  width: calc(41 * var(--art-pixel));
+  height: calc(28 * var(--art-pixel));
+  margin-top: calc(4 * var(--art-pixel));
+  padding: 0;
+  background-color: transparent;
+  background-image: url('../assets/sprites/end-turn-post-it.png');
+  background-size: 100% 100%;
+  image-rendering: pixelated;
+  border: 0;
+  cursor: not-allowed;
+}
+
+/* The text, in two lines centered on the post-it. The yellow of the
+   post-it goes from x 1 to 37 and from the row 2 to 24, and from the row 19
+   its curled corner takes x 32 and further. The box of the text is only the
+   rows 5 to 18, which are yellow from side to side; the second line hangs
+   under it, narrow enough to miss the corner. Its background is the yellow
+   of the post-it, so it does not show, but it tells the contrast test which
+   background the text has (NFR-ACS-001).
+   The lines are 8 pixels of the art apart and not 1em: with an odd scale the
+   font is a bit bigger than half the art (art guide §3), and 1em would push
+   the second line out of the yellow. 8 is even, so the space over and under
+   the letters is a whole physical pixel at every scale, and they stay sharp. */
+.bottom-bar__end-turn-text {
+  position: absolute;
+  left: var(--art-pixel);
+  top: calc(5 * var(--art-pixel));
+  width: calc(37 * var(--art-pixel));
+  height: calc(14 * var(--art-pixel));
+  font-family: var(--font-display);
+  font-size: calc(18 * var(--font-pixel));
+  line-height: calc(8 * var(--art-pixel));
+  text-align: center;
+  color: var(--color-post-it-text);
+  background-color: var(--color-post-it);
+}
+
+.bottom-bar__end-turn:focus-visible {
+  outline: calc(2 * var(--font-pixel)) solid var(--color-accent);
+  outline-offset: var(--art-pixel);
+}
+
+/* With a small scale the post-it would be under 44x44 px CSS (NFR-USA-002):
+   this empty layer, with no drawing, makes the area that takes the touch
+   bigger than the drawing until it reaches them. */
+.bottom-bar__end-turn::after {
+  content: '';
+  position: absolute;
+  inset: min(0px, calc((28 * var(--art-pixel) - 44px) / 2)) min(0px, calc((41 * var(--art-pixel) - 44px) / 2));
+}

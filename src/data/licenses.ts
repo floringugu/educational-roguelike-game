@@ -58,7 +58,9 @@ export const LICENSES: LicenseEntry[] = [
     // The project's own pixel art (ADR-0011): drawn for Empollatro, with
     // palette colors only. The PNG files are the source, except for the
     // classroom, which is drawn in art/classroom.aseprite and exported to the
-    // PNG files of backgrounds/ and of the sprites classroom-*.
+    // PNG files of backgrounds/ and of the sprites classroom-*: each plane
+    // (ADR-0017) is a merge of its layers, with its edge repeated 12 pixels
+    // all around, and each strip of frames starts with the drawn frame.
     name: 'Empollatro sprites',
     author: 'Florin Gugu',
     license: 'Creative Commons Zero (CC0 1.0)',
@@ -66,8 +68,11 @@ export const LICENSES: LicenseEntry[] = [
     sourceUrl: 'https://github.com/floringugu/educational-roguelike-game',
     attribution: 'Empollatro sprites by Florin Gugu',
     files: [
+      'backgrounds/classroom-back-desks.png',
+      'backgrounds/classroom-desk.png',
       'backgrounds/classroom-light.png',
-      'backgrounds/classroom.png',
+      'backgrounds/classroom-room.png',
+      'sprites/block-scrap.png',
       'sprites/block-shield-empty.png',
       'sprites/block-shield-full.png',
       'sprites/card-art-books.png',
@@ -88,15 +93,24 @@ export const LICENSES: LicenseEntry[] = [
       'sprites/classroom-speaker-left.png',
       'sprites/classroom-speaker-right.png',
       'sprites/classroom-tree.png',
+      'sprites/discard-scrap.png',
       'sprites/discard-shredder.png',
       'sprites/discard-shredder-strips.png',
-      'sprites/enemy-math-teacher.png',
+      'sprites/draw-pile-scrap.png',
+      'sprites/draw-pile-sheets.png',
+      'sprites/end-turn-post-it.png',
       'sprites/enemy-midterm.png',
-      'sprites/health-cross-empty.png',
-      'sprites/health-cross-full.png',
+      'sprites/enemy-midterm-portrait.png',
+      'sprites/enemy-midterm-shadow.png',
+      'sprites/enemy-panel-scrap.png',
+      'sprites/energy-can.png',
+      'sprites/energy-scrap.png',
       'sprites/health-neuron-empty.png',
       'sprites/health-neuron-full.png',
+      'sprites/health-scrap.png',
       'sprites/intent-attack.png',
+      'sprites/intent-bubble.png',
+      'sprites/menu-post-it.png',
       'textures/coffee-corner.png',
       'textures/coffee-ring-splash.png',
       'textures/coffee-ring.png',
@@ -114,8 +128,9 @@ export const LICENSES: LicenseEntry[] = [
   },
   {
     // The city seen through the window of the classroom (ADR-0004: a CC0
-    // pack, recolored to the palette). It is a layer of its own, under the
-    // classroom, so that this entry covers exactly the third-party pixels.
+    // pack, recolored to the palette). It is the farthest plane of the
+    // classroom (ADR-0017), so that this entry covers exactly the third-party
+    // pixels.
     name: 'City Mega Pack',
     author: 'GrafxKid',
     license: 'Creative Commons Zero (CC0 1.0)',
@@ -123,7 +138,7 @@ export const LICENSES: LicenseEntry[] = [
     sourceUrl: 'https://opengameart.org/content/city-mega-pack',
     attribution: 'City Mega Pack by GrafxKid (opengameart.org/content/city-mega-pack)',
     modification:
-      'A slice of the city skyline of the pack, cropped, mapped to the palette of the game and with its towers recolored.',
+      'A slice of the city skyline of the pack, cropped, mapped to the palette of the game and with its towers recolored. Grown 3 pixels by repeating its edge, so it still fills the window when the camera moves, and padded 12 pixels all around.',
     files: ['backgrounds/classroom-city.png'],
   },
 ];

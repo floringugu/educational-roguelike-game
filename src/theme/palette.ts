@@ -133,6 +133,23 @@ export const colorRoles = {
   panelText: 'paper',
   healthBar: 'vermilion',
   healthBarTrack: 'ink',
+  // The stationery of the combat interface (ADR-0016): notebook scraps taped
+  // to the classroom for the counters, the panel of the enemy and the list
+  // of the menu, and post-its for "Terminar turno" and the menu. The scraps
+  // and the post-its are sprites; every text on them paints the color of
+  // their paper behind it, so the CSS says which background it is read on.
+  // The list of the menu is drawn in CSS: paper with ruled lines, a red
+  // margin and an ink edge.
+  note: 'paper',
+  noteText: 'ink',
+  noteRule: 'lavender',
+  noteMargin: 'vermilion',
+  noteEdge: 'ink',
+  postIt: 'gold',
+  postItText: 'ink',
+  // The specks of dust that float in the beam of light of the classroom
+  // (ticket 15), half transparent like the light.
+  classroomDust: 'gold',
 } as const satisfies Record<string, PaletteColorName>;
 
 export type ColorRole = keyof typeof colorRoles;
@@ -194,4 +211,10 @@ export const textOnBackgroundPairs: ReadonlyArray<{ text: ColorRole; background:
   // The texts of the panels of the combat interface: the name of the enemy,
   // the numbers of the health and the button "Terminar turno".
   { text: 'panelText', background: 'panel' },
+  // The texts on the stationery of the combat interface: the numbers of the
+  // counters, the name and the health of the enemy, the value of its intent
+  // and the entries of the menu on paper, and "Terminar turno" on its
+  // post-it.
+  { text: 'noteText', background: 'note' },
+  { text: 'postItText', background: 'postIt' },
 ];
