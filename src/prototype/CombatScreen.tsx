@@ -1,15 +1,17 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { usePrefersReducedMotion } from '../background/usePrefersReducedMotion';
 import type { CardData } from '../cards/cardData';
 import { Hand } from '../cards/Hand';
 import { settleMove, shakeMove } from '../classroom/camera';
+import { DeskItems } from '../classroom/DeskItems';
 import { useCamera } from '../classroom/useCamera';
 import { es } from '../i18n/es';
 import { BottomBar } from './BottomBar';
 import { CombatMenu } from './CombatMenu';
+import { type Annoyance, pickPhraseIndex } from './annoyance';
 import { flyCardToShredder, runShredder } from './discardFlight';
 import { EnemyPanel } from './EnemyPanel';
-import { EnemyView } from './EnemyView';
+import { ENEMY_HIT_AREAS, EnemyView } from './EnemyView';
 import {
   bringNextEnemy,
   dealNewHand,
@@ -79,14 +81,22 @@ export function CombatScreen({ onOpenSettings, onOpenCredits }: CombatScreenProp
   // Played cards still flying to the shredder. The discard counter does not
   // count them until they go in.
   const [cardsInFlight, setCardsInFlight] = useState(0);
+  // Whether the enemy has landed on the desk, so a thrown item of the desk
+  // can hit it, and how annoyed it is (ticket 17).
+  const [enemyHasLanded, setEnemyHasLanded] = useState(false);
+  const [annoyance, setAnnoyance] = useState<Annoyance>({ count: 0, phraseIndex: null });
+  // While the menu is open, the items of the desk cannot be picked up.
+  const [menuIsOpen, setMenuIsOpen] = useState(false);
   const previousQuestionId = useRef<string | null>(null);
   const handElement = useRef<HTMLDivElement>(null);
+  const barElement = useRef<HTMLElement>(null);
   const shredderElement = useRef<HTMLSpanElement>(null);
   const stripsElement = useRef<HTMLSpanElement>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
   const camera = useCamera();
 
   const enemyIsDefeated = isEnemyDefeated(combat);
+  const enemyIsStanding = enemyHasLanded && !enemyIsDefeated;
   const handIsEmpty = isHandEmpty(combat);
   const shownDiscardCount = Math.max(combat.discardPile.length - cardsInFlight, 0);
 
@@ -178,6 +188,25 @@ export function CombatScreen({ onOpenSettings, onOpenCredits }: CombatScreenProp
     setEnemyHits(0);
     setEnemyArrivals(enemyArrivals + 1);
     setPlayerTag(null);
+    // The next enemy has not been annoyed yet, but it does not repeat the
+    // last phrase either.
+    setEnemyHasLanded(false);
+    setAnnoyance((current) => ({ count: 0, phraseIndex: current.phraseIndex }));
+  }
+
+  // The same function on every render, so EnemyView does not play the drop
+  // of the enemy again.
+  const handleEnemyLanded = useCallback(() => setEnemyHasLanded(true), []);
+
+  // A thrown item of the desk hit the enemy: it gets annoyed and says a
+  // phrase, never the one it said last (FR-VIS-010). The random number is
+  // drawn here, so the update stays the same if React runs it twice.
+  function handleDeskItemHit() {
+    const random = Math.random();
+    setAnnoyance((current) => ({
+      count: current.count + 1,
+      phraseIndex: pickPhraseIndex(es.combat.annoyancePhrases.length, current.phraseIndex, () => random),
+    }));
   }
 
   return (
@@ -192,17 +221,32 @@ export function CombatScreen({ onOpenSettings, onOpenCredits }: CombatScreenProp
           {es.app.name}
         </h1>
 
-        <CombatMenu onOpenSettings={onOpenSettings} onOpenCredits={onOpenCredits} />
+        <CombatMenu onOpenSettings={onOpenSettings} onOpenCredits={onOpenCredits} onOpenChange={setMenuIsOpen} />
 
         <EnemyPanel enemy={combat.enemy} />
 
-        <EnemyView
-          enemy={combat.enemy}
-          hits={enemyHits}
-          lastDamage={lastDamage}
-          arrivals={enemyArrivals}
-          onDefeatShown={handleEnemyDefeatShown}
-        />
+        {/* The enemy and the items of the desk, which go in front of it or
+            behind it. Each enemy finds the items in their places and starts
+            without being annoyed. */}
+        <div className="combat-screen__scene">
+          <EnemyView
+            key={`enemy-${enemyArrivals}`}
+            enemy={combat.enemy}
+            hits={enemyHits}
+            lastDamage={lastDamage}
+            arrivals={enemyArrivals}
+            annoyance={annoyance}
+            onLanded={handleEnemyLanded}
+            onDefeatShown={handleEnemyDefeatShown}
+          />
+          <DeskItems
+            key={`desk-items-${enemyArrivals}`}
+            enemyHitArea={enemyIsStanding ? ENEMY_HIT_AREAS[combat.enemy.id] : null}
+            isDisabled={menuIsOpen}
+            onEnemyHit={handleDeskItemHit}
+            deskCoverRefs={[barElement, handElement]}
+          />
+        </div>
 
         <div ref={handElement} className="combat-screen__hand" inert={enemyIsDefeated}>
           <Hand cards={combat.hand} onPlayCard={handlePlayCard} />
@@ -218,6 +262,7 @@ export function CombatScreen({ onOpenSettings, onOpenCredits }: CombatScreenProp
           discardCount={shownDiscardCount}
           shredderRef={shredderElement}
           stripsRef={stripsElement}
+          barRef={barElement}
           healthTag={
             playerTag !== null && (
               <span

@@ -15,6 +15,9 @@ type BottomBarProps = {
   // animation of a played card (discardFlight.ts).
   shredderRef: Ref<HTMLSpanElement>;
   stripsRef: Ref<HTMLSpanElement>;
+  // The whole bar, so the items of the desk are not left under it
+  // (DeskItems, ticket 17).
+  barRef?: Ref<HTMLElement>;
   // What the last card did to the player ("+5"), floating over the health.
   healthTag?: ReactNode;
 };
@@ -34,10 +37,11 @@ export function BottomBar({
   discardCount,
   shredderRef,
   stripsRef,
+  barRef,
   healthTag,
 }: BottomBarProps) {
   return (
-    <section className="bottom-bar">
+    <section ref={barRef} className="bottom-bar">
       <p className="bottom-bar__counter bottom-bar__counter--draw-pile">
         <span className="bottom-bar__hidden-text">{es.combat.drawPileLabel} </span>
         <Sprite id="draw-pile-sheets" description="" />

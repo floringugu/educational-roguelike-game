@@ -20,6 +20,9 @@ export type Camera = {
   // keyframes of the camera, such as the enemy that drops onto the desk.
   // It plays even while the classroom is still.
   playOn: (element: HTMLElement, move: CameraMove, delayMs?: number) => Animation;
+  // Whether the classroom is still (useClassroomMotion), for the moves that
+  // a screen plays on its own, such as the flight of a thrown item.
+  isStill: () => boolean;
   // GameFrame keeps the settings up to date.
   setArtPixel: (artPixel: number) => void;
   setStill: (isStill: boolean) => void;
@@ -72,6 +75,9 @@ export function createCamera(initialSettings: CameraSettings): Camera {
     },
     playOn(element, move, delayMs) {
       return playKeyframes(element, stepKeyframes(move, 1, artPixel), move, delayMs);
+    },
+    isStill() {
+      return isStill;
     },
     setArtPixel(newArtPixel) {
       artPixel = newArtPixel;

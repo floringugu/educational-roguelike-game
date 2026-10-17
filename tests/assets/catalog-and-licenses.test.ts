@@ -29,6 +29,7 @@ import {
   type ArtRect,
   type ClassroomPlane,
 } from '../../src/classroom/classroomLayout.ts';
+import { DESK_ITEMS } from '../../src/classroom/deskItems.ts';
 import { LICENSES } from '../../src/data/licenses.ts';
 import { PALETTE, colorRoles } from '../../src/theme/palette.ts';
 
@@ -73,22 +74,41 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
     'intent-bubble': [31, 21],
   };
 
+  // The sprites of the things on the desk that the player can pick up, and
+  // of their shadows (ticket 17), with the size of their place.
+  const DESK_ITEM_SIZES: Record<string, [number, number]> = {};
+  for (const item of DESK_ITEMS) {
+    DESK_ITEM_SIZES[item.sprite] = [item.rect.width, item.rect.height];
+    DESK_ITEM_SIZES[item.shadow] = [item.shadowRect.width, item.shadowRect.height];
+    if (item.shadowOnRide !== undefined) {
+      DESK_ITEM_SIZES[item.shadowOnRide] = [item.shadowRect.width, item.shadowRect.height];
+    }
+  }
+
   // The size of each kind of sprite (art guide §2): the icons of the
   // interface and the portrait of an enemy are 16x16 (ADR-0016). The enemies
   // are still 96x96 and the art of the cards 16x16, until tickets 13 and 14
   // redraw them at 88x96 and 24x24. The shadow of an enemy is as wide as its
-  // feet, under which it is drawn on the desk (ticket 13). The sprites of the
-  // classroom have the size of their place in the drawing, and a strip of
-  // frames has its frames side by side (ADR-0017).
+  // feet, under which it is drawn on the desk (ticket 13). The mark of an
+  // annoyed enemy is a strip of 2 frames of 9x9 (ticket 17). The sprites of
+  // the classroom have the size of their place in the drawing, and a strip
+  // of frames has its frames side by side (ADR-0017).
   function expectedSize(id: string): [number, number] {
     const classroomSprite = CLASSROOM_SPRITES.find((sprite) => sprite.id === id);
     if (classroomSprite !== undefined) {
       const { rect, frames = 1 } = classroomSprite;
       return [rect.width * frames, rect.height];
     }
+    const deskItemSize = DESK_ITEM_SIZES[id];
+    if (deskItemSize !== undefined) {
+      return deskItemSize;
+    }
     const stationerySize = STATIONERY_SIZES[id];
     if (stationerySize !== undefined) {
       return stationerySize;
+    }
+    if (id === 'enemy-annoyance-mark') {
+      return [18, 9];
     }
     if (id.startsWith('enemy-') && id.endsWith('-portrait')) {
       return [16, 16];
@@ -108,7 +128,7 @@ describe('FR-VIS-004: the sprites of the catalog', () => {
   // An icon of the interface is any sprite that is not of the classroom, of
   // an enemy, of a card or a piece of stationery.
   function isInterfaceIcon(id: string): boolean {
-    const isClassroom = CLASSROOM_SPRITES.some((sprite) => sprite.id === id);
+    const isClassroom = id.startsWith('classroom-');
     return !isClassroom && !(id in STATIONERY_SIZES) && !id.startsWith('enemy-') && !id.startsWith('card-art-');
   }
 
@@ -364,9 +384,15 @@ describe('FR-VIS-001: the classroom (tickets 11 and 16)', () => {
     expect([ENEMY_RECT.width, ENEMY_RECT.height]).toEqual([88, 96]);
   });
 
+  // Each sprite of the classroom is either drawn in its place or is one of
+  // the things on the desk, with their shadows (ticket 17).
   it('places every sprite of the classroom once', () => {
     const classroomIds = SPRITE_IDS.filter((id) => id.startsWith('classroom-'));
-    expect(CLASSROOM_SPRITES.map(({ id }) => id).sort()).toEqual([...classroomIds].sort());
+    const placedIds = [
+      ...CLASSROOM_SPRITES.map(({ id }) => id),
+      ...DESK_ITEMS.flatMap((item) => [item.sprite, item.shadow, ...(item.shadowOnRide ? [item.shadowOnRide] : [])]),
+    ];
+    expect(placedIds.sort()).toEqual([...classroomIds].sort());
   });
 });
 

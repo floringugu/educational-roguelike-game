@@ -71,6 +71,18 @@
   white-space: nowrap;
 }
 
+/* The enemy and the items of the desk (ticket 17), over the classroom and
+   under the hand and the bar. Its own stacking context: the items go in
+   front of the enemy or behind it, and under the hand and the bar, which
+   come after it, also when one is held over them. Only the zones where the
+   items are picked up can be touched (DeskItems.css). */
+.combat-screen__scene {
+  position: absolute;
+  inset: 0;
+  isolation: isolate;
+  pointer-events: none;
+}
+
 /* The hand, centered on the safe area, at the bottom of the frame
    (--hand-bottom). The cards keep their size in CSS pixels (Hand.css), so
    the hand is placed from that edge and not from the classroom: the bottom

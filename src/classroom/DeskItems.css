@@ -1,0 +1,45 @@
+/* The things on the green desk (DeskItems.tsx, ticket 17), placed in pixels
+   of the art from the top left corner of the safe area, like the enemy.
+   They share the scene of the combat screen with the enemy, which stands at
+   z-index 10 (EnemyView.css): each item gets its own z-index, so it goes in
+   front of the enemy or behind it (deskItems.ts). This box has none, so it
+   does not put them all on one side. */
+.desk-items {
+  position: absolute;
+  inset: 0;
+  /* Only the zones where the items are picked up can be touched. */
+  pointer-events: none;
+}
+
+.desk-item {
+  position: absolute;
+}
+
+.desk-item__shadow {
+  position: absolute;
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* Positioned, so it is drawn over its shadow. A held item rises with `top`
+   and not with a transform: its flight is a transform (camera.playOn). */
+.desk-item__body {
+  position: relative;
+}
+
+.desk-item__sprite {
+  display: block;
+  image-rendering: pixelated;
+}
+
+/* The zone where the finger picks the item up: at least 44x44 CSS pixels
+   (NFR-USA-002), and invisible. While the finger moves the item, the page
+   must not scroll, zoom or select. */
+.desk-item__grab-zone {
+  position: absolute;
+  pointer-events: auto;
+  touch-action: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  cursor: grab;
+}
