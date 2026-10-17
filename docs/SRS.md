@@ -872,6 +872,24 @@ El aula deberá mostrar textos pintados encima del dibujo, nunca dibujados en é
 - las frases siguen el tono gamberro e irónico y los límites de la guía de arte, y el dueño las revisa antes de que entren en el catálogo.
 - *Verificación:* UT, INS.
 
+**FR-VIS-010** · C · H1 · DP-19
+El jugador deberá poder coger con el dedo los **objetos del pupitre** (el estuche, la botella de agua, el cuaderno, el boli y la tiza), moverlos por el pupitre y lanzárselos al enemigo, que se **mosquea**. Son decorativos: no hacen daño ni cambian nada del combate, porque el daño solo llega acertando (P1, FR-CMB-001).
+
+- Están en su sitio del dibujo, aunque una pantalla enseñe solo una parte de ellos, y al cogerlos se ven enteros.
+- Se mueven a saltos de píxel entero del arte y se quedan donde se sueltan. Al empezar cada combate vuelven a su sitio.
+- Al mosquearse, el enemigo tiembla, le sale la marca de enfado junto a la cara y dice una frase del catálogo (FR-VIS-009) en el bocadillo de su intención, que se ensancha para ella y la escribe letra a letra, como si hablara.
+- No hacen falta para jugar: no están en el orden del teclado y los lectores de pantalla no los anuncian.
+- Con `prefers-reduced-motion`, o con el aula quieta, se pueden arrastrar, pero no vuelan (FR-VIS-007).
+- *Verificación:* UT, MAN.
+
+**FR-VIS-011** · C · H1 · DP-19
+El jugador deberá poder escribir en la pizarra con la **tiza** del pupitre: la arrastra hasta la pizarra y su punta deja un trazo por donde pasa. Frotar la pizarra con el dedo borra lo escrito.
+
+- La punta va por encima del dedo, para que el dedo no tape lo que se escribe.
+- El trazo mide 1 píxel del arte, es del color de la tiza y se pinta en un canvas 2D, sin WebGL. Queda encima de la pizarra y de sus textos, y debajo del enemigo.
+- Lo escrito no se guarda: se borra al empezar cada combate.
+- *Verificación:* UT, MAN.
+
 ---
 
 ## 4. Requisitos no funcionales
@@ -1036,7 +1054,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 
 ### 10.1 Decisiones pendientes (DP)
 
-- **Resuelta:** el dueño la decidió (el 2026-09-30, salvo DP-15 a DP-18, del 2026-10-07) y ya está escrita en los requisitos.
+- **Resuelta:** el dueño la decidió (el 2026-09-30, salvo DP-15 a DP-18, del 2026-10-07, y DP-19, del 2026-10-17) y ya está escrita en los requisitos.
 - **Propuesta:** ya está escrita en los requisitos; solo falta la confirmación del dueño.
 - **Abierta:** falta decidirla, antes del hito indicado.
 
@@ -1060,6 +1078,7 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | DP-16 | ¿Hay un límite de reliquias? | Resuelta | Sí: 5 huecos (prov.); con todos ocupados, el jugador elige cuál soltar o renuncia a la nueva (FR-NOD-004). Las reliquias siguen modificando solo efectos de un acierto (P1) | H2 |
 | DP-17 | ¿Hay ayudas que quiten opciones? | Resuelta | Sí: el **comodín**, de un solo uso, quita 2 distractores y se consigue acertando. El acierto con comodín no tiene crítico y FSRS lo califica *Hard* (FR-ANS-008, FR-SRS-002, ADR-0012) | H2 |
 | DP-18 | ¿El jugador puede dar en su CSV las respuestas aceptadas y los distractores? | Resuelta | Sí, con las columnas opcionales Respuestas y Distractores, reconocidas por la cabecera y con los valores separados por `\|` (FR-SUB-006). Sin ellas, se aplica la regla de DP-1. En los mazos reales los reversos son frases largas, así que sin la columna Respuestas casi ninguna fila daría pregunta escrita | H2 |
+| DP-19 | ¿El jugador puede tocar las cosas del aula? | Resuelta | Sí, como adorno: coge, mueve y lanza al enemigo los objetos del pupitre, y el enemigo se mosquea (FR-VIS-010); y escribe en la pizarra con la tiza (FR-VIS-011). Nada de eso cambia el combate (P1). Usar la tiza para hacer cuentas durante una pregunta queda fuera, como idea para H2: la hoja de la pregunta tapa la pizarra | H1 |
 
 ### 10.2 Valores provisionales (se calibran jugando)
 
@@ -1088,6 +1107,11 @@ El MVP está terminado cuando se cumplen **los cinco** criterios (Q40):
 | Coste máximo por PDF | 0,05 $ | NFR-CST-001 | H4 |
 | Rendimiento | 100 ms / 30 fps / 3 s | NFR-PRF-002/003/004 | H1-H2 |
 | Guiños del aula | uno cada 20 a 40 s, nunca dos a la vez | FR-VIS-001 | H1 |
+| Velocidad mínima para lanzar un objeto del pupitre | 0,8 px CSS por ms, hacia arriba | FR-VIS-010 | H1 |
+| Duración del temblor y de la marca de enfado del mosqueo | 1,5 s | FR-VIS-010 | H1 |
+| Ritmo al que se escribe la frase del mosqueo | una letra cada 35 ms | FR-VIS-010 | H1 |
+| Tiempo que se queda la frase del mosqueo después de escribirse | 1,2 s | FR-VIS-010 | H1 |
+| Distancia de la punta de la tiza al dedo | unos 32 px CSS por encima | FR-VIS-011 | H1 |
 | JavaScript inicial del build | ≤ 150 kB con gzip | NFR-PRF-004 | H2 |
 
 ---

@@ -25,6 +25,17 @@ export const es = {
     // Before the number of a tag: "-6" of damage, "+4" of healing.
     lossSign: '-',
     gainSign: '+',
+    // What the enemy says in the bubble of its intent when a thing of the
+    // desk hits it (FR-VIS-010, ticket 17). Two lines at most in the bubble.
+    annoyancePhrases: [
+      '¡Al pasillo!',
+      'Esto va al parte.',
+      'Muy maduro, sí.',
+      'Se lo digo a tu tutor.',
+      'Con esa puntería, estudia.',
+      'Eso te baja un punto.',
+      'No soy una diana.',
+    ],
   },
   // The enemies of the prototype (ticket 06): the name shown over its health
   // and the description of the sprite for screen readers.

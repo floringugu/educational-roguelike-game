@@ -57,11 +57,14 @@ Estos son los términos canónicos del proyecto. El [SRS](SRS.md), los ADRs, la 
 
 | Término | Código | Definición |
 |---|---|---|
-| **Aula** | `Classroom` | Fondo de la pantalla de combate: un aula española en pixel art, vista desde la silla de un alumno, con el pupitre verde en primer plano y el enemigo de pie sobre él (ADR-0013). Es un PNG con sprites animados encima. |
+| **Aula** | `Classroom` | Fondo de la pantalla de combate: un aula española en pixel art, vista desde la silla de un alumno, con el pupitre verde en primer plano y el enemigo de pie sobre él (ADR-0013). Son cinco planos en PNG que mueve una cámara, con sprites animados encima (ADR-0017). |
 | **Capa de luz** | `LightLayer` | Imagen semitransparente, encima del aula, con la luz que entra por las persianas. Es la única excepción a la regla de píxeles opacos de la guía de arte. |
 | **Panel del enemigo** | `EnemyPanel` | Panel de arriba de la pantalla de combate con el retrato, el nombre y la barra de vida del enemigo. |
 | **Barra inferior** | `BottomBar` | Fila de paneles, debajo de la mano, con la pila de robo, la energía, la vida y el bloqueo del jugador, el descarte y el botón Terminar turno. |
 | **Guiño** | `ClassroomWink` | Animación ocasional del aula, como una mosca que cruza, un aviso por la megafonía o el reloj que va hacia atrás. Sale al azar y nunca a la vez que otro guiño. |
+| **Objeto del pupitre** | `DeskItem` | Cosa del pupitre verde que el jugador puede coger, mover y lanzar al enemigo: el estuche, la botella de agua, el cuaderno, el boli y la tiza. Es un adorno y no cambia el combate (FR-VIS-010). |
+| **Tiza** | `Chalk` | Objeto del pupitre con el que el jugador escribe en la pizarra (FR-VIS-011). |
+| **Mosqueo** | `Annoyance` | Reacción del enemigo cuando le da un objeto del pupitre: tiembla, le sale la marca de enfado junto a la cara y dice una frase en un bocadillo. No cambia su vida ni su intención (FR-VIS-010). |
 
 ## Aprendizaje
 

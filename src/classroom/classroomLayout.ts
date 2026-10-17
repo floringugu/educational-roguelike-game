@@ -69,13 +69,8 @@ export const CLASSROOM_SPRITES: ReadonlyArray<ClassroomSprite> = [
   // The box of confiscated phones, on the right back desk, under the cork
   // board.
   { id: 'classroom-phone-box', plane: 'backDesks', rect: { x: 157, y: 99, width: 20, height: 19 } },
-  // On the green desk: the pencil case at the left corner, and the spiral
-  // notebook with the pen at the right one. They stand at the edges of the
-  // whole drawing, so a phone that shows only the safe area sees just their
-  // tips.
-  { id: 'classroom-pencil-case', plane: 'desk', rect: { x: -18, y: 163, width: 34, height: 28 } },
-  { id: 'classroom-notebook', plane: 'desk', rect: { x: 170, y: 178, width: 28, height: 36 } },
-  { id: 'classroom-pen', plane: 'desk', rect: { x: 180, y: 193, width: 17, height: 6 } },
+  // The things on the green desk that the player can pick up are not here:
+  // they move on their own, with their shadows (deskItems.ts, ticket 17).
 ];
 
 // The specks of dust that float up through the beam of light (ticket 15):

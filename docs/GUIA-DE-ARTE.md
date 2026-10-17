@@ -14,7 +14,7 @@ Todo se ve como lo vería un alumno sentado en su silla: los ojos quedan poco po
 - **El aula** tiene una perspectiva suave de un punto, con el punto de fuga en el centro de la pizarra. La pared del fondo se ve de frente, con la pizarra en el centro y el reloj y el corcho a la derecha. La pared de la izquierda se ve de lado, en perspectiva, con la ventana con persiana y el radiador debajo (§2): sus líneas horizontales van hacia el punto de fuga y las verticales siguen verticales.
 - **El pupitre del primer plano** es lo que más cerca está: se ve casi toda su cara de arriba, la formica verde, y debajo una franja de su canto.
 - **Los objetos sueltos** se ven de frente, con algo de su cara de arriba. Cuanto más por debajo de los ojos quedan, más se ve esa cara: de 1 a 3 píxeles en un objeto pequeño.
-  - Los objetos que están sobre el pupitre del primer plano, como el estuche, el cuaderno y el boli, están solo un poco girados hacia el punto de fuga. No siguen del todo la perspectiva de la pared de la ventana: sus lados largos se inclinan bastante menos. Se ve su cara de arriba y el lado que mira al centro. El estuche y el cuaderno están en los bordes del aula entera, cortados por ellos. En un móvil que solo enseña la zona segura (§2) asoma su punta por una esquina del pupitre; en una pantalla más ancha se ve un poco más. El estuche lleva la cremallera a lo largo de la cara de arriba.
+  - Los objetos que están sobre el pupitre del primer plano, como el estuche, el cuaderno y el boli, están solo un poco girados hacia el punto de fuga. No siguen del todo la perspectiva de la pared de la ventana: sus lados largos se inclinan bastante menos. Se ve su cara de arriba y el lado que mira al centro. El estuche y el cuaderno están en los bordes del aula entera, cortados por ellos. En un móvil que solo enseña la zona segura (§2) asoma su punta por una esquina del pupitre; en una pantalla más ancha se ve un poco más. El estuche es de tela azul, con los dos extremos redondeados y la cremallera a lo largo de la cara de arriba. El tirador lleva un pompón rojo, y el estuche tiene una pegatina dorada arriba y garabatos de corrector en el lateral: un corazón, una estrella y un zigzag.
   - Una pila de libros muestra los lomos de frente y una franja de la tapa del libro de arriba.
   - Una taza es un cilindro de frente, con la boca como un óvalo estrecho arriba.
 - **Las cosas planas que están de pie** (la pizarra, los carteles, el horario, el reloj) se ven de frente, sin perspectiva.
@@ -34,6 +34,8 @@ Todo se ve como lo vería un alumno sentado en su silla: los ojos quedan poco po
 | Planos opacos del aula: la ciudad, la sala, los pupitres del fondo y el pupitre | 240×456: el aula con su borde repetido 12 píxeles alrededor (§7) | 1440×2736 | test (ticket 16) |
 | Capa de luz | 216×432, como el aula | 1296×2592 | test (ticket 11) |
 | Sombra de un enemigo | 59×7 | 354×42 | test (ticket 16) |
+| Marca de enfado de un enemigo | una tira de 2 fotogramas de 9×9 (18×9) | 54×54 cada fotograma | test (ticket 17) |
+| Objetos del pupitre y sus sombras | el tamaño de su sitio en el dibujo: estuche 44×31, botella 7×22, cuaderno 38×36 y boli 17×6; sus sombras, 46×31, 9×6, 36×31 y 14×5 | ×6 | test (ticket 17) |
 | Sprites del aula que cambian de dibujo, como el árbol o el segundero | una tira con los fotogramas uno al lado del otro, cada uno del tamaño del sprite (§7) | ×6 | test (ticket 16) |
 | Texturas | el tamaño con que las pinta el CSS, dividido entre la escala | según el CSS | test |
 
@@ -54,7 +56,8 @@ Todo se ve como lo vería un alumno sentado en su silla: los ojos quedan poco po
   - la pizarra (x 46-150, y 41-108), con sus dos zonas de texto, y a su derecha el horario de corcho con el pósit (x 152-180, y 42-100);
   - la pared de dos tonos, que cambia de color en y 86, los pupitres del fondo con mochilas a los lados y el suelo, hasta y 157;
   - el pupitre verde del primer plano, desde y 157, con la punta del estuche asomando por la esquina de la izquierda y la del cuaderno de espiral, con el boli, por la de la derecha, en diagonal hacia el punto de fuga, y garabatos escritos en la formica a los dos lados (x 14-46 y x 136-154, y 184-216), que están por definir;
-  - repartidas por todo el pupitre, hasta su borde de delante, cosas de estudiante pintadas en el aula, que no se mueven: una botella de agua (x 21-30, y 160-182), una chuleta doblada medio escondida bajo el cuaderno (x 158-174, y 186-197), un chicle (x 102-111, y 226-230), un taco de pósits (x 13-22, y 233-241), una calculadora (x 146-157, y 234-250) y una regla de madera (x 42-83, y 254-268). Los contadores y la mano de cartas tapan en parte las de abajo;
+  - al lado del estuche, la botella de agua (x 21-30, y 160-182). Ella, el estuche, el cuaderno y el boli son los objetos del pupitre, que el jugador puede coger y lanzar (FR-VIS-010): cada uno es un sprite con su sombra aparte, y no están pintados en el plano del pupitre (§7);
+  - repartidas por todo el pupitre, hasta su borde de delante, cosas de estudiante pintadas en el aula, que no se mueven: una chuleta doblada medio escondida bajo el cuaderno (x 158-174, y 186-197), un chicle (x 102-111, y 226-230), un taco de pósits (x 13-22, y 233-241), una calculadora (x 146-157, y 234-250) y una regla de madera (x 42-83, y 254-268). Los contadores y la mano de cartas tapan en parte las de abajo;
   - el enemigo de pie en el centro del pupitre, no en su borde (x 46-134, y 92-188), con los pies en y 188;
   - los contadores (la pila de robo, la energía, la vida, el bloqueo y el descarte) y Terminar turno, de pie sobre el pupitre, en una fila de 33 píxeles del arte de alto que va de x 0 a 180. Su base está como mucho en y 275 y siempre por encima de la mano: en una pantalla que solo enseña la zona segura, como la de 360×640, la fila sube hasta y 207-240;
   - la mano de cartas, abajo del todo, colocada desde el borde de abajo del marco y no desde la zona segura. Las cartas tienen su tamaño en px CSS, así que en un móvil alargado la mano baja hasta el margen.
@@ -151,11 +154,12 @@ Todos los píxeles del juego miden lo mismo en pantalla: el aula, los sprites, l
   | La ciudad | `classroom-city.png` | `city` |
   | La sala | `classroom-room.png` | `walls`, `window`, `window-frame`, `board`, `cork` y `clock-light` |
   | Los pupitres del fondo | `classroom-back-desks.png` | `back-desks` |
-  | El pupitre | `classroom-desk.png` | `desk`, `desk-marks`, `desk-shadows` y `desk-items` |
+  | El pupitre | `classroom-desk.png` | `desk`, `desk-marks` y `desk-items` |
 
   - Después de fusionarlo, se le añaden 12 píxeles alrededor que repiten su borde: cada píxel nuevo copia el del borde más cercano. Así la cámara nunca deja ver un hueco. *Test (ticket 16).*
   - La capa `light` se exporta tal cual, sin borde, como `classroom-light.png`.
   - Las demás capas son los sprites del aula, que se exportan aparte.
+  - Los objetos del pupitre (ticket 17) quedan fuera del plano del pupitre, porque el jugador los mueve: cada uno en su capa (`pencil-case`, `water-bottle`, `notebook` y `pen`) y su sombra en otra (`pencil-case-shadow`, `water-bottle-shadow`, `notebook-shadow` y `pen-shadow`). El boli tiene además `pen-shadow-paper`, la sombra que hace sobre el cuaderno, más clara que la del pupitre. En el `.aseprite`, `pen-shadow` está oculta, porque el boli empieza encima del cuaderno. Bajo los objetos y sus sombras, `desk` lleva repintada la formica con su tramado.
   - En `walls`, el hueco del cristal está borrado para que se vea la ciudad, y la pared sigue 16 filas por debajo del borde del pupitre, que se mueve más que ella y la destaparía. La capa `city` está crecida 3 píxeles repitiendo su borde, para llenar el cristal aunque la pared se mueva delante.
   - Un sprite que cambia de dibujo es una tira con los fotogramas uno al lado del otro. El primero es el que está dibujado en el `.aseprite`, el que se ve en reposo.
 - **Sin antialiasing:** los bordes no se suavizan con tonos intermedios. *Revisión.*

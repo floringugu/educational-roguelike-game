@@ -5,6 +5,9 @@ import './CombatMenu.css';
 type CombatMenuProps = {
   onOpenSettings: () => void;
   onOpenCredits: () => void;
+  // Told when the list opens or closes: while it is open, the things on the
+  // desk cannot be picked up (ticket 17).
+  onOpenChange?: (isOpen: boolean) => void;
 };
 
 // The menu at the top left of the combat (ticket 12): a small post-it with
@@ -14,7 +17,7 @@ type CombatMenuProps = {
 // It is a disclosure button: a button that shows and hides the list under
 // it. aria-expanded tells screen readers whether the list is open, and the
 // entries are plain buttons, reached with Tab like any other.
-export function CombatMenu({ onOpenSettings, onOpenCredits }: CombatMenuProps) {
+export function CombatMenu({ onOpenSettings, onOpenCredits, onOpenChange }: CombatMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
   const listId = useId();
   const menuElement = useRef<HTMLDivElement>(null);
@@ -32,6 +35,10 @@ export function CombatMenu({ onOpenSettings, onOpenCredits }: CombatMenuProps) {
       menuElement.current?.querySelector<HTMLElement>('.combat-menu__entry')?.focus();
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    onOpenChange?.(isOpen);
+  }, [isOpen, onOpenChange]);
 
   // A touch or a click anywhere outside the menu closes it.
   useEffect(() => {

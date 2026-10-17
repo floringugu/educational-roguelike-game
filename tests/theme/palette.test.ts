@@ -46,6 +46,8 @@ const wordsThatAreNotColors = new Set([
   'solid', 'dashed', 'dotted', 'double', 'inset', 'thin', 'medium', 'thick', 'underline',
   // Gradients, such as the ruled lines of the cards.
   'linear', 'repeating', 'gradient', 'calc',
+  // Border images, such as the bubble of the intent of the enemy.
+  'fill', 'stretch',
 ]);
 
 // Returns the words used as colors in a CSS file without going through a

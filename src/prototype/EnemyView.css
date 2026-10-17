@@ -7,12 +7,35 @@
   position: absolute;
   left: calc(var(--safe-left) + 42 * var(--art-pixel));
   top: calc(var(--safe-top) + 92 * var(--art-pixel));
+  /* Over the items of the desk behind it, and under the ones in front of
+     it and the ones the player holds (DeskItems.css, ticket 17). */
+  z-index: 10;
   width: calc(96 * var(--art-pixel));
   height: calc(96 * var(--art-pixel));
-  /* The lean of a hit (EnemyView.tsx) turns the body in 3D, seen from 170
-     pixels of the art in front of its feet. */
+}
+
+/* What shakes when the enemy gets annoyed (ticket 17): its body and its
+   annoyance mark, not its shadow on the desk. The lean of a hit
+   (EnemyView.tsx) turns the body in 3D, seen from 170 pixels of the art in
+   front of its feet. */
+.enemy__shake {
+  position: relative;
+  height: 100%;
   perspective: calc(170 * var(--art-pixel));
   perspective-origin: 50% 94%;
+}
+
+/* The annoyance mark (ticket 17): 9x9 pixels of the art next to the face of
+   the enemy, where EnemyView.tsx puts it. Its sprite has its 2 frames side
+   by side; the animation shows it and beats from one to the other. */
+.enemy__annoyance-mark {
+  position: absolute;
+  width: calc(9 * var(--art-pixel));
+  height: calc(9 * var(--art-pixel));
+  background-image: url('../assets/sprites/enemy-annoyance-mark.png');
+  background-size: 200% 100%;
+  image-rendering: pixelated;
+  visibility: hidden;
 }
 
 /* The intent over the head of the enemy (FR-CMB-005): a bubble of paper of
@@ -23,22 +46,40 @@
    enemy, which starts at the row 8 of its sprite, and ends over the row 10,
    above the letters "EXAMEN" (rows 11 to 15). It starts at x 82, a whole
    pixel of the art: centered, it could fall between two pixels and blur.
-   Over the enemy, so its tail is not hidden behind the head. */
+   It counts as interface (ticket 17): it is not inside the enemy, so it
+   goes over the enemy and over the items of the desk that the player holds
+   or throws (DeskItems.css).
+   When the enemy talks, the bubble widens, to --bubble-width pixels of the
+   art from --bubble-left (EnemyView.tsx). The sprite is drawn as a border
+   image: its left 14 columns, with the tail, and its right 3 columns, with
+   the outline and its shadow, keep their size, and only the plain paper in
+   between stretches. */
 .enemy__intent {
   position: absolute;
-  top: calc(-10 * var(--art-pixel));
-  left: calc(40 * var(--art-pixel));
-  z-index: 1;
+  left: calc(var(--safe-left) + var(--bubble-left, 82) * var(--art-pixel));
+  top: calc(var(--safe-top) + 82 * var(--art-pixel));
+  z-index: 30;
   display: flex;
   align-items: flex-start;
   gap: var(--art-pixel);
-  width: calc(31 * var(--art-pixel));
+  width: calc(var(--bubble-width, 31) * var(--art-pixel));
   height: calc(21 * var(--art-pixel));
   margin: 0;
   padding: calc(2 * var(--art-pixel)) 0 0 calc(2 * var(--art-pixel));
-  background-image: url('../assets/sprites/intent-bubble.png');
-  background-size: 100% 100%;
+  border-style: solid;
+  border-width: 0;
+  border-image-source: url('../assets/sprites/intent-bubble.png');
+  border-image-slice: 0 3 0 14 fill;
+  border-image-width: 0 calc(3 * var(--art-pixel)) 0 calc(14 * var(--art-pixel));
+  border-image-repeat: stretch;
   image-rendering: pixelated;
+}
+
+/* While it talks, the icon and the value do not show, but screen readers
+   still read them. */
+.enemy__intent--talking > .sprite,
+.enemy__intent--talking > .enemy__intent-value {
+  opacity: 0;
 }
 
 .enemy__intent .sprite {
@@ -62,6 +103,55 @@
   white-space: nowrap;
   color: var(--color-note-text);
   background-color: var(--color-note);
+}
+
+/* The phrase of an annoyed enemy (ticket 17), on the paper of the bubble,
+   which goes from x 1 to its width minus 3 and from the row 1 to 17, with a
+   pixel of paper on each side. Two lines at most, of even width. */
+.enemy__phrase {
+  position: absolute;
+  left: calc(2 * var(--art-pixel));
+  top: var(--art-pixel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: calc((var(--bubble-width, 31) - 5) * var(--art-pixel));
+  height: calc(17 * var(--art-pixel));
+}
+
+.enemy__phrase-text,
+.enemy__phrase-measure {
+  font-family: var(--font-display);
+  /* Half scale (FR-VIS-008), like the value, with lines of 12 pixels of the
+     font: m6x11plus has 18 pixels of its own per em. */
+  font-size: calc(18 * var(--font-pixel));
+  line-height: calc(12 * var(--font-pixel));
+  text-align: center;
+  text-wrap: balance;
+}
+
+/* Its background is the color of the paper, on the paper, like the value. */
+.enemy__phrase-text {
+  color: var(--color-note-text);
+  background-color: var(--color-note);
+}
+
+/* The letters still to come: they take their place, so the lines do not
+   change as the phrase is written. */
+.enemy__phrase-rest {
+  visibility: hidden;
+}
+
+/* The phrase, written whole in a hidden box as wide as the widest phrase
+   the bubble can hold, so EnemyView.tsx can measure how wide the bubble
+   must get. */
+.enemy__phrase-measure {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  width: calc(72 * var(--art-pixel));
+  visibility: hidden;
 }
 
 /* Read by screen readers, not shown: the icon already says it. */
